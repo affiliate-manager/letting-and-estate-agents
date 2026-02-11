@@ -54,10 +54,12 @@ export function searchAgents(query, filters = {}) {
     }
   }
 
-  // 3. Area name match
+  // 3. Area name match (word-boundary aware to avoid "godmanchester" matching "manchester")
   if (qLower.length >= 2) {
+    const qWordRe = new RegExp('(^|\\s)' + qLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(\\s|$)');
     for (const [area, ids] of Object.entries(_data.areaIndex)) {
-      if (area.includes(qLower) || qLower.includes(area)) {
+      const isMatch = area === qLower || qWordRe.test(area) || qLower === area || qLower.includes(area + ' ') || qLower.startsWith(area + ' ') || qLower.endsWith(' ' + area);
+      if (isMatch) {
         for (const id of ids) {
           if (!matched.has(id)) {
             matched.set(id, { agent: _data.agents[id], matchType: 'area', priority: 3 });
@@ -192,10 +194,11 @@ export function getSuggestions(query) {
     if (suggestions.length >= 5) break;
   }
 
-  // Area name matches
+  // Area name matches (word-boundary aware)
   const seenAreas = new Set();
+  const sugRe = new RegExp('(^|\\s)' + qLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
   for (const area of Object.keys(_data.areaIndex)) {
-    if (area.includes(qLower) && !seenAreas.has(area) && area.length > 2) {
+    if (sugRe.test(area) && !seenAreas.has(area) && area.length > 2) {
       const titleCase = area.charAt(0).toUpperCase() + area.slice(1);
       const count = _data.areaIndex[area].length;
       if (count >= 1) {
