@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compare Letting & Estate Agents - Lendlord</title>
+  <meta name="description" content="Compare letting & estate agents side by side. Fees, services, reviews and regulatory compliance.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <header class="site-header" id="site-header"></header>
+
+  <section class="compare-header">
+    <div class="container">
+      <h1 style="margin-bottom:var(--sp-2)">Compare Letting & Estate Agents</h1>
+      <p class="text-secondary">Select up to 3 agents to compare fees, services and performance side by side</p>
+
+      <div class="compare-agents" id="compare-slots" style="margin-top:var(--sp-6)">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:var(--sp-6)">
+    <div class="container">
+      <!-- Search to add agents -->
+      <div id="add-agent-section" style="margin-bottom:var(--sp-6)">
+        <div class="search-wrapper" style="max-width:480px">
+          <div class="search-input-wrap">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" class="search-input" id="agent-search" placeholder="Search agent by name..." autocomplete="off">
+          </div>
+          <div class="search-suggestions" id="agent-suggestions"></div>
+        </div>
+      </div>
+
+      <!-- Comparison Table -->
+      <div id="compare-content" style="display:none">
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+          <table class="compare-table" id="compare-table">
+            <tbody id="compare-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="compare-empty" class="empty-state">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:64px;height:64px;opacity:0.4"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+        <h3>Add agents to compare</h3>
+        <p>Search for agents above or select them from the search results page</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <script type="module">
+    import { loadData, getAgent, getData } from './js/data.js';
+    import { renderHeader, renderFooter, renderAuthModal, initScrollTop, initTrustTooltip } from './js/ui.js';
+    import { getParam, lsGet, lsSet, debounce, ICONS, trustScoreClass, starsHTML, reviewPlatformsHTML, fmtFee, fmtAgentType, initials } from './js/utils.js';
+    import { initAuth, bindAuthEvents } from './js/auth.js';
+
+    renderHeader('compare');
+    renderFooter();
+    renderAuthModal();
+    initScrollTop();
+    initTrustTooltip();
+    await initAuth();
+    bindAuthEvents();
+    window.showAuthModal = () => document.getElementById('auth-modal').classList.add('open');
+
+    const data = await loadData();
+
+    // Get compare list from URL or localStorage
+    let compareIds = [];
+    const idsParam = getParam('ids');
+    if (idsParam) {
+      compareIds = idsParam.split(',').map(Number).filter(id => !isNaN(id) && getAgent(id));
+    } else {
+      compareIds = lsGet('af_compare', []);
+    }
+
+    function renderSlots() {
+      const slotsEl = document.getElementById('compare-slots');
+      let html = '';
+
+      for (let i = 0; i < 3; i++) {
+        if (i < compareIds.length) {
+          const agent = getAgent(compareIds[i]);
+          const logo = agent.logo
+            ? `<img src="${agent.logo}" alt="" style="width:40px;height:40px;border-radius:8px;object-fit:contain;background:var(--bg);padding:2px" onerror="this.style.display='none'">`
+            : `<div style="width:40px;height:40px;border-radius:8px;background:var(--primary-bg);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--primary)">${initials(agent.name)}</div>`;
+          html += `
+            <div class="compare-slot filled">
+              <div style="display:flex;align-items:center;gap:var(--sp-3);width:100%">
+                ${logo}
+                <div style="flex:1;min-width:0">
+                  <div class="font-semibold text-sm" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${agent.name}</div>
+                  <div class="text-xs text-muted">${agent.postcode || ''}</div>
+                </div>
+                <button class="btn btn-ghost btn-icon" onclick="removeAgent(${i})" style="flex-shrink:0">
+                  ${ICONS.x}
+                </button>
+              </div>
+            </div>`;
+        } else {
+          html += `
+            <div class="compare-slot" onclick="document.getElementById('agent-search').focus()">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px;height:24px;margin-bottom:8px"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+              <span class="text-sm">Add Agent</span>
+            </div>`;
+        }
+      }
+      slotsEl.innerHTML = html;
+    }
+
+    function renderComparison() {
+      if (compareIds.length < 2) {
+        document.getElementById('compare-content').style.display = 'none';
+        document.getElementById('compare-empty').style.display = '';
+        return;
+      }
+      document.getElementById('compare-content').style.display = '';
+      document.getElementById('compare-empty').style.display = 'none';
+
+      const agents = compareIds.map(id => getAgent(id));
+      const tbody = document.getElementById('compare-tbody');
+
+      const rows = [
+        { label: 'Trust Score', fn: a => `<div class="trust-score-wrap"><div class="trust-score ${trustScoreClass(a.trust_score)} trust-score-sm">${a.trust_score}</div><span class="trust-score-label">Trust <span class="trust-info-trigger" data-trust-tooltip>?</span></span></div>` },
+        { label: 'Rating', fn: a => starsHTML(a.reviews.avg, a.reviews.count) + reviewPlatformsHTML(a.reviews) },
+        { label: 'Agent Type', fn: a => fmtAgentType(a.agent_type) || '-' },
+        { label: 'Management Fee', fn: a => a.fees.full_management || (a.fees.mgmt_pct ? a.fees.mgmt_pct + '%' : '-') },
+        { label: 'Tenant Find Fee', fn: a => a.fees.tenant_find || '-' },
+        { label: 'Guaranteed Rent', fn: a => a.fees.guaranteed_rent || (a.guaranteed_rent ? 'Available' : '-') },
+        { label: 'VAT Inclusive', fn: a => a.fees.vat_inclusive === true ? 'Yes' : a.fees.vat_inclusive === false ? 'No' : '-' },
+        { label: 'Renewal Fee', fn: a => a.fees.renewal || '-' },
+        { label: 'Setup Fee', fn: a => a.fees.setup || '-' },
+        { label: 'Service Tiers', fn: a => a.service_tiers.length ? a.service_tiers.join(', ') : '-' },
+        { label: 'ARLA', fn: a => a.regulatory.arla ? `<span class="badge badge-green">Yes</span>` : a.regulatory.arla === false ? `<span class="badge badge-red">No</span>` : '-' },
+        { label: 'Client Money Protection', fn: a => a.regulatory.cmp ? `<span class="badge badge-green">Yes</span>` : a.regulatory.cmp === false ? `<span class="badge badge-red">No</span>` : '-' },
+        { label: 'Property Ombudsman', fn: a => a.regulatory.tpo ? `<span class="badge badge-green">Yes</span>` : a.regulatory.tpo === false ? `<span class="badge badge-red">No</span>` : '-' },
+        { label: 'Deposit Protection', fn: a => a.regulatory.deposit || '-' },
+        { label: 'Years in Business', fn: a => a.performance.years || '-' },
+        { label: 'Offices', fn: a => a.performance.offices || '-' },
+        { label: 'Properties Listed', fn: a => a.performance.listed || '-' },
+        { label: 'Avg Time to Let', fn: a => a.performance.avg_time_to_let ? a.performance.avg_time_to_let + ' days' : '-' },
+        { label: 'Portals', fn: a => a.portals.length ? a.portals.join(', ') : '-' },
+        { label: 'Areas Covered', fn: a => a.areas.length ? a.areas.slice(0, 5).join(', ') : '-' },
+        { label: 'Social Media', fn: a => {
+          const count = Object.values(a.social).filter(Boolean).length;
+          return count ? `${count} channel${count > 1 ? 's' : ''}` : '-';
+        }},
+        { label: 'Activity', fn: a => a.activity === 'active' ? '<span class="badge badge-green">Active</span>' : a.activity === 'moderate' ? '<span class="badge badge-amber">Moderate</span>' : '<span class="badge badge-gray">Low</span>' },
+      ];
+
+      // Header row
+      let html = `<tr><th style="min-width:160px">Metric</th>${agents.map(a =>
+        `<td style="text-align:center;font-weight:700">${a.name}<br><a href="agent.html?id=${a.id}" class="text-xs" style="font-weight:400">View Profile</a></td>`
+      ).join('')}</tr>`;
+
+      rows.forEach(row => {
+        const values = agents.map(a => row.fn(a));
+        html += `<tr><th>${row.label}</th>${values.map(v => `<td>${v}</td>`).join('')}</tr>`;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    window.removeAgent = (index) => {
+      compareIds.splice(index, 1);
+      lsSet('af_compare', compareIds);
+      renderSlots();
+      renderComparison();
+    };
+
+    // Agent search
+    const searchInput = document.getElementById('agent-search');
+    const suggestionsEl = document.getElementById('agent-suggestions');
+
+    const showSuggestions = debounce(val => {
+      if (val.length < 2 || compareIds.length >= 3) { suggestionsEl.classList.remove('open'); return; }
+      const q = val.toLowerCase();
+      const matches = data.agents.filter(a =>
+        a.name.toLowerCase().includes(q) && !compareIds.includes(a.id)
+      ).slice(0, 8);
+
+      if (!matches.length) { suggestionsEl.classList.remove('open'); return; }
+      suggestionsEl.innerHTML = matches.map(a => `
+        <div class="suggestion-item" data-id="${a.id}">
+          <span>${a.name}</span>
+          <span class="suggestion-type">${a.postcode || ''}</span>
+        </div>
+      `).join('');
+      suggestionsEl.classList.add('open');
+
+      suggestionsEl.querySelectorAll('.suggestion-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const id = parseInt(item.dataset.id);
+          if (compareIds.length < 3 && !compareIds.includes(id)) {
+            compareIds.push(id);
+            lsSet('af_compare', compareIds);
+            renderSlots();
+            renderComparison();
+          }
+          searchInput.value = '';
+          suggestionsEl.classList.remove('open');
+        });
+      });
+    }, 200);
+
+    searchInput.addEventListener('input', e => showSuggestions(e.target.value));
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.search-wrapper')) suggestionsEl.classList.remove('open');
+    });
+
+    // Initial render
+    renderSlots();
+    renderComparison();
+  </script>
+
+</body>
+</html>

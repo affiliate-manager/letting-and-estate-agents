@@ -1,0 +1,337 @@
+/* ==========================================================================
+   Shared UI components - Header, Footer, Modals, Cards
+   ========================================================================== */
+
+import { SITE_NAME, FREE_RESULTS, SORT_OPTIONS, AGENT_TYPES } from './config.js';
+import { ICONS, trustScoreClass, starsHTML, reviewPlatformsHTML, regBadgesHTML, fmtFee, fmtLocation, fmtAgentType, categoryBadgeHTML, experienceBadgeHTML, brandAgeHTML, initials, socialIconsHTML } from './utils.js';
+
+/* ---------- Header ---------- */
+export function renderHeader(activePage = '') {
+  const header = document.getElementById('site-header');
+  if (!header) return;
+
+  const pages = [
+    { id: 'home', label: 'Home', href: 'index.html' },
+    { id: 'compare', label: 'Compare', href: 'compare.html' },
+    { id: 'areas', label: 'Area Insights', href: 'area.html' },
+    { id: 'portfolio', label: 'Portfolio', href: 'portfolio.html' },
+  ];
+
+  header.innerHTML = `
+    <div class="container">
+      <a href="index.html" class="logo">
+        ${ICONS.lendlordLogo}
+      </a>
+      <nav class="nav-links">
+        ${pages.map(p => `<a href="${p.href}" class="${activePage === p.id ? 'active' : ''}">${p.label}</a>`).join('')}
+      </nav>
+      <div class="header-actions">
+        <button class="btn btn-sm btn-outline" id="auth-btn" onclick="window.showAuthModal && window.showAuthModal()">Sign In</button>
+        <button class="menu-btn" onclick="document.querySelector('.mobile-nav').classList.toggle('open')" aria-label="Menu">${ICONS.menu}</button>
+      </div>
+    </div>
+    <nav class="mobile-nav">
+      ${pages.map(p => `<a href="${p.href}" class="${activePage === p.id ? 'active' : ''}">${p.label}</a>`).join('')}
+      <a href="#" onclick="window.showAuthModal && window.showAuthModal(); return false;">Sign In / Sign Up</a>
+    </nav>
+  `;
+}
+
+/* ---------- Footer ---------- */
+export function renderFooter() {
+  const footer = document.getElementById('site-footer');
+  if (!footer) return;
+
+  footer.innerHTML = `
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="logo" style="color:#fff">
+            ${ICONS.lendlordLogoWhite}
+          </a>
+          <p>The UK's most transparent letting & estate agent comparison platform. Find, compare and choose with confidence.</p>
+        </div>
+        <div>
+          <h4 class="footer-heading">Platform</h4>
+          <div class="footer-links">
+            <a href="index.html">Find Agents</a>
+            <a href="compare.html">Compare Agents</a>
+            <a href="area.html">Area Insights</a>
+            <a href="portfolio.html">Portfolio Manager</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-heading">Resources</h4>
+          <div class="footer-links">
+            <a href="#">Letting Guide</a>
+            <a href="#">Fee Calculator</a>
+            <a href="#">Regulatory Check</a>
+            <a href="#">Blog</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-heading">Legal</h4>
+          <div class="footer-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Cookie Policy</a>
+            <a href="#">Contact Us</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; ${new Date().getFullYear()} ${SITE_NAME}. All rights reserved.</span>
+        <span>Data updated February 2026</span>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- Agent Card ---------- */
+export function renderAgentCard(agent, index, isBlurred = false) {
+  const fee = fmtFee(agent);
+  const logo = agent.logo
+    ? `<img src="${agent.logo}" alt="${agent.name}" class="agent-card-logo" onerror="this.outerHTML='<div class=\\'agent-card-logo-placeholder\\'>${initials(agent.name)}</div>'">`
+    : `<div class="agent-card-logo-placeholder">${initials(agent.name)}</div>`;
+
+  const blurClass = isBlurred ? 'card-blurred' : '';
+  const overlay = isBlurred ? `
+    <div class="blur-overlay">
+      <div style="margin-bottom:12px">${ICONS.lock}</div>
+      <h3>Sign up to see more agents</h3>
+      <p>Create a free account to unlock all results</p>
+      <button class="btn btn-primary" onclick="window.showAuthModal && window.showAuthModal()">Sign Up Free</button>
+    </div>` : '';
+
+  const services = agent.service_tiers.length > 0
+    ? agent.service_tiers.slice(0, 3).map(s => `<span class="tag">${s}</span>`).join('')
+    : agent.services.slice(0, 3).map(s => `<span class="tag">${s}</span>`).join('');
+
+  const areasList = agent.areas.slice(0, 3).join(', ');
+
+  return `
+    <div class="card ${blurClass} fade-in-up" data-agent-id="${agent.id}" style="animation-delay:${Math.min(index, 8) * 60}ms">
+      ${overlay}
+      <div class="card-body agent-card">
+        <div class="agent-card-header">
+          ${logo}
+          <div class="agent-card-info">
+            <div class="agent-card-name">${agent.name}</div>
+            <div class="agent-card-location">
+              ${ICONS.mapPin}
+              <span>${agent.postcode || 'UK'}${agent.address ? ' - ' + agent.address.split(',').pop().trim() : ''}</span>
+            </div>
+          </div>
+          <div class="trust-score-wrap">
+            <div class="trust-score ${trustScoreClass(agent.trust_score)}">${agent.trust_score}</div>
+            <span class="trust-score-label">Trust <span class="trust-info-trigger" data-trust-tooltip>?</span></span>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          ${starsHTML(agent.reviews.avg, agent.reviews.count)}
+          ${agent.activity ? `<span class="flex items-center gap-1 text-xs"><span class="activity-dot ${agent.activity}"></span>${agent.activity === 'active' ? 'Active' : agent.activity === 'moderate' ? 'Moderate' : 'Low'}</span>` : ''}
+          ${agent.agent_type ? `<span class="badge badge-blue">${fmtAgentType(agent.agent_type)}</span>` : ''}
+          ${categoryBadgeHTML(agent.category)}
+          ${experienceBadgeHTML(agent.experience)}
+        </div>
+        ${reviewPlatformsHTML(agent.reviews)}
+
+        <div class="agent-card-stats">
+          ${fee ? `<div class="agent-card-stat"><span class="agent-card-stat-label">Management Fee</span><span class="agent-card-stat-value">${fee}</span></div>` : ''}
+          ${agent.performance.years ? `<div class="agent-card-stat"><span class="agent-card-stat-label">Branch Age</span><span class="agent-card-stat-value">${agent.performance.years} years</span></div>` : ''}
+          ${agent.performance.brand_age ? `<div class="agent-card-stat"><span class="agent-card-stat-label">Brand Heritage</span><span class="agent-card-stat-value">${agent.performance.brand_age} years</span></div>` : ''}
+          ${agent.performance.offices ? `<div class="agent-card-stat"><span class="agent-card-stat-label">Offices</span><span class="agent-card-stat-value">${agent.performance.offices}</span></div>` : ''}
+          ${agent.performance.listed ? `<div class="agent-card-stat"><span class="agent-card-stat-label">Properties Listed</span><span class="agent-card-stat-value">${agent.performance.listed}</span></div>` : ''}
+        </div>
+
+        ${services ? `<div class="agent-card-services">${services}</div>` : ''}
+        ${regBadgesHTML(agent.regulatory)}
+        ${areasList ? `<div class="agent-card-location" style="margin-top:2px">${ICONS.mapPin}<span>${areasList}</span></div>` : ''}
+        ${socialIconsHTML(agent.social)}
+
+        <div class="agent-card-footer">
+          <a href="agent.html?id=${agent.id}" class="btn btn-primary btn-sm">View Profile</a>
+          <button class="btn btn-outline btn-sm" onclick="window.toggleCompare && window.toggleCompare(${agent.id})" data-compare-btn="${agent.id}">
+            ${ICONS.compare} Compare
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- Card Grid ---------- */
+export function renderCardsGrid(agents, containerId, showAll = false) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  if (!agents.length) {
+    container.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1">
+        ${ICONS.search}
+        <h3>No agents found</h3>
+        <p>Try a different postcode or adjust your filters</p>
+      </div>`;
+    return;
+  }
+
+  const isAuthed = window._isAuthenticated && window._isAuthenticated();
+  const limit = (showAll || isAuthed) ? agents.length : FREE_RESULTS;
+
+  let html = '';
+  agents.forEach((agent, i) => {
+    const blurred = i >= limit;
+    html += renderAgentCard(agent, i, blurred);
+  });
+
+  container.innerHTML = html;
+}
+
+/* ---------- Skeleton Loading ---------- */
+export function renderSkeletons(containerId, count = 6) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  let html = '';
+  for (let i = 0; i < count; i++) {
+    html += `<div class="skeleton skeleton-card" style="animation-delay:${i * 100}ms"></div>`;
+  }
+  container.innerHTML = html;
+}
+
+/* ---------- Scroll to Top Button ---------- */
+export function initScrollTop() {
+  const btn = document.createElement('button');
+  btn.className = 'scroll-top';
+  btn.innerHTML = ICONS.arrowUp;
+  btn.setAttribute('aria-label', 'Scroll to top');
+  btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  document.body.appendChild(btn);
+
+  window.addEventListener('scroll', () => {
+    btn.classList.toggle('visible', window.scrollY > 400);
+  });
+}
+
+/* ---------- Trust Score Tooltip ---------- */
+export function initTrustTooltip() {
+  // Create single global tooltip element
+  const tip = document.createElement('div');
+  tip.id = 'trust-tooltip';
+  tip.innerHTML = `
+    <div class="trust-tip-arrow"></div>
+    <strong>Trust Score (50-100)</strong>
+    Calculated from:
+    <ul>
+      <li>Review rating (25%)</li>
+      <li>Review volume (10%)</li>
+      <li>ARLA membership (10%)</li>
+      <li>Client Money Protection (10%)</li>
+      <li>Ombudsman/Redress (8%)</li>
+      <li>Years in business (10%)</li>
+      <li>Data completeness (12%)</li>
+      <li>Social media presence (5%)</li>
+      <li>Portal coverage (5%)</li>
+      <li>Fee transparency (5%)</li>
+    </ul>`;
+  document.body.appendChild(tip);
+
+  document.addEventListener('mouseenter', (e) => {
+    const trigger = e.target.closest('[data-trust-tooltip]');
+    if (!trigger) return;
+    const rect = trigger.getBoundingClientRect();
+    tip.style.display = 'block';
+    // Position below the ? icon, centered
+    const tipW = tip.offsetWidth;
+    let left = rect.left + rect.width / 2 - tipW / 2;
+    // Keep within viewport
+    if (left < 8) left = 8;
+    if (left + tipW > window.innerWidth - 8) left = window.innerWidth - tipW - 8;
+    tip.style.top = (rect.bottom + 8) + 'px';
+    tip.style.left = left + 'px';
+    // Position arrow to point at the trigger
+    const arrow = tip.querySelector('.trust-tip-arrow');
+    arrow.style.left = (rect.left + rect.width / 2 - left) + 'px';
+  }, true);
+
+  document.addEventListener('mouseleave', (e) => {
+    const trigger = e.target.closest('[data-trust-tooltip]');
+    if (!trigger) return;
+    // Small delay so user can move to tooltip
+    setTimeout(() => {
+      if (!tip.matches(':hover')) tip.style.display = 'none';
+    }, 100);
+  }, true);
+
+  tip.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+}
+
+/* ---------- Auth Modal HTML ---------- */
+export function renderAuthModal() {
+  const existing = document.getElementById('auth-modal');
+  if (existing) return;
+
+  const div = document.createElement('div');
+  div.id = 'auth-modal';
+  div.className = 'modal-backdrop';
+  div.innerHTML = `
+    <div class="modal">
+      <button class="modal-close" onclick="document.getElementById('auth-modal').classList.remove('open')">${ICONS.x}</button>
+      <h2>Create Your Free Account</h2>
+      <p class="text-secondary" style="margin-bottom:var(--sp-5)">Unlock all agent results, save favourites, and compare agents side by side.</p>
+
+      <button class="btn-google" id="google-signin-btn">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Continue with Google
+      </button>
+
+      <div class="form-divider">or</div>
+
+      <form id="email-auth-form">
+        <div class="form-group">
+          <label class="form-label" for="auth-email">Email</label>
+          <input class="form-input" type="email" id="auth-email" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="auth-password">Password</label>
+          <input class="form-input" type="password" id="auth-password" placeholder="Min 6 characters" required minlength="6">
+        </div>
+        <div id="auth-error" class="text-sm" style="color:var(--danger);margin-bottom:var(--sp-3);display:none"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Sign Up / Sign In</button>
+      </form>
+
+      <p class="text-xs text-muted" style="margin-top:var(--sp-4);text-align:center">
+        By signing up you agree to our Terms of Service and Privacy Policy
+      </p>
+    </div>
+  `;
+  document.body.appendChild(div);
+
+  // Close on backdrop click
+  div.addEventListener('click', (e) => {
+    if (e.target === div) div.classList.remove('open');
+  });
+}
+
+/* ---------- Compare Bar (bottom sticky) ---------- */
+export function renderCompareBar() {
+  let bar = document.getElementById('compare-bar');
+  if (bar) return;
+
+  bar = document.createElement('div');
+  bar.id = 'compare-bar';
+  bar.className = 'hook-banner';
+  bar.innerHTML = `
+    <div class="hook-banner-inner">
+      <div class="hook-banner-text">
+        <h4 id="compare-bar-title">0 agents selected</h4>
+        <p>Select up to 3 agents to compare side by side</p>
+      </div>
+      <a href="compare.html" class="btn btn-accent btn-sm" id="compare-bar-btn" style="display:none">
+        Compare Now ${ICONS.arrowRight}
+      </a>
+      <button class="btn btn-ghost btn-sm" onclick="window.clearCompare && window.clearCompare()">Clear</button>
+    </div>
+  `;
+  document.body.appendChild(bar);
+}

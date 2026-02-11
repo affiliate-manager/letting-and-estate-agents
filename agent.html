@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent Profile - Lendlord</title>
+  <meta name="description" content="Detailed letting agent profile with fees, reviews, regulatory compliance and more.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <header class="site-header" id="site-header"></header>
+
+  <!-- Profile Hero -->
+  <section class="profile-hero" id="profile-hero">
+    <div class="container">
+      <div class="profile-header" id="profile-header">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Profile Tabs -->
+  <div style="background:var(--surface);position:sticky;top:var(--header-h);z-index:50">
+    <div class="container">
+      <div class="profile-tabs" id="profile-tabs">
+        <button class="profile-tab active" data-tab="overview">Overview</button>
+        <button class="profile-tab" data-tab="fees">Fees & Services</button>
+        <button class="profile-tab" data-tab="reviews">Reviews</button>
+        <button class="profile-tab" data-tab="regulatory">Regulatory</button>
+        <button class="profile-tab" data-tab="performance">Performance</button>
+        <button class="profile-tab" data-tab="contact">Contact</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Content -->
+  <section class="profile-content">
+    <div class="container">
+
+      <!-- Overview Tab -->
+      <div class="profile-section active" id="tab-overview">
+        <div class="data-grid" id="overview-grid">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Fees & Services Tab -->
+      <div class="profile-section" id="tab-fees">
+        <div class="data-grid" id="fees-grid"></div>
+      </div>
+
+      <!-- Reviews Tab -->
+      <div class="profile-section" id="tab-reviews">
+        <div class="data-grid" id="reviews-grid"></div>
+      </div>
+
+      <!-- Regulatory Tab -->
+      <div class="profile-section" id="tab-regulatory">
+        <div class="data-grid" id="regulatory-grid"></div>
+      </div>
+
+      <!-- Performance Tab -->
+      <div class="profile-section" id="tab-performance">
+        <div class="data-grid" id="performance-grid"></div>
+      </div>
+
+      <!-- Contact Tab -->
+      <div class="profile-section" id="tab-contact">
+        <div class="data-grid" id="contact-grid"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <script type="module">
+    import { loadData, getAgent } from './js/data.js';
+    import { renderHeader, renderFooter, renderAuthModal, initScrollTop, initTrustTooltip } from './js/ui.js';
+    import { ICONS, trustScoreClass, starsHTML, reviewPlatformsHTML, regBadgesHTML, socialIconsHTML, fmtAgentType, categoryBadgeHTML, experienceBadgeHTML, brandAgeHTML, fmtLocation, initials, getParam } from './js/utils.js';
+    import { REGULATORY_LABELS } from './js/config.js';
+    import { initAuth, bindAuthEvents } from './js/auth.js';
+    import { initHooks, trackProfileView } from './js/hooks.js';
+
+    renderHeader('');
+    renderFooter();
+    renderAuthModal();
+    initScrollTop();
+    initTrustTooltip();
+
+    await initAuth();
+    bindAuthEvents();
+    trackProfileView();
+    initHooks();
+
+    window.showAuthModal = () => document.getElementById('auth-modal').classList.add('open');
+
+    const data = await loadData();
+    const agentId = parseInt(getParam('id'));
+    const agent = getAgent(agentId);
+
+    if (!agent) {
+      document.getElementById('profile-header').innerHTML = `
+        <div class="empty-state">
+          <h3>Agent not found</h3>
+          <p>The agent you're looking for doesn't exist.</p>
+          <a href="index.html" class="btn btn-primary" style="margin-top:var(--sp-4)">Back to Search</a>
+        </div>`;
+      throw new Error('Agent not found');
+    }
+
+    // Update page title
+    document.title = `${agent.name} - Lendlord`;
+
+    // -- Profile Header --
+    const logo = agent.logo
+      ? `<img src="${agent.logo}" alt="${agent.name}" class="profile-logo" onerror="this.outerHTML='<div class=\\'profile-logo-placeholder\\'>${initials(agent.name)}</div>'">`
+      : `<div class="profile-logo-placeholder">${initials(agent.name)}</div>`;
+
+    document.getElementById('profile-header').innerHTML = `
+      ${logo}
+      <div class="profile-info" style="flex:1">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-4);flex-wrap:wrap">
+          <div>
+            <h1>${agent.name}</h1>
+            <div style="display:flex;align-items:center;gap:var(--sp-2);margin-top:4px;flex-wrap:wrap">
+              <span class="text-secondary" style="display:flex;align-items:center;gap:4px">${ICONS.mapPin} ${fmtLocation(agent)}</span>
+              ${agent.agent_type ? `<span class="badge badge-blue">${fmtAgentType(agent.agent_type)}</span>` : ''}
+              ${categoryBadgeHTML(agent.category)}
+              ${experienceBadgeHTML(agent.experience)}
+              ${agent.activity === 'active' ? '<span class="badge badge-green"><span class="activity-dot active"></span> Active</span>' : ''}
+              ${agent.special_offers ? `<span class="badge badge-amber">Special Offer</span>` : ''}
+            </div>
+          </div>
+          <div class="trust-score-wrap">
+            <div class="trust-score ${trustScoreClass(agent.trust_score)}" style="width:64px;height:64px;font-size:1.3rem">${agent.trust_score}</div>
+            <span class="trust-score-label" style="font-size:0.7rem">Trust <span class="trust-info-trigger" data-trust-tooltip>?</span></span>
+          </div>
+        </div>
+
+        <div class="profile-meta">
+          ${agent.reviews.avg ? `<div class="profile-meta-item">${starsHTML(agent.reviews.avg, agent.reviews.count)}</div>` : ''}
+          ${agent.performance.years ? `<div class="profile-meta-item">${ICONS.clock} ${agent.performance.years} years</div>` : ''}
+          ${agent.performance.brand_age ? `<div class="profile-meta-item" title="Brand heritage">${ICONS.building} Brand: ${agent.performance.brand_age}y</div>` : ''}
+          ${agent.performance.offices ? `<div class="profile-meta-item">${ICONS.building} ${agent.performance.offices} office${agent.performance.offices > 1 ? 's' : ''}</div>` : ''}
+          ${agent.url ? `<div class="profile-meta-item"><a href="${agent.url.startsWith('http') ? agent.url : 'https://' + agent.url}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:4px">${ICONS.globe} Website</a></div>` : ''}
+        </div>
+        <div class="profile-header-badges">
+          ${reviewPlatformsHTML(agent.reviews, 'lg')}
+          ${regBadgesHTML(agent.regulatory)}
+          ${socialIconsHTML(agent.social)}
+        </div>
+      </div>
+    `;
+
+    // -- Tabs --
+    document.querySelectorAll('.profile-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.profile-section').forEach(s => s.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+      });
+    });
+
+    // -- Overview Tab --
+    const ovHTML = [];
+
+    // Trust Score breakdown
+    ovHTML.push(`
+      <div class="data-card">
+        <div class="data-card-title">${ICONS.shieldCheck} Agent Trust Score</div>
+        <div style="display:flex;align-items:center;gap:var(--sp-4);margin-bottom:var(--sp-4)">
+          <div class="trust-score-wrap">
+            <div class="trust-score ${trustScoreClass(agent.trust_score)}" style="width:64px;height:64px;font-size:1.4rem">${agent.trust_score}</div>
+            <span class="trust-score-label" style="font-size:0.7rem">Trust <span class="trust-info-trigger" data-trust-tooltip>?</span></span>
+          </div>
+          <div>
+            <div class="font-semibold">${agent.trust_score >= 80 ? 'Highly Trusted' : agent.trust_score >= 68 ? 'Moderately Trusted' : 'Limited Data'}</div>
+            <div class="text-sm text-muted">Based on reviews, compliance, experience & transparency</div>
+          </div>
+        </div>
+        ${reviewPlatformsHTML(agent.reviews, 'lg') ? `<div style="margin-bottom:var(--sp-3)">${reviewPlatformsHTML(agent.reviews, 'lg')}</div>` : ''}
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${trustBar('Reviews', agent.reviews.avg ? Math.min((agent.reviews.avg / 5) * 100, 100) : 0)}
+          ${trustBar('Compliance', ((agent.regulatory.arla ? 1 : 0) + (agent.regulatory.cmp ? 1 : 0) + (agent.regulatory.tpo ? 1 : 0)) / 3 * 100)}
+          ${trustBar('Experience', agent.performance.years ? Math.min(agent.performance.years / 20 * 100, 100) : 0)}
+          ${trustBar('Transparency', agent.data_richness / 30 * 100)}
+        </div>
+      </div>
+    `);
+
+    // Services
+    if (agent.services.length || agent.service_tiers.length) {
+      ovHTML.push(`
+        <div class="data-card">
+          <div class="data-card-title">${ICONS.briefcase} Services Offered</div>
+          ${agent.service_tiers.length ? `
+            <div style="margin-bottom:var(--sp-3)">
+              <div class="text-xs text-muted" style="margin-bottom:var(--sp-2);text-transform:uppercase;letter-spacing:0.04em">Service Tiers</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                ${agent.service_tiers.map(t => `<span class="badge badge-blue">${t}</span>`).join('')}
+              </div>
+            </div>
+          ` : ''}
+          ${agent.services.length ? `
+            <div>
+              <div class="text-xs text-muted" style="margin-bottom:var(--sp-2);text-transform:uppercase;letter-spacing:0.04em">All Services</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                ${agent.services.map(s => `<span class="tag">${s}</span>`).join('')}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `);
+    }
+
+    // Areas covered
+    if (agent.areas.length) {
+      ovHTML.push(`
+        <div class="data-card">
+          <div class="data-card-title">${ICONS.mapPin} Areas Covered</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            ${agent.areas.map(a => `<span class="tag">${a}</span>`).join('')}
+          </div>
+        </div>
+      `);
+    }
+
+    // Portals
+    if (agent.portals.length) {
+      ovHTML.push(`
+        <div class="data-card">
+          <div class="data-card-title">${ICONS.globe} Listed On</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            ${agent.portals.map(p => `<span class="badge badge-green">${p}</span>`).join('')}
+          </div>
+        </div>
+      `);
+    }
+
+    // Awards
+    if (agent.awards.length) {
+      ovHTML.push(`
+        <div class="data-card">
+          <div class="data-card-title">${ICONS.award} Awards & Recognition</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            ${agent.awards.map(a => `<div style="display:flex;align-items:center;gap:8px"><span style="color:var(--warning)">${ICONS.award}</span><span class="text-sm">${a}</span></div>`).join('')}
+          </div>
+        </div>
+      `);
+    }
+
+    // Special offers
+    if (agent.special_offers) {
+      ovHTML.push(`
+        <div class="data-card" style="border-color:var(--warning);border-width:2px">
+          <div class="data-card-title" style="color:var(--warning)">${ICONS.trendUp} Special Offer</div>
+          <p>${agent.special_offers}</p>
+        </div>
+      `);
+    }
+
+    document.getElementById('overview-grid').innerHTML = ovHTML.join('');
+
+    // -- Fees Tab --
+    const feesHTML = [];
+    const f = agent.fees;
+    const hasFees = f.tenant_find || f.full_management || f.guaranteed_rent || f.mgmt_pct || f.detail;
+
+    if (hasFees) {
+      let tableRows = '';
+      if (f.tenant_find) tableRows += `<tr><td>Tenant Find</td><td class="font-semibold">${f.tenant_find}</td></tr>`;
+      if (f.full_management) tableRows += `<tr><td>Full Management</td><td class="font-semibold">${f.full_management}</td></tr>`;
+      if (f.guaranteed_rent) tableRows += `<tr><td>Guaranteed Rent</td><td class="font-semibold">${f.guaranteed_rent}</td></tr>`;
+      if (f.mgmt_pct) tableRows += `<tr><td>Management Fee %</td><td class="font-semibold">${f.mgmt_pct}%</td></tr>`;
+      if (f.letting_pct) tableRows += `<tr><td>Letting Fee %</td><td class="font-semibold">${f.letting_pct}%</td></tr>`;
+      if (f.renewal) tableRows += `<tr><td>Renewal Fee</td><td>${f.renewal}</td></tr>`;
+      if (f.setup) tableRows += `<tr><td>Setup Fee</td><td>${f.setup}</td></tr>`;
+      if (f.vat_inclusive !== null) tableRows += `<tr><td>VAT Inclusive</td><td>${f.vat_inclusive ? 'Yes' : 'No'}</td></tr>`;
+
+      feesHTML.push(`
+        <div class="data-card" style="grid-column:1/-1">
+          <div class="data-card-title">${ICONS.pound} Fee Structure</div>
+          <table class="fee-table">
+            <thead><tr><th>Service</th><th>Fee</th></tr></thead>
+            <tbody>${tableRows}</tbody>
+          </table>
+        </div>
+      `);
+
+      // Fee detail (JSON string)
+      if (f.detail) {
+        try {
+          const detail = typeof f.detail === 'string' ? JSON.parse(f.detail) : f.detail;
+          let detailRows = '';
+          for (const [k, v] of Object.entries(detail)) {
+            detailRows += `<tr><td>${k.replace(/_/g, ' ')}</td><td>${v}</td></tr>`;
+          }
+          feesHTML.push(`
+            <div class="data-card" style="grid-column:1/-1">
+              <div class="data-card-title">${ICONS.info} Detailed Fee Breakdown</div>
+              <table class="fee-table">
+                <thead><tr><th>Item</th><th>Fee</th></tr></thead>
+                <tbody>${detailRows}</tbody>
+              </table>
+            </div>
+          `);
+        } catch(e) {
+          feesHTML.push(`
+            <div class="data-card" style="grid-column:1/-1">
+              <div class="data-card-title">${ICONS.info} Fee Details</div>
+              <p class="text-sm text-secondary">${f.detail}</p>
+            </div>
+          `);
+        }
+      }
+    } else {
+      feesHTML.push(`
+        <div class="data-card" style="grid-column:1/-1">
+          <div class="empty-state">
+            ${ICONS.pound}
+            <h3>Fee data not available</h3>
+            <p>This agent hasn't published their fee structure online. Contact them directly for a quote.</p>
+          </div>
+        </div>
+      `);
+    }
+    document.getElementById('fees-grid').innerHTML = feesHTML.join('');
+
+    // -- Reviews Tab --
+    const revHTML = [];
+    const r = agent.reviews;
+
+    if (r.avg || r.google || r.trustpilot || r.feefo) {
+      // Aggregated score
+      revHTML.push(`
+        <div class="data-card">
+          <div class="data-card-title">${ICONS.star} Aggregated Rating</div>
+          <div style="display:flex;align-items:center;gap:var(--sp-4);margin-bottom:var(--sp-4)">
+            <div style="font-size:2.5rem;font-weight:800;color:var(--warning)">${r.avg || '-'}</div>
+            <div>
+              ${starsHTML(r.avg, r.count)}
+              <div class="text-sm text-muted" style="margin-top:4px">${r.count ? r.count.toLocaleString() + ' total reviews' : 'No review count'}</div>
+            </div>
+          </div>
+          ${reviewPlatformsHTML(r, 'lg')}
+        </div>
+      `);
+
+      // Per platform
+      const platforms = [];
+      if (r.google) platforms.push({ name: 'Google', rating: r.google, color: '#4285F4', icon: ICONS.google });
+      if (r.trustpilot) platforms.push({ name: 'Trustpilot', rating: r.trustpilot, color: '#00B67A', icon: ICONS.trustpilot });
+      if (r.feefo) platforms.push({ name: 'Feefo', rating: r.feefo, color: '#FFD700', icon: ICONS.feefo });
+
+      if (platforms.length) {
+        revHTML.push(`
+          <div class="data-card">
+            <div class="data-card-title">${ICONS.barChart} Ratings by Platform</div>
+            ${platforms.map(p => `
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--sp-3) 0;border-bottom:1px solid var(--border-light)">
+                <div style="display:flex;align-items:center;gap:var(--sp-3)">
+                  ${p.name === 'Google' ? `<span class="g-logo g-logo-lg">${p.icon}</span>` : p.name === 'Trustpilot' ? `<span class="tp-logo tp-logo-lg">${p.icon}</span>` : `<span class="review-platform-icon" style="width:24px;height:24px">${p.icon}</span><span class="font-semibold text-sm">${p.name}</span>`}
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <div style="width:100px;height:8px;background:var(--bg);border-radius:4px;overflow:hidden">
+                    <div style="width:${(p.rating / 5) * 100}%;height:100%;background:${p.color};border-radius:4px"></div>
+                  </div>
+                  <span class="font-bold">${p.rating}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `);
+      }
+
+      // Recent review
+      if (r.recent) {
+        revHTML.push(`
+          <div class="data-card" style="grid-column:1/-1">
+            <div class="data-card-title">${ICONS.users} Recent Review</div>
+            <blockquote style="border-left:3px solid var(--primary-bg);padding-left:var(--sp-4);color:var(--text-secondary);font-style:italic;line-height:1.7">
+              "${r.recent}"
+            </blockquote>
+            ${r.source ? `<div class="text-xs text-muted" style="margin-top:var(--sp-2)">Source: ${r.source}</div>` : ''}
+          </div>
+        `);
+      }
+    } else {
+      revHTML.push(`<div class="data-card" style="grid-column:1/-1"><div class="empty-state">${ICONS.star}<h3>No reviews available</h3><p>This agent doesn't have any reviews listed online yet.</p></div></div>`);
+    }
+    document.getElementById('reviews-grid').innerHTML = revHTML.join('');
+
+    // -- Regulatory Tab --
+    const regHTML = [];
+    const reg = agent.regulatory;
+
+    const checks = [
+      { key: 'arla', label: 'ARLA Propertymark', val: reg.arla, icon: ICONS.arla },
+      { key: 'tpo', label: 'The Property Ombudsman', val: reg.tpo, icon: ICONS.tpo },
+      { key: 'prs', label: 'Property Redress Scheme', val: reg.prs, icon: null },
+      { key: 'cmp', label: 'Client Money Protection', val: reg.cmp, icon: ICONS.cmp },
+    ];
+
+    const knownCount = checks.filter(c => c.val !== null && c.val !== undefined);
+    const passCount = checks.filter(c => c.val === true).length;
+
+    regHTML.push(`
+      <div class="data-card" style="grid-column:1/-1">
+        <div class="data-card-title">${ICONS.shieldCheck} Regulatory Compliance</div>
+        ${knownCount.length ? `<div class="text-sm text-secondary" style="margin-bottom:var(--sp-4)">Passed ${passCount} of ${knownCount.length} checks</div>` : ''}
+        <div class="reg-checklist">
+          ${checks.map(c => {
+            const isYes = c.val === true;
+            const isNo = c.val === false;
+            return `
+              <div class="reg-check-item ${isYes ? 'yes' : 'no'}">
+                <div class="reg-check-icon ${isYes ? 'yes' : 'no'}">${isYes ? ICONS.check : (isNo ? ICONS.x : ICONS.info)}</div>
+                ${c.icon && isYes ? `<span class="reg-check-logo">${c.icon}</span>` : `<span class="reg-check-label">${c.label}</span>`}
+                <span class="text-xs text-muted" style="margin-left:auto">${isYes ? 'Verified' : isNo ? 'Not Found' : 'Unknown'}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `);
+
+    if (reg.deposit) {
+      regHTML.push(`
+        <div class="data-card">
+          <div class="data-card-title">${ICONS.shield} Deposit Protection</div>
+          <div class="badge badge-green" style="font-size:0.85rem;padding:6px 14px">${reg.deposit}</div>
+        </div>
+      `);
+    }
+
+    if (reg.other && reg.other.length) {
+      regHTML.push(`
+        <div class="data-card">
+          <div class="data-card-title">${ICONS.award} Other Memberships</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            ${reg.other.map(m => `<span class="badge badge-blue">${m}</span>`).join('')}
+          </div>
+        </div>
+      `);
+    }
+    document.getElementById('regulatory-grid').innerHTML = regHTML.join('');
+
+    // -- Performance Tab --
+    const perfHTML = [];
+    const p = agent.performance;
+    const hasPerf = p.avg_time_to_let || p.avg_rent || p.asking_vs_achieved || p.listed || p.let_recent || p.years || p.offices;
+
+    if (hasPerf) {
+      const metrics = [];
+      if (p.avg_time_to_let) metrics.push({ label: 'Avg Time to Let', value: `${p.avg_time_to_let} days`, icon: ICONS.clock });
+      if (p.avg_rent) metrics.push({ label: 'Avg Rent Achieved', value: p.avg_rent, icon: ICONS.pound });
+      if (p.asking_vs_achieved) metrics.push({ label: 'Asking vs Achieved', value: p.asking_vs_achieved, icon: ICONS.trendUp });
+      if (p.listed) metrics.push({ label: 'Properties Listed', value: p.listed.toString(), icon: ICONS.building });
+      if (p.let_recent) metrics.push({ label: 'Recently Let', value: p.let_recent.toString(), icon: ICONS.check });
+      if (p.years) metrics.push({ label: 'Branch Age', value: p.years + ' years', icon: ICONS.clock });
+      if (p.brand_age) metrics.push({ label: 'Brand Heritage', value: p.brand_age + ' years', icon: ICONS.building });
+      if (p.offices) metrics.push({ label: 'Offices', value: p.offices.toString(), icon: ICONS.building });
+
+      perfHTML.push(`
+        <div class="data-card" style="grid-column:1/-1">
+          <div class="data-card-title">${ICONS.barChart} Performance Metrics</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:var(--sp-4)">
+            ${metrics.map(m => `
+              <div style="text-align:center;padding:var(--sp-4);background:var(--bg);border-radius:var(--radius-md)">
+                <div style="color:var(--primary);margin-bottom:8px">${m.icon}</div>
+                <div style="font-size:1.5rem;font-weight:800;color:var(--text)">${m.value}</div>
+                <div class="text-xs text-muted">${m.label}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `);
+    } else {
+      perfHTML.push(`<div class="data-card" style="grid-column:1/-1"><div class="empty-state">${ICONS.barChart}<h3>No performance data</h3><p>Performance metrics aren't available for this agent yet.</p></div></div>`);
+    }
+    document.getElementById('performance-grid').innerHTML = perfHTML.join('');
+
+    // -- Contact Tab --
+    const contHTML = [];
+    const contactItems = [];
+    if (agent.phone) contactItems.push({ icon: ICONS.phone, label: 'Phone', value: agent.phone, link: `tel:${agent.phone}` });
+    if (agent.email) contactItems.push({ icon: ICONS.mail, label: 'Email', value: agent.email, link: `mailto:${agent.email}` });
+    if (agent.url) contactItems.push({ icon: ICONS.globe, label: 'Website', value: agent.url, link: agent.url.startsWith('http') ? agent.url : 'https://' + agent.url });
+    if (agent.address) contactItems.push({ icon: ICONS.mapPin, label: 'Address', value: `${agent.address}${agent.postcode ? ', ' + agent.postcode : ''}` });
+
+    if (contactItems.length) {
+      contHTML.push(`
+        <div class="data-card">
+          <div class="data-card-title">${ICONS.phone} Contact Information</div>
+          <div style="display:flex;flex-direction:column;gap:var(--sp-3)">
+            ${contactItems.map(c => `
+              <div style="display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-2) 0">
+                <div style="color:var(--primary)">${c.icon}</div>
+                <div>
+                  <div class="text-xs text-muted">${c.label}</div>
+                  ${c.link ? `<a href="${c.link}" target="_blank" rel="noopener" class="font-semibold">${c.value}</a>` : `<span class="font-semibold">${c.value}</span>`}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `);
+    }
+
+    // Social media
+    const social = agent.social;
+    const socialLinks = [];
+    if (social.facebook) socialLinks.push({ name: 'Facebook', url: social.facebook, icon: ICONS.facebook });
+    if (social.instagram) socialLinks.push({ name: 'Instagram', url: social.instagram, icon: ICONS.instagram });
+    if (social.linkedin) socialLinks.push({ name: 'LinkedIn', url: social.linkedin, icon: ICONS.linkedin });
+    if (social.youtube) socialLinks.push({ name: 'YouTube', url: social.youtube, icon: ICONS.youtube });
+    if (social.tiktok) socialLinks.push({ name: 'TikTok', url: social.tiktok, icon: ICONS.tiktok });
+
+    if (socialLinks.length) {
+      contHTML.push(`
+        <div class="data-card">
+          <div class="data-card-title">${ICONS.users} Social Media</div>
+          <div style="display:flex;flex-direction:column;gap:var(--sp-3)">
+            ${socialLinks.map(s => `
+              <a href="${s.url}" target="_blank" rel="noopener" class="social-link">
+                <span class="social-icon">${s.icon}</span>
+                <span class="font-semibold text-sm">${s.name}</span>
+                <span style="margin-left:auto;color:var(--text-muted)">${ICONS.externalLink}</span>
+              </a>
+            `).join('')}
+          </div>
+        </div>
+      `);
+    }
+    document.getElementById('contact-grid').innerHTML = contHTML.join('') || '<div class="data-card" style="grid-column:1/-1"><div class="empty-state"><h3>No contact info available</h3></div></div>';
+
+    // Helper: trust bar
+    function trustBar(label, pct) {
+      pct = Math.max(0, Math.min(100, pct));
+      const color = pct >= 60 ? 'var(--accent)' : pct >= 30 ? 'var(--warning)' : 'var(--danger)';
+      return `
+        <div style="display:flex;align-items:center;gap:var(--sp-3)">
+          <span class="text-xs" style="width:90px;color:var(--text-secondary)">${label}</span>
+          <div style="flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden">
+            <div style="width:${pct}%;height:100%;background:${color};border-radius:4px;transition:width 0.6s var(--ease)"></div>
+          </div>
+          <span class="text-xs font-semibold" style="min-width:32px;text-align:right">${Math.round(pct)}%</span>
+        </div>
+      `;
+    }
+  </script>
+
+</body>
+</html>

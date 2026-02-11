@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search Results - Lendlord</title>
+  <meta name="description" content="Compare letting & estate agents near you. See trust scores, fees, reviews and compliance.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header" id="site-header"></header>
+
+  <!-- Search Bar -->
+  <section style="background:var(--surface);border-bottom:1px solid var(--border-light);padding:var(--sp-4) 0">
+    <div class="container">
+      <div class="search-wrapper" style="max-width:100%">
+        <div class="search-input-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" class="search-input" id="search-input" placeholder="Enter postcode or area..." autocomplete="off" aria-label="Search">
+          <button class="search-btn" id="search-btn">Search</button>
+        </div>
+        <div class="search-suggestions" id="search-suggestions"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Results -->
+  <section class="section" style="padding-top:var(--sp-6)">
+    <div class="container">
+      <div class="results-layout">
+
+        <!-- Sidebar Filters (desktop) -->
+        <aside class="results-sidebar">
+          <div class="filter-panel" id="filter-panel">
+            <h3 style="font-size:1rem;margin-bottom:var(--sp-4)">Filters</h3>
+
+            <div class="filter-section">
+              <div class="filter-section-title">Service Type</div>
+              <label class="filter-option"><input type="radio" name="serviceType" value="" checked> All Services</label>
+              <label class="filter-option"><input type="radio" name="serviceType" value="tenant_find"> Tenant Find</label>
+              <label class="filter-option"><input type="radio" name="serviceType" value="full_management"> Full Management</label>
+              <label class="filter-option"><input type="radio" name="serviceType" value="guaranteed_rent"> Guaranteed Rent</label>
+            </div>
+
+            <div class="filter-section">
+              <div class="filter-section-title">Agent Type</div>
+              <label class="filter-option"><input type="radio" name="agentType" value="" checked> All Types</label>
+              <label class="filter-option"><input type="radio" name="agentType" value="high_street"> High Street</label>
+              <label class="filter-option"><input type="radio" name="agentType" value="online"> Online</label>
+              <label class="filter-option"><input type="radio" name="agentType" value="hybrid"> Hybrid</label>
+            </div>
+
+            <div class="filter-section">
+              <div class="filter-section-title">Agent Category</div>
+              <label class="filter-option"><input type="radio" name="category" value="" checked> All Categories</label>
+              <label class="filter-option"><input type="radio" name="category" value="letting"> Letting (incl. both)</label>
+              <label class="filter-option"><input type="radio" name="category" value="estate"> Estate (incl. both)</label>
+              <label class="filter-option"><input type="radio" name="category" value="letting_only"> Letting Only</label>
+              <label class="filter-option"><input type="radio" name="category" value="estate_only"> Estate Only</label>
+              <label class="filter-option"><input type="radio" name="category" value="both"> Both Services</label>
+            </div>
+
+            <div class="filter-section">
+              <div class="filter-section-title">Experience Level</div>
+              <label class="filter-option"><input type="radio" name="experience" value="" checked> All Levels</label>
+              <label class="filter-option"><input type="radio" name="experience" value="veteran"> Veteran (25y+)</label>
+              <label class="filter-option"><input type="radio" name="experience" value="established"> Established (11-25y)</label>
+              <label class="filter-option"><input type="radio" name="experience" value="growing"> Growing (4-10y)</label>
+              <label class="filter-option"><input type="radio" name="experience" value="new"> New (0-3y)</label>
+            </div>
+
+            <div class="filter-section">
+              <div class="filter-section-title">Minimum Trust Score</div>
+              <div style="display:flex;align-items:center;gap:var(--sp-2)">
+                <input type="range" id="filter-trust" min="50" max="100" value="50" style="flex:1">
+                <span id="filter-trust-val" class="text-sm font-semibold" style="min-width:28px;text-align:right">50</span>
+              </div>
+            </div>
+
+            <div class="filter-section">
+              <div class="filter-section-title">Compliance</div>
+              <label class="filter-option"><input type="checkbox" id="filter-arla"> ARLA Propertymark</label>
+              <label class="filter-option"><input type="checkbox" id="filter-cmp"> Client Money Protection</label>
+            </div>
+
+            <div class="filter-section">
+              <div class="filter-section-title">Data Quality</div>
+              <label class="filter-option"><input type="checkbox" id="filter-reviews"> Has Reviews</label>
+              <label class="filter-option"><input type="checkbox" id="filter-fees"> Has Fee Data</label>
+            </div>
+
+            <button class="btn btn-outline btn-sm" style="width:100%;margin-top:var(--sp-3)" id="clear-filters-btn">Clear All Filters</button>
+          </div>
+        </aside>
+
+        <!-- Main Results -->
+        <div class="results-main">
+          <!-- Results header -->
+          <div class="results-header">
+            <div>
+              <span class="results-count" id="results-count">Searching...</span>
+              <button class="btn btn-outline btn-sm filter-mobile-btn" id="filter-mobile-btn" style="margin-left:var(--sp-2)">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                Filters
+              </button>
+            </div>
+            <div class="results-sort">
+              <label for="sort-select">Sort by:</label>
+              <select id="sort-select">
+                <option value="trust">Trust Score</option>
+                <option value="reviews">Most Reviews</option>
+                <option value="rating">Highest Rated</option>
+                <option value="fees_low">Lowest Fees</option>
+                <option value="years">Most Experienced</option>
+                <option value="name">Name (A-Z)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Area insight banner -->
+          <div id="area-insight-banner" class="card" style="display:none;margin-bottom:var(--sp-4)">
+            <div class="card-body" style="padding:var(--sp-4)">
+              <div style="display:flex;flex-wrap:wrap;gap:var(--sp-6);align-items:center">
+                <div>
+                  <span class="text-xs text-muted" style="text-transform:uppercase;letter-spacing:0.04em">Area Insight</span>
+                  <h3 id="area-title" style="font-size:1.1rem"></h3>
+                </div>
+                <div class="flex gap-6 flex-wrap" id="area-quick-stats"></div>
+                <a id="area-link" href="#" class="btn btn-outline btn-sm" style="margin-left:auto">Full Area Report</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cards Grid -->
+          <div class="cards-grid" id="cards-grid">
+            <!-- Cards rendered by JS -->
+          </div>
+
+          <!-- Load More -->
+          <div style="text-align:center;margin-top:var(--sp-8)" id="load-more-wrap" class="hidden">
+            <button class="btn btn-outline" id="load-more-btn">Load More Agents</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mobile filter drawer -->
+  <div class="filter-drawer-backdrop" id="filter-backdrop"></div>
+  <div class="filter-drawer" id="filter-drawer">
+    <div class="filter-drawer-header">
+      <h3>Filters</h3>
+      <button class="btn btn-ghost btn-sm" id="close-filter-drawer">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+    <div id="mobile-filters-content">
+      <!-- Cloned from sidebar on mobile -->
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:var(--sp-4)" id="apply-mobile-filters">Apply Filters</button>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <script type="module">
+    import { loadData, searchAgents, sortResults, getSuggestions, getAreaStats } from './js/data.js';
+    import { renderHeader, renderFooter, renderAuthModal, renderCardsGrid, renderSkeletons, renderCompareBar, initScrollTop, initTrustTooltip } from './js/ui.js';
+    import { getParam, setParams, debounce, lsGet, lsSet, ssGet, ssSet, ICONS } from './js/utils.js';
+    import { initAuth, bindAuthEvents, isAuthenticated } from './js/auth.js';
+    import { initHooks } from './js/hooks.js';
+
+    // Render shared UI
+    renderHeader('');
+    renderFooter();
+    renderAuthModal();
+    renderCompareBar();
+    initScrollTop();
+    initTrustTooltip();
+
+    // Initialize auth and hooks
+    await initAuth();
+    bindAuthEvents();
+    initHooks();
+
+    // State
+    let allResults = [];
+    let displayCount = 20;
+    let currentSort = 'trust';
+
+    // Auth state check
+    window._isAuthenticated = isAuthenticated;
+
+    // Search input setup
+    const searchInput = document.getElementById('search-input');
+    const searchBtn = document.getElementById('search-btn');
+    const suggestionsEl = document.getElementById('search-suggestions');
+    const q = getParam('q') || '';
+    if (q) searchInput.value = q;
+
+    // Load data
+    renderSkeletons('cards-grid');
+    const data = await loadData();
+
+    // Perform search
+    function performSearch(query) {
+      const filters = getFilters();
+      allResults = searchAgents(query, filters);
+
+      // Apply sort
+      if (currentSort !== 'trust' || Object.keys(filters).some(k => filters[k])) {
+        allResults = sortResults(allResults, currentSort);
+      }
+
+      displayCount = 20;
+      renderResults();
+      updateAreaBanner(query);
+      trackSearch(query);
+    }
+
+    function getFilters() {
+      const f = {};
+      const st = document.querySelector('input[name="serviceType"]:checked');
+      if (st && st.value) f.serviceType = st.value;
+      const at = document.querySelector('input[name="agentType"]:checked');
+      if (at && at.value) f.agentType = at.value;
+      const cat = document.querySelector('input[name="category"]:checked');
+      if (cat && cat.value) f.category = cat.value;
+      const exp = document.querySelector('input[name="experience"]:checked');
+      if (exp && exp.value) f.experience = exp.value;
+      const trust = document.getElementById('filter-trust');
+      if (trust && parseInt(trust.value) > 50) f.minTrust = parseInt(trust.value);
+      if (document.getElementById('filter-arla')?.checked) f.arla = true;
+      if (document.getElementById('filter-cmp')?.checked) f.cmp = true;
+      if (document.getElementById('filter-reviews')?.checked) f.hasReviews = true;
+      if (document.getElementById('filter-fees')?.checked) f.hasFees = true;
+      return f;
+    }
+
+    function renderResults() {
+      const visible = allResults.slice(0, displayCount);
+      const countEl = document.getElementById('results-count');
+      countEl.innerHTML = `Found <strong>${allResults.length}</strong> agent${allResults.length !== 1 ? 's' : ''}${searchInput.value ? ` near <strong>${searchInput.value.toUpperCase()}</strong>` : ''}`;
+
+      const isAuthed = window._isAuthenticated();
+      const container = document.getElementById('cards-grid');
+      if (!visible.length) {
+        container.innerHTML = `
+          <div class="empty-state" style="grid-column:1/-1">
+            ${ICONS.search}
+            <h3>No agents found</h3>
+            <p>Try a different postcode or adjust your filters</p>
+          </div>`;
+        document.getElementById('load-more-wrap').classList.add('hidden');
+        return;
+      }
+
+      renderCardsGrid(visible, 'cards-grid');
+
+      // Show/hide load more
+      const loadMoreWrap = document.getElementById('load-more-wrap');
+      if (displayCount < allResults.length) {
+        loadMoreWrap.classList.remove('hidden');
+      } else {
+        loadMoreWrap.classList.add('hidden');
+      }
+    }
+
+    function updateAreaBanner(query) {
+      const banner = document.getElementById('area-insight-banner');
+      const outcode = query.trim().toUpperCase().split(' ')[0];
+      const stats = getAreaStats(outcode);
+      if (!stats || stats.agentCount < 2) {
+        banner.style.display = 'none';
+        return;
+      }
+      banner.style.display = 'block';
+      document.getElementById('area-title').textContent = `${outcode} Area Overview`;
+      document.getElementById('area-link').href = `area.html?postcode=${outcode}`;
+      const qsEl = document.getElementById('area-quick-stats');
+      qsEl.innerHTML = `
+        <div class="agent-card-stat"><span class="agent-card-stat-label">Agents</span><span class="agent-card-stat-value">${stats.agentCount}</span></div>
+        <div class="agent-card-stat"><span class="agent-card-stat-label">Avg Trust</span><span class="agent-card-stat-value">${stats.avgTrust}</span></div>
+        ${stats.avgFee ? `<div class="agent-card-stat"><span class="agent-card-stat-label">Avg Fee</span><span class="agent-card-stat-value">${stats.avgFee}%</span></div>` : ''}
+        ${stats.avgRating ? `<div class="agent-card-stat"><span class="agent-card-stat-label">Avg Rating</span><span class="agent-card-stat-value">${stats.avgRating}</span></div>` : ''}
+      `;
+    }
+
+    // Track searches for hooks
+    function trackSearch(query) {
+      const searches = ssGet('af_searches', []);
+      const postcodes = ssGet('af_postcodes', new Set());
+      searches.push(query);
+      ssSet('af_searches', searches);
+      const outcode = query.trim().toUpperCase().split(' ')[0];
+      if (outcode) {
+        const pcs = new Set(ssGet('af_postcodes', []));
+        pcs.add(outcode);
+        ssSet('af_postcodes', [...pcs]);
+      }
+    }
+
+    // Event listeners
+    function doSearch() {
+      const val = searchInput.value.trim();
+      if (val) {
+        setParams({ q: val });
+        performSearch(val);
+      }
+    }
+
+    searchBtn.addEventListener('click', doSearch);
+    searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSearch();
+      if (e.key === 'Escape') suggestionsEl.classList.remove('open');
+    });
+
+    // Suggestions
+    const showSuggestions = debounce(val => {
+      const results = getSuggestions(val);
+      if (!results.length) { suggestionsEl.classList.remove('open'); return; }
+      suggestionsEl.innerHTML = results.map(s => `
+        <div class="suggestion-item" data-value="${s.value}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>${s.text}</span>
+          <span class="suggestion-type">${s.type} (${s.count})</span>
+        </div>
+      `).join('');
+      suggestionsEl.classList.add('open');
+      suggestionsEl.querySelectorAll('.suggestion-item').forEach(item => {
+        item.addEventListener('click', () => {
+          searchInput.value = item.dataset.value;
+          suggestionsEl.classList.remove('open');
+          doSearch();
+        });
+      });
+    }, 200);
+    searchInput.addEventListener('input', e => showSuggestions(e.target.value));
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.search-wrapper')) suggestionsEl.classList.remove('open');
+    });
+
+    // Sort
+    document.getElementById('sort-select').addEventListener('change', e => {
+      currentSort = e.target.value;
+      allResults = sortResults(allResults, currentSort);
+      renderResults();
+    });
+
+    // Load more
+    document.getElementById('load-more-btn').addEventListener('click', () => {
+      displayCount += 20;
+      renderResults();
+    });
+
+    // Filters
+    document.querySelectorAll('#filter-panel input').forEach(input => {
+      input.addEventListener('change', () => performSearch(searchInput.value.trim()));
+    });
+    const trustSlider = document.getElementById('filter-trust');
+    trustSlider.addEventListener('input', e => {
+      document.getElementById('filter-trust-val').textContent = e.target.value;
+    });
+    trustSlider.addEventListener('change', () => performSearch(searchInput.value.trim()));
+
+    document.getElementById('clear-filters-btn').addEventListener('click', () => {
+      document.querySelectorAll('#filter-panel input[type="radio"]').forEach(r => { if (r.value === '') r.checked = true; });
+      document.querySelectorAll('#filter-panel input[type="checkbox"]').forEach(c => c.checked = false);
+      trustSlider.value = 50;
+      document.getElementById('filter-trust-val').textContent = '50';
+      performSearch(searchInput.value.trim());
+    });
+
+    // Mobile filter drawer
+    const filterBackdrop = document.getElementById('filter-backdrop');
+    const filterDrawer = document.getElementById('filter-drawer');
+    document.getElementById('filter-mobile-btn').addEventListener('click', () => {
+      // Clone filters into mobile drawer
+      const content = document.getElementById('mobile-filters-content');
+      content.innerHTML = document.getElementById('filter-panel').innerHTML;
+      filterBackdrop.classList.add('open');
+      filterDrawer.classList.add('open');
+    });
+    const closeDrawer = () => {
+      filterBackdrop.classList.remove('open');
+      filterDrawer.classList.remove('open');
+    };
+    document.getElementById('close-filter-drawer').addEventListener('click', closeDrawer);
+    filterBackdrop.addEventListener('click', closeDrawer);
+    document.getElementById('apply-mobile-filters').addEventListener('click', () => {
+      closeDrawer();
+      performSearch(searchInput.value.trim());
+    });
+
+    // Compare functionality
+    let compareList = lsGet('af_compare', []);
+    window.toggleCompare = (id) => {
+      const idx = compareList.indexOf(id);
+      if (idx >= 0) compareList.splice(idx, 1);
+      else if (compareList.length < 3) compareList.push(id);
+      lsSet('af_compare', compareList);
+      updateCompareBar();
+    };
+    window.clearCompare = () => {
+      compareList = [];
+      lsSet('af_compare', []);
+      updateCompareBar();
+    };
+    function updateCompareBar() {
+      const bar = document.getElementById('compare-bar');
+      const title = document.getElementById('compare-bar-title');
+      const btn = document.getElementById('compare-bar-btn');
+      title.textContent = `${compareList.length} agent${compareList.length !== 1 ? 's' : ''} selected`;
+      btn.style.display = compareList.length >= 2 ? 'inline-flex' : 'none';
+      btn.href = `compare.html?ids=${compareList.join(',')}`;
+      bar.classList.toggle('visible', compareList.length > 0);
+      // Update button states
+      document.querySelectorAll('[data-compare-btn]').forEach(b => {
+        const id = parseInt(b.dataset.compareBtn);
+        b.classList.toggle('btn-accent', compareList.includes(id));
+        b.classList.toggle('btn-outline', !compareList.includes(id));
+      });
+    }
+    updateCompareBar();
+
+    // Auth modal
+    window.showAuthModal = () => document.getElementById('auth-modal').classList.add('open');
+
+    // Initial search
+    if (q) performSearch(q);
+    else {
+      document.getElementById('cards-grid').innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:64px;height:64px;opacity:0.4"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <h3>Search for letting & estate agents</h3>
+          <p>Enter a postcode or area name above to find letting & estate agents near your property</p>
+        </div>`;
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Area Insights - Lendlord</title>
+  <meta name="description" content="Local lettings & estate market intelligence. See agent density, average fees and reviews by postcode area.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <header class="site-header" id="site-header"></header>
+
+  <!-- Area Hero -->
+  <section class="area-hero" id="area-hero">
+    <div class="container">
+      <div style="max-width:640px">
+        <h1 id="area-title">Local Market Intelligence</h1>
+        <p style="color:rgba(255,255,255,0.8);margin-top:var(--sp-2)" id="area-subtitle">
+          Explore letting & estate agent data by postcode area. See who operates where, average fees and agent quality.
+        </p>
+      </div>
+
+      <!-- Search -->
+      <div class="search-wrapper" style="max-width:480px;margin-top:var(--sp-6)">
+        <div class="search-input-wrap" style="border-color:rgba(255,255,255,0.2)">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" class="search-input" id="area-search" placeholder="Enter postcode area (e.g. SW1, B17, LS1)" autocomplete="off">
+          <button class="search-btn" id="area-search-btn">Explore</button>
+        </div>
+        <div class="search-suggestions" id="area-suggestions"></div>
+      </div>
+
+      <!-- Stats (shown when area selected) -->
+      <div class="area-stats-grid hidden" id="area-stats-grid"></div>
+    </div>
+  </section>
+
+  <!-- Area Content -->
+  <section class="section" style="padding-top:var(--sp-6)">
+    <div class="container">
+      <!-- Popular areas (shown when no area selected) -->
+      <div id="popular-areas">
+        <div class="section-header" style="text-align:left;margin-bottom:var(--sp-6)">
+          <h2>Popular Areas</h2>
+          <p>Browse letting & estate agent data by popular postcode areas</p>
+        </div>
+        <div class="features-grid" id="popular-grid"></div>
+      </div>
+
+      <!-- Agent list (shown when area selected) -->
+      <div id="area-agents" style="display:none">
+        <div class="results-header" style="margin-bottom:var(--sp-4)">
+          <span class="results-count" id="area-agent-count"></span>
+          <div class="results-sort">
+            <label for="area-sort">Sort by:</label>
+            <select id="area-sort">
+              <option value="trust">Trust Score</option>
+              <option value="reviews">Most Reviews</option>
+              <option value="rating">Highest Rated</option>
+              <option value="name">Name (A-Z)</option>
+            </select>
+          </div>
+        </div>
+        <div class="cards-grid" id="area-cards-grid"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <script type="module">
+    import { loadData, getAreaStats, sortResults, getSuggestions, getData } from './js/data.js';
+    import { renderHeader, renderFooter, renderAuthModal, renderCardsGrid, initScrollTop, initTrustTooltip } from './js/ui.js';
+    import { getParam, setParams, debounce, ICONS, fmtAgentType, lsGet } from './js/utils.js';
+    import { initAuth, bindAuthEvents, isAuthenticated } from './js/auth.js';
+
+    renderHeader('areas');
+    renderFooter();
+    renderAuthModal();
+    initScrollTop();
+    initTrustTooltip();
+    await initAuth();
+    bindAuthEvents();
+    window.showAuthModal = () => document.getElementById('auth-modal').classList.add('open');
+    window._isAuthenticated = isAuthenticated;
+
+    const data = await loadData();
+    const searchInput = document.getElementById('area-search');
+    const suggestionsEl = document.getElementById('area-suggestions');
+
+    // Show popular areas
+    function showPopularAreas() {
+      const postcodeIndex = data.postcodeIndex;
+      const sorted = Object.entries(postcodeIndex)
+        .map(([outcode, ids]) => ({ outcode, count: ids.length }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 12);
+
+      document.getElementById('popular-grid').innerHTML = sorted.map(({ outcode, count }) => {
+        const stats = getAreaStats(outcode);
+        return `
+          <a href="area.html?postcode=${outcode}" class="feature-card" style="text-decoration:none;cursor:pointer">
+            <h3 style="color:var(--primary)">${outcode}</h3>
+            <div style="display:flex;gap:var(--sp-4);margin-top:var(--sp-2)">
+              <span class="text-sm text-secondary">${count} agent${count !== 1 ? 's' : ''}</span>
+              ${stats && stats.avgTrust ? `<span class="text-sm text-secondary">Avg Trust: ${stats.avgTrust}</span>` : ''}
+              ${stats && stats.avgFee ? `<span class="text-sm text-secondary">Avg Fee: ${stats.avgFee}%</span>` : ''}
+            </div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    // Show area details
+    function showArea(outcode) {
+      outcode = outcode.toUpperCase().trim();
+      const stats = getAreaStats(outcode);
+
+      if (!stats) {
+        document.getElementById('area-title').textContent = `No data for ${outcode}`;
+        document.getElementById('area-subtitle').textContent = 'Try a different postcode area.';
+        document.getElementById('area-stats-grid').classList.add('hidden');
+        document.getElementById('area-agents').style.display = 'none';
+        document.getElementById('popular-areas').style.display = '';
+        return;
+      }
+
+      // Update hero
+      document.getElementById('area-title').textContent = `${outcode} Area Insights`;
+      document.getElementById('area-subtitle').textContent = `${stats.agentCount} letting & estate agent${stats.agentCount !== 1 ? 's' : ''} operating in the ${outcode} postcode area`;
+      document.title = `${outcode} Letting & Estate Agents - Lendlord`;
+
+      // Stats grid
+      const statsGrid = document.getElementById('area-stats-grid');
+      statsGrid.classList.remove('hidden');
+      statsGrid.innerHTML = `
+        <div class="area-stat-card">
+          <div class="stat-value">${stats.agentCount}</div>
+          <div class="stat-label">Agents</div>
+        </div>
+        <div class="area-stat-card">
+          <div class="stat-value">${stats.avgTrust} <span class="trust-info-trigger" data-trust-tooltip style="font-size:0.6rem;vertical-align:super">?</span></div>
+          <div class="stat-label">Avg Trust Score</div>
+        </div>
+        <div class="area-stat-card">
+          <div class="stat-value">${stats.avgFee ? stats.avgFee + '%' : 'N/A'}</div>
+          <div class="stat-label">Avg Mgmt Fee</div>
+        </div>
+        <div class="area-stat-card">
+          <div class="stat-value">${stats.avgRating || 'N/A'}</div>
+          <div class="stat-label">Avg Rating</div>
+        </div>
+      `;
+
+      // Agent types breakdown
+      const types = stats.agentTypes;
+      if (Object.keys(types).length > 0) {
+        const typeLabels = { high_street: 'High Street', online: 'Online', hybrid: 'Hybrid' };
+        const typeInfo = Object.entries(types).map(([t, c]) => `${typeLabels[t] || t}: ${c}`).join(' | ');
+        document.getElementById('area-subtitle').textContent += ` (${typeInfo})`;
+      }
+
+      // Show agents
+      document.getElementById('popular-areas').style.display = 'none';
+      document.getElementById('area-agents').style.display = '';
+      document.getElementById('area-agent-count').innerHTML = `<strong>${stats.agentCount}</strong> agents in ${outcode}`;
+
+      renderCardsGrid(stats.agents, 'area-cards-grid');
+
+      // Sort
+      document.getElementById('area-sort').addEventListener('change', (e) => {
+        const sorted = sortResults(stats.agents, e.target.value);
+        renderCardsGrid(sorted, 'area-cards-grid');
+      });
+    }
+
+    // Search
+    function doSearch() {
+      const val = searchInput.value.trim();
+      if (val) {
+        setParams({ postcode: val.toUpperCase() });
+        showArea(val);
+      }
+    }
+
+    document.getElementById('area-search-btn').addEventListener('click', doSearch);
+    searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') doSearch();
+      if (e.key === 'Escape') suggestionsEl.classList.remove('open');
+    });
+
+    // Suggestions
+    const showSugg = debounce(val => {
+      if (val.length < 2) { suggestionsEl.classList.remove('open'); return; }
+      const q = val.toUpperCase();
+      const matches = Object.keys(data.postcodeIndex)
+        .filter(k => k.startsWith(q))
+        .slice(0, 8)
+        .map(k => ({ text: k, count: data.postcodeIndex[k].length }));
+
+      if (!matches.length) { suggestionsEl.classList.remove('open'); return; }
+      suggestionsEl.innerHTML = matches.map(m => `
+        <div class="suggestion-item" data-value="${m.text}">
+          <span>${m.text}</span>
+          <span class="suggestion-type">${m.count} agents</span>
+        </div>
+      `).join('');
+      suggestionsEl.classList.add('open');
+
+      suggestionsEl.querySelectorAll('.suggestion-item').forEach(item => {
+        item.addEventListener('click', () => {
+          searchInput.value = item.dataset.value;
+          suggestionsEl.classList.remove('open');
+          doSearch();
+        });
+      });
+    }, 200);
+    searchInput.addEventListener('input', e => showSugg(e.target.value));
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.search-wrapper')) suggestionsEl.classList.remove('open');
+    });
+
+    // Check URL params
+    const postcodeParam = getParam('postcode');
+    if (postcodeParam) {
+      searchInput.value = postcodeParam;
+      showArea(postcodeParam);
+    } else {
+      showPopularAreas();
+    }
+  </script>
+
+</body>
+</html>

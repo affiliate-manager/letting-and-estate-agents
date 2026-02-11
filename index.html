@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lendlord - Find the Best Letting & Estate Agent for Your Property</title>
+  <meta name="description" content="Compare 999+ UK letting & estate agents by postcode. See trust scores, fees, reviews and regulatory compliance. Free and transparent.">
+  <meta property="og:title" content="Lendlord - UK Letting & Estate Agent Comparison">
+  <meta property="og:description" content="Find the right letting or estate agent for your property. Compare fees, reviews, services and more.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header" id="site-header"></header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <h1>Find the Right Letting & Estate Agent for Your Property</h1>
+      <p>Compare 999+ UK letting & estate agents. See fees, reviews, trust scores and regulatory compliance - all in one place.</p>
+
+      <div class="search-wrapper" id="hero-search">
+        <div class="search-input-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input
+            type="text"
+            class="search-input"
+            id="hero-search-input"
+            placeholder="Enter a postcode or area (e.g. SW1, Manchester, B17)"
+            autocomplete="off"
+            aria-label="Search by postcode or area"
+          >
+          <button class="search-btn" id="hero-search-btn">Find Agents</button>
+        </div>
+        <div class="search-suggestions" id="hero-suggestions"></div>
+      </div>
+
+      <div class="trust-strip" id="trust-strip">
+        <div class="trust-strip-item">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          <span><strong id="stat-agents">999</strong> Verified Agents</span>
+        </div>
+        <div class="trust-strip-item">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span><strong id="stat-areas">691</strong> Postcode Areas</span>
+        </div>
+        <div class="trust-strip-item">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+          <span><strong>100%</strong> Free to Search</span>
+        </div>
+      </div>
+      <div class="review-source-strip">
+        <span class="review-source-label">Reviews sourced from</span>
+        <div class="review-source-logos">
+          <span class="review-source-item">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 272 92"><path d="M115.75 47.18c0 12.77-9.99 22.18-22.25 22.18s-22.25-9.41-22.25-22.18C71.25 34.32 81.24 25 93.5 25s22.25 9.32 22.25 22.18zm-9.74 0c0-7.98-5.79-13.44-12.51-13.44S80.99 39.2 80.99 47.18c0 7.9 5.79 13.44 12.51 13.44s12.51-5.55 12.51-13.44z" fill="#EA4335"/><path d="M163.75 47.18c0 12.77-9.99 22.18-22.25 22.18s-22.25-9.41-22.25-22.18c0-12.85 9.99-22.18 22.25-22.18s22.25 9.32 22.25 22.18zm-9.74 0c0-7.98-5.79-13.44-12.51-13.44s-12.51 5.46-12.51 13.44c0 7.9 5.79 13.44 12.51 13.44s12.51-5.55 12.51-13.44z" fill="#FBBC05"/><path d="M209.75 26.34v39.82c0 16.38-9.66 23.07-21.08 23.07-10.75 0-17.22-7.19-19.66-13.07l8.48-3.53c1.51 3.61 5.21 7.87 11.17 7.87 7.31 0 11.84-4.51 11.84-13v-3.19h-.34c-2.18 2.69-6.38 5.04-11.68 5.04-11.09 0-21.25-9.66-21.25-22.09 0-12.52 10.16-22.26 21.25-22.26 5.29 0 9.49 2.35 11.68 4.96h.34v-3.61h9.25zm-8.56 20.92c0-7.81-5.21-13.52-11.84-13.52-6.72 0-12.35 5.71-12.35 13.52 0 7.73 5.63 13.36 12.35 13.36 6.63 0 11.84-5.63 11.84-13.36z" fill="#4285F4"/><path d="M225 3v65h-9.5V3h9.5z" fill="#34A853"/><path d="M262.02 54.48l7.56 5.04c-2.44 3.61-8.32 9.83-18.48 9.83-12.6 0-22.01-9.74-22.01-22.18 0-13.19 9.49-22.18 20.92-22.18 11.51 0 17.14 9.16 18.98 14.11l1.01 2.52-29.65 12.28c2.27 4.45 5.8 6.72 10.75 6.72 4.96 0 8.4-2.44 10.92-6.14zm-23.27-7.98l19.82-8.23c-1.09-2.77-4.37-4.7-8.23-4.7-4.95 0-11.84 4.37-11.59 12.93z" fill="#EA4335"/><path d="M35.29 41.19V32H67c.31 1.64.47 3.58.47 5.68 0 7.06-1.93 15.79-8.15 22.01-6.05 6.3-13.78 9.66-24.02 9.66C16.32 69.35.36 53.89.36 34.91.36 15.93 16.32.47 35.3.47c10.5 0 17.98 4.12 23.6 9.49l-6.64 6.64c-4.03-3.78-9.49-6.72-16.97-6.72-13.86 0-24.7 11.17-24.7 25.03 0 13.86 10.84 25.03 24.7 25.03 8.99 0 14.11-3.61 17.39-6.89 2.66-2.66 4.41-6.46 5.1-11.65l-22.49-.01z" fill="#4285F4"/></svg>
+          </span>
+          <span class="review-source-sep"></span>
+          <span class="review-source-item">
+            <svg viewBox="0 0 140 34" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M36.785 11.97h14.173v2.597h-5.572v14.602H42.32V14.567h-5.548v-2.598h.012zm13.568 4.745h2.62v2.404h.049c.087-.34.247-.668.482-.984a4.57 4.57 0 0 1 1.965-1.517 3.456 3.456 0 0 1 1.248-.243c.32 0 .556.012.68.025.123.012.246.036.382.048v2.646a9.09 9.09 0 0 0-.605-.085 5.198 5.198 0 0 0-.606-.036c-.47 0-.914.097-1.334.28-.42.181-.779.46-1.087.813a4.107 4.107 0 0 0-.742 1.335c-.185.534-.272 1.14-.272 1.833v5.923h-2.792V16.715h.012zM70.618 29.17h-2.743v-1.736h-.05c-.346.632-.852 1.13-1.532 1.506-.68.376-1.372.57-2.076.57-1.668 0-2.88-.4-3.62-1.214-.742-.813-1.113-2.039-1.113-3.678v-7.902h2.793v7.635c0 1.093.21 1.87.643 2.319.42.449 1.025.68 1.791.68.593 0 1.075-.085 1.47-.268.396-.182.717-.412.952-.716.247-.291.42-.655.532-1.068.11-.413.16-.862.16-1.347v-7.223h2.793V29.17zm4.757-3.993c.087.8.395 1.36.927 1.687.543.316 1.186.486 1.94.486.26 0 .556-.025.89-.061.333-.037.654-.122.939-.23.296-.11.53-.28.728-.498.186-.22.272-.498.26-.85a1.163 1.163 0 0 0-.395-.862c-.248-.23-.556-.4-.94-.546a9.56 9.56 0 0 0-1.31-.352c-.494-.097-.988-.207-1.494-.316a14.42 14.42 0 0 1-1.508-.413 4.632 4.632 0 0 1-1.297-.655 2.898 2.898 0 0 1-.915-1.044c-.234-.425-.346-.947-.346-1.578 0-.68.173-1.238.507-1.7a3.821 3.821 0 0 1 1.273-1.104 5.973 5.973 0 0 1 1.717-.595c.63-.109 1.236-.17 1.804-.17.655 0 1.285.073 1.879.207a4.885 4.885 0 0 1 1.618.667c.482.304.877.704 1.199 1.19.321.485.519 1.08.605 1.772H80.54c-.136-.655-.433-1.104-.914-1.323-.482-.23-1.038-.34-1.656-.34-.198 0-.433.012-.704.049a3.918 3.918 0 0 0-.767.182 1.666 1.666 0 0 0-.605.388.93.93 0 0 0-.247.668c0 .34.123.607.358.813.235.206.544.376.927.522.383.134.816.255 1.31.352.494.097 1 .206 1.52.316.506.109 1 .255 1.495.412.494.158.926.377 1.31.656.383.279.692.619.926 1.032.235.412.359.934.359 1.541 0 .74-.173 1.36-.52 1.882-.345.51-.79.934-1.334 1.25a6.34 6.34 0 0 1-1.829.704 9.334 9.334 0 0 1-1.99.218 8.585 8.585 0 0 1-2.223-.267c-.68-.182-1.273-.449-1.767-.8a3.99 3.99 0 0 1-1.174-1.348c-.284-.534-.433-1.178-.457-1.918h2.817v-.024zm9.218-8.46h2.113v-3.74h2.793v3.74h2.52v2.05H89.5v6.653c0 .29.012.534.037.752.024.207.086.389.173.534a.79.79 0 0 0 .407.328c.186.073.42.11.742.11.197 0 .395 0 .593-.013.198-.012.395-.036.593-.085v2.124c-.309.037-.618.061-.902.097a7.355 7.355 0 0 1-.902.049c-.741 0-1.334-.073-1.78-.206-.444-.134-.803-.34-1.05-.607-.26-.267-.42-.595-.519-.996a7.342 7.342 0 0 1-.16-1.371V18.79h-2.113v-2.076h-.025zm9.403 0h2.645v1.686h.05c.394-.728.938-1.238 1.642-1.553a5.499 5.499 0 0 1 2.287-.474c1 0 1.865.17 2.607.522.741.34 1.359.814 1.853 1.42.494.607.853 1.311 1.1 2.113a8.71 8.71 0 0 1 .371 2.573c0 .837-.111 1.65-.334 2.428a6.436 6.436 0 0 1-1.001 2.087 4.89 4.89 0 0 1-1.705 1.445c-.692.364-1.495.546-2.434.546a6.95 6.95 0 0 1-1.224-.11 5.455 5.455 0 0 1-1.173-.351 4.254 4.254 0 0 1-1.039-.62 3.871 3.871 0 0 1-.803-.873h-.05v6.215h-2.792V16.715zm9.762 6.238a6.11 6.11 0 0 0-.222-1.638 4.391 4.391 0 0 0-.668-1.408 3.374 3.374 0 0 0-1.099-.984 3.129 3.129 0 0 0-1.52-.376c-1.174 0-2.064.4-2.657 1.202-.593.801-.89 1.87-.89 3.204 0 .631.075 1.214.235 1.748.16.534.383.996.704 1.384.31.389.68.692 1.113.91.432.231.939.34 1.507.34.643 0 1.174-.133 1.619-.388a3.389 3.389 0 0 0 1.087-.995c.284-.413.495-.875.618-1.396a7.683 7.683 0 0 0 .173-1.603zm4.93-10.985h2.793v2.598h-2.793v-2.598zm0 4.746h2.793V29.17h-2.793V16.715zm5.289-4.746h2.793v17.2h-2.793v-17.2zm11.356 17.54c-1.014 0-1.916-.17-2.706-.497a5.977 5.977 0 0 1-2.014-1.36 5.908 5.908 0 0 1-1.249-2.076 7.888 7.888 0 0 1-.432-2.646c0-.947.148-1.82.432-2.622a5.91 5.91 0 0 1 1.249-2.075c.543-.583 1.223-1.032 2.014-1.36.79-.328 1.692-.498 2.706-.498 1.013 0 1.915.17 2.706.498.791.328 1.458.79 2.014 1.36a5.893 5.893 0 0 1 1.248 2.075c.284.801.432 1.675.432 2.622 0 .96-.148 1.845-.432 2.646a5.891 5.891 0 0 1-1.248 2.076c-.544.583-1.223 1.032-2.014 1.36-.791.327-1.693.497-2.706.497zm0-2.173c.618 0 1.161-.133 1.618-.388a3.42 3.42 0 0 0 1.125-1.008c.296-.412.506-.886.655-1.408.136-.522.21-1.056.21-1.602 0-.534-.074-1.056-.21-1.59a4.13 4.13 0 0 0-.655-1.408 3.386 3.386 0 0 0-1.125-.995c-.457-.255-1-.389-1.618-.389-.618 0-1.162.134-1.619.389a3.52 3.52 0 0 0-1.124.995 4.347 4.347 0 0 0-.655 1.408 6.387 6.387 0 0 0-.211 1.59c0 .546.075 1.08.211 1.602s.358.996.655 1.408c.296.413.667.753 1.124 1.008.457.267 1.001.388 1.619.388zm7.216-10.62h2.113v-3.74h2.793v3.74h2.52v2.05h-2.52v6.653c0 .29.012.534.036.752.025.207.087.389.174.534a.787.787 0 0 0 .407.328c.186.073.42.11.742.11.197 0 .395 0 .593-.013.198-.012.395-.036.593-.085v2.124c-.309.037-.618.061-.902.097a7.359 7.359 0 0 1-.902.049c-.741 0-1.335-.073-1.78-.206-.444-.134-.803-.34-1.05-.607-.259-.267-.42-.595-.519-.996a7.37 7.37 0 0 1-.16-1.371V18.79h-2.113v-2.076h-.025z" fill="#fff"/><path d="M33.523 11.969H20.722L16.768 0 12.8 11.97 0 11.957l10.367 7.404-3.966 11.956 10.367-7.392 10.355 7.392-3.954-11.956 10.354-7.392z" fill="#04DA8D"/><path d="m24.058 22.069-.89-2.707-6.4 4.564 7.29-1.857z" fill="#126849"/></svg>
+          </span>
+          <span class="review-source-sep"></span>
+          <span class="review-source-item review-source-feefo">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 17.27l6.18 3.73-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" fill="#FFD700"/></svg>
+            Feefo
+          </span>
+        </div>
+      </div>
+      <div class="review-source-strip" style="margin-top:var(--sp-2)">
+        <span class="review-source-label">Agents verified by</span>
+        <div class="review-source-logos">
+          <span class="review-source-item review-source-reg">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60"><rect width="200" height="60" rx="4" fill="#1B3A5C"/><path d="M20 42l8-24h6l8 24h-5.5l-1.5-5h-8.5l-1.5 5H20zm7.5-9h5.5l-2.7-9.5h-.1L27.5 33zM46 42V18h9c2.3 0 4 .6 5.2 1.8 1.2 1.1 1.8 2.7 1.8 4.7 0 1.5-.4 2.8-1.2 3.8-.8 1-1.9 1.6-3.3 1.9L63 42h-5.8l-4.7-11H51v11h-5zm5-15h3.5c1.1 0 1.9-.3 2.4-.8.5-.5.8-1.3.8-2.2 0-.9-.3-1.6-.8-2.1-.5-.5-1.3-.8-2.4-.8H51v5.9zm20 15V18h5v20h11v4H71zm26 0l8-24h6l8 24h-5.5l-1.5-5H103l-1.5 5H97zm7.5-9h5.5l-2.7-9.5h-.1l-2.7 9.5z" fill="#fff"/><rect x="120" y="12" width="68" height="36" rx="3" fill="#E8542F"/><path d="M130 38V22h4.6v12.5h7.4v3.5H130zm15 0V22h4.6v16H145zm8 0V22h8.5c1.8 0 3.2.5 4.2 1.4 1 .9 1.5 2.2 1.5 3.8 0 1.1-.3 2-.8 2.7-.5.7-1.2 1.3-2 1.6l3.6 8.5h-5l-3-7.5h-2.4V38H153zm4.6-11h3c.8 0 1.4-.2 1.8-.6.4-.4.6-1 .6-1.7s-.2-1.3-.6-1.7c-.4-.4-1-.6-1.8-.6h-3v4.6zm15 11V22h12v3.5h-7.4v2.8h6.6v3.3h-6.6v3h7.7V38h-12.3z" fill="#fff"/></svg>
+          </span>
+          <span class="review-source-sep"></span>
+          <span class="review-source-item review-source-reg">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60"><rect width="200" height="60" rx="4" fill="#2E7D32"/><path d="M16 15h8a14.5 14.5 0 010 29H16V15zm8 24.5c5.8 0 9-3.5 9-10s-3.2-10-9-10h-3v20h3z" fill="#fff" opacity="0.3"/><path d="M45 42c-2.4 0-4.3-.7-5.8-2.2-1.4-1.5-2.2-3.5-2.2-6.1v-1.5c0-2.6.7-4.7 2.1-6.2 1.4-1.5 3.2-2.2 5.5-2.2 2.2 0 3.9.6 5.1 1.9 1.2 1.3 1.8 3 1.8 5.3h-4.8c0-1.1-.2-2-.7-2.6-.5-.6-1.1-.9-2-.9-.9 0-1.6.4-2.2 1.3-.5.9-.8 2.1-.8 3.6v1.3c0 1.6.3 2.9.8 3.7.5.9 1.4 1.3 2.4 1.3.8 0 1.5-.3 1.9-.8.4-.5.7-1.3.7-2.3h4.8c-.1 2.2-.8 3.9-2.1 5.2-1.2 1.3-3 1.9-5.2 1.9h-.3zm15-17.7h5.2l4 12.8h.1l4-12.8h5.2V42H74V29h-.1l-4.2 13H66l-4.2-13h-.1V42H57V24.3zm22 0h8.2c2 0 3.6.5 4.8 1.6 1.1 1 1.7 2.5 1.7 4.4 0 1.9-.6 3.4-1.7 4.5-1.2 1.1-2.8 1.6-4.8 1.6H84v5.9h-5V24.3zM84 32h2.7c.9 0 1.6-.3 2.1-.7.5-.5.7-1.2.7-2s-.2-1.5-.7-2c-.5-.5-1.2-.7-2.1-.7H84V32z" fill="#fff"/><rect x="102" y="10" width="88" height="40" rx="3" fill="#fff" opacity="0.15"/><text x="146" y="36" font-family="Arial,sans-serif" font-size="11" fill="#fff" text-anchor="middle" font-weight="700">PROTECTED</text></svg>
+          </span>
+          <span class="review-source-sep"></span>
+          <span class="review-source-item review-source-reg">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60"><rect width="200" height="60" rx="4" fill="#003366"/><circle cx="30" cy="30" r="16" fill="none" stroke="#C9A84C" stroke-width="2"/><path d="M30 18l2 6.2h6.5l-5.3 3.8 2 6.2L30 30.3l-5.2 3.9 2-6.2-5.3-3.8H28L30 18z" fill="#C9A84C"/><path d="M54 24h14v4h-4.5v14H59V28h-5v-4zm16 0h5v8.5h6V24h5v18h-5v-6h-6v6h-5V24zm27.5 18.3c-2.5 0-4.5-.7-6-2.2-1.5-1.5-2.2-3.5-2.2-6.1v-.5c0-2.7.7-4.8 2.2-6.3 1.5-1.5 3.5-2.2 5.8-2.2 2.4 0 4.3.7 5.8 2.2 1.5 1.5 2.2 3.5 2.2 6v1h-11c.1 1.3.5 2.3 1.1 3 .7.7 1.6 1.1 2.7 1.1 1 0 1.7-.2 2.3-.6.6-.4 1-.9 1.4-1.5l3.3 2.4c-.6 1.1-1.6 2-2.8 2.6-1.3.7-2.8 1-4.5 1h-.3zm-.2-13.7c-.9 0-1.7.3-2.3 1-.5.6-.9 1.6-1 2.8h6.2v-.3c0-1.1-.3-2-.8-2.6-.5-.6-1.2-.9-2.1-.9zm22.7-.3h-5.5V42h-5V24h14.8c2 0 3.5.5 4.6 1.5 1.1 1 1.7 2.3 1.7 4 0 1.3-.3 2.4-1 3.3-.6.9-1.5 1.5-2.6 1.9l4.5 7.3h-5.5l-3.8-6.5h-2.2v6.8zm0-3.8h4.5c.8 0 1.4-.2 1.8-.7.4-.4.7-1.1.7-1.8 0-.8-.2-1.4-.7-1.9-.4-.4-1.1-.7-1.8-.7H120v5.1zM145 42V24h10.5c2 0 3.5.5 4.7 1.5 1.1 1 1.7 2.4 1.7 4.1 0 1.8-.6 3.1-1.7 4.1-1.1 1-2.7 1.5-4.7 1.5H150v6.8h-5zm5-10.3h4.8c.9 0 1.5-.2 2-.7.5-.4.7-1.1.7-1.9s-.2-1.4-.7-1.9c-.5-.5-1.1-.7-2-.7H150v5.2z" fill="#fff"/></svg>
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- As Seen In -->
+  <section class="as-seen-in">
+    <div class="container">
+      <p class="as-seen-label">As Seen In</p>
+      <div class="as-seen-track-wrap">
+        <div class="as-seen-track">
+          <span class="as-seen-logo">Mortgage Solutions</span>
+          <span class="as-seen-logo">Investing.com</span>
+          <span class="as-seen-logo as-seen-serif">The Intermediary</span>
+          <span class="as-seen-logo">Mortgage Strategy</span>
+          <span class="as-seen-logo">Property Reporter</span>
+          <span class="as-seen-logo as-seen-serif">Mortgage Soup</span>
+          <span class="as-seen-logo">Modern Lender</span>
+          <span class="as-seen-logo">Mortgage Introducer</span>
+          <span class="as-seen-logo">Trusted Mortgage Capital</span>
+          <span class="as-seen-logo as-seen-bold">Landlord<span class="as-seen-accent">ZONE</span></span>
+          <span class="as-seen-logo">Property Investor Today</span>
+          <span class="as-seen-logo">Landlord Today</span>
+          <span class="as-seen-logo as-seen-bold">BTL Insider</span>
+          <span class="as-seen-logo">IFA Magazine</span>
+          <!-- duplicate set for seamless scroll -->
+          <span class="as-seen-logo">Mortgage Solutions</span>
+          <span class="as-seen-logo">Investing.com</span>
+          <span class="as-seen-logo as-seen-serif">The Intermediary</span>
+          <span class="as-seen-logo">Mortgage Strategy</span>
+          <span class="as-seen-logo">Property Reporter</span>
+          <span class="as-seen-logo as-seen-serif">Mortgage Soup</span>
+          <span class="as-seen-logo">Modern Lender</span>
+          <span class="as-seen-logo">Mortgage Introducer</span>
+          <span class="as-seen-logo">Trusted Mortgage Capital</span>
+          <span class="as-seen-logo as-seen-bold">Landlord<span class="as-seen-accent">ZONE</span></span>
+          <span class="as-seen-logo">Property Investor Today</span>
+          <span class="as-seen-logo">Landlord Today</span>
+          <span class="as-seen-logo as-seen-bold">BTL Insider</span>
+          <span class="as-seen-logo">IFA Magazine</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="section" style="background:var(--surface)">
+    <div class="container">
+      <div class="section-header">
+        <h2>How It Works</h2>
+        <p>Finding the right agent has never been easier</p>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-icon blue">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </div>
+          <h3>Search Your Postcode</h3>
+          <p>Enter your property's postcode to find letting & estate agents operating in your area</p>
+        </div>
+        <div class="step-card">
+          <div class="step-icon green">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+          </div>
+          <h3>Compare Side by Side</h3>
+          <p>See trust scores, fees, services, reviews and regulatory compliance at a glance</p>
+        </div>
+        <div class="step-card">
+          <div class="step-icon amber">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <h3>Choose with Confidence</h3>
+          <p>Make an informed decision backed by real data, verified reviews and compliance checks</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Everything You Need to Choose the Right Agent</h2>
+        <p>More data, more transparency, better decisions</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon blue">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <h3>Agent Trust Score</h3>
+          <p>Our proprietary 50-100 score combines reviews, regulatory compliance, experience and transparency into one clear number.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon green">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 7c0-5.333-8-5.333-8 0v8.5c0 2-2 3.5-4 3.5h12"/><path d="M6 15h8"/></svg>
+          </div>
+          <h3>Fee Finder</h3>
+          <p>See transparent fee breakdowns for lettings management, tenant find, sales and more. No hidden costs.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon amber">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3>Regulatory Shield</h3>
+          <p>Instantly check ARLA, Client Money Protection, Property Ombudsman and deposit scheme compliance.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon blue">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+          </div>
+          <h3>Service Decoder</h3>
+          <p>Compare what's included in each service tier. See exactly what you're paying for, across agents.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon green">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <h3>Social Proof Hub</h3>
+          <p>Aggregated reviews from Google, Trustpilot, Feefo and more. All in one place, weighted and verified.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon amber">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          </div>
+          <h3>Local Market Intelligence</h3>
+          <p>Area-level insights: average fees, number of agents, typical time to let or sell, and market trends for your postcode.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="section" style="background:var(--surface)">
+    <div class="container">
+      <div class="stats-bar" id="stats-bar">
+        <div class="stat-item">
+          <div class="stat-value" id="stat-total">999</div>
+          <div class="stat-label">Letting & Estate Agents</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="stat-reviewed">582</div>
+          <div class="stat-label">With Reviews</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="stat-postcodes">691</div>
+          <div class="stat-label">Postcode Areas</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="stat-arla">813</div>
+          <div class="stat-label">Compliance Checked</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section">
+    <div class="container" style="text-align:center">
+      <h2>Ready to Find Your Perfect Letting or Estate Agent?</h2>
+      <p class="text-secondary" style="max-width:480px;margin:var(--sp-3) auto var(--sp-6)">
+        Search by postcode to see agents near your property, compare their fees, read reviews and check compliance - all free.
+      </p>
+      <a href="#hero-search" class="btn btn-primary btn-lg" onclick="document.getElementById('hero-search-input').focus();return false;">
+        Find Agents Near Your Properties
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <!-- Scripts -->
+  <script type="module">
+    import { loadData, getSuggestions } from './js/data.js';
+    import { renderHeader, renderFooter, renderAuthModal, initScrollTop } from './js/ui.js';
+    import { debounce } from './js/utils.js';
+    import { initAuth, bindAuthEvents } from './js/auth.js';
+
+    // Render shared components
+    renderHeader('home');
+    renderFooter();
+    renderAuthModal();
+    initScrollTop();
+
+    // Initialize auth
+    await initAuth();
+    bindAuthEvents();
+
+    // Load data and update stats
+    const data = await loadData();
+    if (data && data.stats) {
+      const s = data.stats;
+      const el = id => document.getElementById(id);
+      if (el('stat-agents')) el('stat-agents').textContent = s.totalAgents.toLocaleString();
+      if (el('stat-areas')) el('stat-areas').textContent = s.postcodeAreas.toLocaleString();
+      if (el('stat-total')) el('stat-total').textContent = s.totalAgents.toLocaleString();
+      if (el('stat-reviewed')) el('stat-reviewed').textContent = s.withReviews.toLocaleString();
+      if (el('stat-postcodes')) el('stat-postcodes').textContent = s.postcodeAreas.toLocaleString();
+    }
+
+    // Search functionality
+    const searchInput = document.getElementById('hero-search-input');
+    const searchBtn = document.getElementById('hero-search-btn');
+    const suggestionsEl = document.getElementById('hero-suggestions');
+
+    function doSearch() {
+      const q = searchInput.value.trim();
+      if (q) {
+        window.location.href = `results.html?q=${encodeURIComponent(q)}`;
+      }
+    }
+
+    searchBtn.addEventListener('click', doSearch);
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') doSearch();
+      if (e.key === 'Escape') suggestionsEl.classList.remove('open');
+    });
+
+    // Autocomplete suggestions
+    const showSuggestions = debounce((val) => {
+      const results = getSuggestions(val);
+      if (!results.length) {
+        suggestionsEl.classList.remove('open');
+        return;
+      }
+      suggestionsEl.innerHTML = results.map(s => `
+        <div class="suggestion-item" data-value="${s.value}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>${s.text}</span>
+          <span class="suggestion-type">${s.type} (${s.count})</span>
+        </div>
+      `).join('');
+      suggestionsEl.classList.add('open');
+
+      suggestionsEl.querySelectorAll('.suggestion-item').forEach(item => {
+        item.addEventListener('click', () => {
+          searchInput.value = item.dataset.value;
+          suggestionsEl.classList.remove('open');
+          doSearch();
+        });
+      });
+    }, 200);
+
+    searchInput.addEventListener('input', (e) => showSuggestions(e.target.value));
+
+    // Close suggestions on outside click
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#hero-search')) {
+        suggestionsEl.classList.remove('open');
+      }
+    });
+
+    // Auth modal helper
+    window.showAuthModal = () => {
+      document.getElementById('auth-modal').classList.add('open');
+    };
+  </script>
+
+</body>
+</html>
