@@ -81,7 +81,7 @@
   <script type="module">
     import { loadData, getAgent } from './js/data.js';
     import { renderHeader, renderFooter, renderAuthModal, initScrollTop, initTrustTooltip } from './js/ui.js';
-    import { ICONS, trustScoreClass, starsHTML, reviewPlatformsHTML, regBadgesHTML, socialIconsHTML, fmtAgentType, categoryBadgeHTML, experienceBadgeHTML, brandAgeHTML, fmtLocation, initials, getParam } from './js/utils.js';
+    import { ICONS, trustScoreClass, starsHTML, reviewPlatformsHTML, regBadgesHTML, socialIconsHTML, fmtAgentType, categoryBadgeHTML, experienceBadgeHTML, brandAgeHTML, fmtLocation, initials, getParam, portalBadgesHTML, hiddenFeesAlertHTML, complianceStatusHTML, guaranteedRentBadgeHTML, noTenantFeesBadgeHTML, naeaBadgeHTML, confidenceBadgeHTML, websiteScoreHTML } from './js/utils.js';
     import { REGULATORY_LABELS } from './js/config.js';
     import { initAuth, bindAuthEvents } from './js/auth.js';
     import { initHooks, trackProfileView } from './js/hooks.js';
@@ -133,6 +133,8 @@
               ${categoryBadgeHTML(agent.category)}
               ${experienceBadgeHTML(agent.experience)}
               ${agent.activity === 'active' ? '<span class="badge badge-green"><span class="activity-dot active"></span> Active</span>' : ''}
+              ${guaranteedRentBadgeHTML(agent)}
+              ${noTenantFeesBadgeHTML(agent.fees)}
               ${agent.special_offers ? `<span class="badge badge-amber">Special Offer</span>` : ''}
             </div>
           </div>
@@ -151,7 +153,8 @@
         </div>
         <div class="profile-header-badges">
           ${reviewPlatformsHTML(agent.reviews, 'lg')}
-          ${regBadgesHTML(agent.regulatory)}
+          ${complianceStatusHTML(agent.regulatory)}
+          ${portalBadgesHTML(agent.portals, 'lg')}
           ${socialIconsHTML(agent.social)}
         </div>
       </div>
@@ -190,7 +193,9 @@
           ${trustBar('Compliance', ((agent.regulatory.arla ? 1 : 0) + (agent.regulatory.cmp ? 1 : 0) + (agent.regulatory.tpo ? 1 : 0)) / 3 * 100)}
           ${trustBar('Experience', agent.performance.years ? Math.min(agent.performance.years / 20 * 100, 100) : 0)}
           ${trustBar('Transparency', agent.data_richness / 30 * 100)}
+          ${agent.website_score ? websiteScoreHTML(agent.website_score) : ''}
         </div>
+        ${agent.confidence ? `<div style="margin-top:var(--sp-3)">${confidenceBadgeHTML(agent.confidence)}</div>` : ''}
       </div>
     `);
 
@@ -231,14 +236,12 @@
       `);
     }
 
-    // Portals
+    // Portals — branded badges
     if (agent.portals.length) {
       ovHTML.push(`
         <div class="data-card">
-          <div class="data-card-title">${ICONS.globe} Listed On</div>
-          <div style="display:flex;flex-wrap:wrap;gap:6px">
-            ${agent.portals.map(p => `<span class="badge badge-green">${p}</span>`).join('')}
-          </div>
+          <div class="data-card-title">${ICONS.globe} Portal Coverage</div>
+          ${portalBadgesHTML(agent.portals, 'lg')}
         </div>
       `);
     }
@@ -273,14 +276,13 @@
     const hasFees = f.tenant_find || f.full_management || f.guaranteed_rent || f.mgmt_pct || f.detail;
 
     if (hasFees) {
+      // Main fee table (core fees only)
       let tableRows = '';
       if (f.tenant_find) tableRows += `<tr><td>Tenant Find</td><td class="font-semibold">${f.tenant_find}</td></tr>`;
       if (f.full_management) tableRows += `<tr><td>Full Management</td><td class="font-semibold">${f.full_management}</td></tr>`;
       if (f.guaranteed_rent) tableRows += `<tr><td>Guaranteed Rent</td><td class="font-semibold">${f.guaranteed_rent}</td></tr>`;
       if (f.mgmt_pct) tableRows += `<tr><td>Management Fee %</td><td class="font-semibold">${f.mgmt_pct}%</td></tr>`;
       if (f.letting_pct) tableRows += `<tr><td>Letting Fee %</td><td class="font-semibold">${f.letting_pct}%</td></tr>`;
-      if (f.renewal) tableRows += `<tr><td>Renewal Fee</td><td>${f.renewal}</td></tr>`;
-      if (f.setup) tableRows += `<tr><td>Setup Fee</td><td>${f.setup}</td></tr>`;
       if (f.vat_inclusive !== null) tableRows += `<tr><td>VAT Inclusive</td><td>${f.vat_inclusive ? 'Yes' : 'No'}</td></tr>`;
 
       feesHTML.push(`
@@ -293,7 +295,97 @@
         </div>
       `);
 
-      // Fee detail (JSON string)
+      // Additional / Hidden Fees section
+      const additionalFees = [];
+      if (f.renewal) additionalFees.push({ label: 'Renewal Fee', value: f.renewal });
+      if (f.setup) additionalFees.push({ label: 'Setup Fee', value: f.setup });
+      if (f.inventory) additionalFees.push({ label: 'Inventory Fee', value: f.inventory });
+      if (additionalFees.length) {
+        feesHTML.push(`
+          <div class="data-card hidden-fees-card" style="grid-column:1/-1">
+            <div class="data-card-title" style="color:var(--warning)">${ICONS.info} Additional Fees to Consider</div>
+            <p class="text-sm text-secondary" style="margin-bottom:var(--sp-3)">These fees may apply on top of the standard management or letting fee.</p>
+            <table class="fee-table">
+              <thead><tr><th>Fee Type</th><th>Amount</th></tr></thead>
+              <tbody>
+                ${additionalFees.map(af => `<tr><td>${af.label}</td><td class="font-semibold">${af.value}</td></tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        `);
+      }
+
+      // Rent Collection & Minimum Fee (extra tier)
+      if (f.rent_collection || f.minimum) {
+        let extraRows = '';
+        if (f.rent_collection) extraRows += `<tr><td>Rent Collection Only</td><td class="font-semibold">${f.rent_collection}</td></tr>`;
+        if (f.minimum) extraRows += `<tr><td>Minimum Fee</td><td class="font-semibold">${f.minimum}</td></tr>`;
+        feesHTML.push(`
+          <div class="data-card" style="grid-column:1/-1">
+            <div class="data-card-title">${ICONS.pound} Other Fee Tiers</div>
+            <table class="fee-table">
+              <thead><tr><th>Service</th><th>Fee</th></tr></thead>
+              <tbody>${extraRows}</tbody>
+            </table>
+          </div>
+        `);
+      }
+
+      // No Tenant Fees badge
+      if (f.no_tenant_fees) {
+        feesHTML.push(`
+          <div class="data-card" style="grid-column:1/-1;border-color:var(--accent);border-width:2px">
+            <div class="data-card-title" style="color:var(--accent-dark)">${ICONS.check} No Tenant Fees</div>
+            <p class="text-sm text-secondary">This agent advertises that tenants are not charged any fees, in compliance with the Tenant Fees Act 2019.</p>
+          </div>
+        `);
+      }
+
+      // Tenant fees breakdown (if they do charge tenants)
+      if (f.tenant_detail) {
+        try {
+          const tDetail = typeof f.tenant_detail === 'string' ? JSON.parse(f.tenant_detail) : f.tenant_detail;
+          let tRows = '';
+          for (const [k, v] of Object.entries(tDetail)) {
+            tRows += `<tr><td>${k.replace(/_/g, ' ')}</td><td>${v}</td></tr>`;
+          }
+          if (tRows) {
+            feesHTML.push(`
+              <div class="data-card" style="grid-column:1/-1">
+                <div class="data-card-title">${ICONS.users} Tenant Fee Breakdown</div>
+                <table class="fee-table">
+                  <thead><tr><th>Item</th><th>Fee</th></tr></thead>
+                  <tbody>${tRows}</tbody>
+                </table>
+              </div>
+            `);
+          }
+        } catch(e) {}
+      }
+
+      // Additional named fees
+      if (f.additional) {
+        try {
+          const aDetail = typeof f.additional === 'string' ? JSON.parse(f.additional) : f.additional;
+          let aRows = '';
+          for (const [k, v] of Object.entries(aDetail)) {
+            aRows += `<tr><td>${k.replace(/_/g, ' ')}</td><td>${v}</td></tr>`;
+          }
+          if (aRows) {
+            feesHTML.push(`
+              <div class="data-card" style="grid-column:1/-1">
+                <div class="data-card-title">${ICONS.info} Other Named Fees</div>
+                <table class="fee-table">
+                  <thead><tr><th>Fee</th><th>Amount</th></tr></thead>
+                  <tbody>${aRows}</tbody>
+                </table>
+              </div>
+            `);
+          }
+        } catch(e) {}
+      }
+
+      // Landlord fee detail (JSON string)
       if (f.detail) {
         try {
           const detail = typeof f.detail === 'string' ? JSON.parse(f.detail) : f.detail;
@@ -402,9 +494,11 @@
 
     const checks = [
       { key: 'arla', label: 'ARLA Propertymark', val: reg.arla, icon: ICONS.arla },
+      { key: 'naea', label: 'NAEA Propertymark', val: reg.naea, icon: null },
       { key: 'tpo', label: 'The Property Ombudsman', val: reg.tpo, icon: ICONS.tpo },
       { key: 'prs', label: 'Property Redress Scheme', val: reg.prs, icon: null },
       { key: 'cmp', label: 'Client Money Protection', val: reg.cmp, icon: ICONS.cmp },
+      { key: 'pi', label: 'Professional Indemnity Insurance', val: reg.pi_insurance, icon: null },
     ];
 
     const knownCount = checks.filter(c => c.val !== null && c.val !== undefined);
@@ -418,17 +512,34 @@
           ${checks.map(c => {
             const isYes = c.val === true;
             const isNo = c.val === false;
+            const statusText = isYes ? 'Displayed on website' : isNo ? 'Not displayed on website' : 'Unknown';
             return `
               <div class="reg-check-item ${isYes ? 'yes' : 'no'}">
                 <div class="reg-check-icon ${isYes ? 'yes' : 'no'}">${isYes ? ICONS.check : (isNo ? ICONS.x : ICONS.info)}</div>
                 ${c.icon && isYes ? `<span class="reg-check-logo">${c.icon}</span>` : `<span class="reg-check-label">${c.label}</span>`}
-                <span class="text-xs text-muted" style="margin-left:auto">${isYes ? 'Verified' : isNo ? 'Not Found' : 'Unknown'}</span>
+                <span class="text-xs text-muted" style="margin-left:auto">${statusText}</span>
               </div>
             `;
           }).join('')}
         </div>
+        <div class="compliance-disclaimer">
+          ${ICONS.info} Compliance data is based on information publicly displayed on the agent's website. Agents may hold certifications not shown on their site.
+        </div>
       </div>
     `);
+
+    // ARLA membership details
+    if (reg.arla && (reg.arla_level || reg.arla_number)) {
+      regHTML.push(`
+        <div class="data-card">
+          <div class="data-card-title">${ICONS.shieldCheck} ARLA Membership Details</div>
+          <div style="display:flex;flex-direction:column;gap:var(--sp-2)">
+            ${reg.arla_level ? `<div class="text-sm"><span class="text-muted">Level:</span> <span class="font-semibold">${reg.arla_level}</span></div>` : ''}
+            ${reg.arla_number ? `<div class="text-sm"><span class="text-muted">Membership #:</span> <span class="font-semibold">${reg.arla_number}</span></div>` : ''}
+          </div>
+        </div>
+      `);
+    }
 
     if (reg.deposit) {
       regHTML.push(`
@@ -454,13 +565,14 @@
     // -- Performance Tab --
     const perfHTML = [];
     const p = agent.performance;
-    const hasPerf = p.avg_time_to_let || p.avg_rent || p.asking_vs_achieved || p.listed || p.let_recent || p.years || p.offices;
+    const hasPerf = p.avg_time_to_let || p.avg_rent || p.asking_vs_achieved || p.listed || p.let_recent || p.years || p.offices || p.managed;
 
     if (hasPerf) {
       const metrics = [];
       if (p.avg_time_to_let) metrics.push({ label: 'Avg Time to Let', value: `${p.avg_time_to_let} days`, icon: ICONS.clock });
       if (p.avg_rent) metrics.push({ label: 'Avg Rent Achieved', value: p.avg_rent, icon: ICONS.pound });
       if (p.asking_vs_achieved) metrics.push({ label: 'Asking vs Achieved', value: p.asking_vs_achieved, icon: ICONS.trendUp });
+      if (p.managed) metrics.push({ label: 'Under Management', value: p.managed.toLocaleString(), icon: ICONS.building });
       if (p.listed) metrics.push({ label: 'Properties Listed', value: p.listed.toString(), icon: ICONS.building });
       if (p.let_recent) metrics.push({ label: 'Recently Let', value: p.let_recent.toString(), icon: ICONS.check });
       if (p.years) metrics.push({ label: 'Branch Age', value: p.years + ' years', icon: ICONS.clock });
@@ -521,6 +633,7 @@
     if (social.linkedin) socialLinks.push({ name: 'LinkedIn', url: social.linkedin, icon: ICONS.linkedin });
     if (social.youtube) socialLinks.push({ name: 'YouTube', url: social.youtube, icon: ICONS.youtube });
     if (social.tiktok) socialLinks.push({ name: 'TikTok', url: social.tiktok, icon: ICONS.tiktok });
+    if (social.twitter) socialLinks.push({ name: 'X (Twitter)', url: social.twitter, icon: ICONS.twitter || ICONS.externalLink });
 
     if (socialLinks.length) {
       contHTML.push(`

@@ -54,6 +54,7 @@ export const ICONS = {
   youtube: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FF0000"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`,
   tiktok: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#000000"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-.81-.07l-.38-.03z"/></svg>`,
   linkedin: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>`,
+  twitter: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#000000"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`,
 };
 
 /* ---------- Trust Score class ---------- */
@@ -135,6 +136,7 @@ export function socialIconsHTML(social) {
   if (social.youtube) links.push({ icon: ICONS.youtube, url: social.youtube, name: 'YouTube' });
   if (social.tiktok) links.push({ icon: ICONS.tiktok, url: social.tiktok, name: 'TikTok' });
   if (social.linkedin) links.push({ icon: ICONS.linkedin, url: social.linkedin, name: 'LinkedIn' });
+  if (social.twitter) links.push({ icon: ICONS.twitter || ICONS.externalLink, url: social.twitter, name: 'X (Twitter)' });
   if (!links.length) return '';
   return `<div class="social-icons-row">${links.map(l =>
     `<a href="${l.url}" target="_blank" rel="noopener" title="${l.name}" class="social-icon-sm">${l.icon}</a>`
@@ -193,6 +195,110 @@ export function brandAgeHTML(brandAge) {
 export function initials(name) {
   if (!name) return '?';
   return name.split(/[\s&]+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+}
+
+/* ---------- Hidden Fees Alert ---------- */
+export function hiddenFeesAlertHTML(fees, compact = true) {
+  if (!fees) return '';
+  const items = [];
+  if (fees.renewal) items.push(`Renewal: ${fees.renewal}`);
+  if (fees.setup) items.push(`Setup: ${fees.setup}`);
+  if (fees.inventory) items.push(`Inventory: ${fees.inventory}`);
+  if (!items.length) return '';
+  if (compact) {
+    return `<div class="hidden-fees-alert hidden-fees-alert-compact" title="This agent charges additional fees beyond the standard management fee">
+      <span class="hidden-fees-icon">${ICONS.info}</span>
+      <span>Additional fees: ${items.join(' · ')}</span>
+    </div>`;
+  }
+  return `<div class="hidden-fees-alert">
+    <span class="hidden-fees-icon">${ICONS.info}</span>
+    <span>Additional fees: ${items.join(' · ')}</span>
+  </div>`;
+}
+
+/* ---------- Portal Coverage Badges ---------- */
+const PORTAL_COLORS = {
+  'rightmove':     { bg: '#e6faf3', color: '#00785a', abbr: 'RM' },
+  'zoopla':        { bg: '#f0e6ff', color: '#6b21a8', abbr: 'Z' },
+  'onthemarket':   { bg: '#e8ecf4', color: '#2A2A6C', abbr: 'OTM' },
+  'primelocation': { bg: '#fce8f1', color: '#c0246a', abbr: 'PL' },
+};
+
+export function portalBadgesHTML(portals, size = 'sm') {
+  if (!portals || !portals.length) return '';
+  const badges = portals.map(p => {
+    const key = p.toLowerCase().replace(/[\s_-]/g, '');
+    const info = PORTAL_COLORS[key];
+    if (!info) return `<span class="portal-badge" title="${p}">${p}</span>`;
+    return `<span class="portal-badge" style="background:${info.bg};color:${info.color}" title="${p}">${size === 'sm' ? info.abbr : p}</span>`;
+  }).join('');
+  return `<div class="portal-badges">${badges}</div>`;
+}
+
+/* ---------- Compliance Status (Not Displayed) ---------- */
+export function complianceStatusHTML(regulatory) {
+  if (!regulatory) return '';
+  const items = [];
+  // Show verified badges for found certifications
+  if (regulatory.arla) items.push({ icon: ICONS.arla, label: 'ARLA', key: 'arla', verified: true });
+  if (regulatory.cmp) items.push({ icon: ICONS.cmp, label: 'CMP', key: 'cmp', verified: true });
+  if (regulatory.tpo) items.push({ icon: ICONS.tpo, label: 'TPO', key: 'tpo', verified: true });
+  // Show "not displayed" for missing critical certifications
+  if (!regulatory.cmp) items.push({ icon: null, label: 'CMP', key: 'cmp', verified: false });
+  if (!regulatory.arla) items.push({ icon: null, label: 'ARLA', key: 'arla', verified: false });
+
+  if (!items.length) return '';
+
+  return `<div class="compliance-badges">${items.map(i => {
+    if (i.verified && i.icon) {
+      return `<span class="reg-badge-logo" title="${i.label} — Displayed on website">${i.icon}</span>`;
+    } else if (i.verified) {
+      return `<span class="reg-badge verified" title="${i.label} — Displayed on website">${ICONS.shieldCheck}${i.label}</span>`;
+    } else {
+      return `<span class="compliance-not-displayed" title="${i.label} not displayed on website. Agent may still hold this certification.">${ICONS.info} ${i.label}</span>`;
+    }
+  }).join('')}</div>`;
+}
+
+/* ---------- Guaranteed Rent Badge ---------- */
+export function guaranteedRentBadgeHTML(agent) {
+  if (!agent.guaranteed_rent) return '';
+  return `<span class="badge badge-green guaranteed-rent-badge" title="This agent offers a guaranteed rent scheme">${ICONS.shieldCheck} Guaranteed Rent</span>`;
+}
+
+/* ---------- No Tenant Fees badge ---------- */
+export function noTenantFeesBadgeHTML(fees) {
+  if (!fees || !fees.no_tenant_fees) return '';
+  return `<span class="badge badge-green no-tenant-fees-badge" title="This agent advertises no fees for tenants">${ICONS.check} No Tenant Fees</span>`;
+}
+
+/* ---------- NAEA Propertymark badge ---------- */
+export function naeaBadgeHTML(regulatory) {
+  if (!regulatory || !regulatory.naea) return '';
+  return `<span class="reg-badge verified" title="NAEA Propertymark member — Estate agent accreditation">${ICONS.shieldCheck} NAEA</span>`;
+}
+
+/* ---------- Data Confidence badge ---------- */
+export function confidenceBadgeHTML(confidence) {
+  if (confidence === null || confidence === undefined) return '';
+  const pct = Math.round(confidence * 100);
+  if (pct >= 80) return `<span class="badge badge-green text-xs" title="Data quality: ${pct}%">High Quality Data</span>`;
+  if (pct >= 50) return `<span class="badge badge-amber text-xs" title="Data quality: ${pct}%">Moderate Data</span>`;
+  return `<span class="badge badge-gray text-xs" title="Data quality: ${pct}%">Limited Data</span>`;
+}
+
+/* ---------- Website Quality Score ---------- */
+export function websiteScoreHTML(score) {
+  if (!score && score !== 0) return '';
+  const color = score >= 7 ? 'var(--accent)' : score >= 4 ? 'var(--warning)' : 'var(--danger)';
+  return `<div style="display:flex;align-items:center;gap:8px">
+    <span class="text-xs" style="width:100px;color:var(--text-secondary)">Website Quality</span>
+    <div style="flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden">
+      <div style="width:${(score / 10) * 100}%;height:100%;background:${color};border-radius:4px"></div>
+    </div>
+    <span class="text-xs font-semibold" style="min-width:32px;text-align:right">${score}/10</span>
+  </div>`;
 }
 
 /* ---------- URL helpers ---------- */

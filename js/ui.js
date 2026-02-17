@@ -3,7 +3,7 @@
    ========================================================================== */
 
 import { SITE_NAME, FREE_RESULTS, SORT_OPTIONS, AGENT_TYPES } from './config.js';
-import { ICONS, trustScoreClass, starsHTML, reviewPlatformsHTML, regBadgesHTML, fmtFee, fmtLocation, fmtAgentType, categoryBadgeHTML, experienceBadgeHTML, brandAgeHTML, initials, socialIconsHTML } from './utils.js';
+import { ICONS, trustScoreClass, starsHTML, reviewPlatformsHTML, regBadgesHTML, fmtFee, fmtLocation, fmtAgentType, categoryBadgeHTML, experienceBadgeHTML, brandAgeHTML, initials, socialIconsHTML, hiddenFeesAlertHTML, portalBadgesHTML, complianceStatusHTML, guaranteedRentBadgeHTML, noTenantFeesBadgeHTML, naeaBadgeHTML, confidenceBadgeHTML } from './utils.js';
 
 /* ---------- Header ---------- */
 export function renderHeader(activePage = '') {
@@ -134,6 +134,8 @@ export function renderAgentCard(agent, index, isBlurred = false) {
           ${agent.agent_type ? `<span class="badge badge-blue">${fmtAgentType(agent.agent_type)}</span>` : ''}
           ${categoryBadgeHTML(agent.category)}
           ${experienceBadgeHTML(agent.experience)}
+          ${guaranteedRentBadgeHTML(agent)}
+          ${noTenantFeesBadgeHTML(agent.fees)}
         </div>
         ${reviewPlatformsHTML(agent.reviews)}
 
@@ -143,10 +145,14 @@ export function renderAgentCard(agent, index, isBlurred = false) {
           ${agent.performance.brand_age ? `<div class="agent-card-stat"><span class="agent-card-stat-label">Brand Heritage</span><span class="agent-card-stat-value">${agent.performance.brand_age} years</span></div>` : ''}
           ${agent.performance.offices ? `<div class="agent-card-stat"><span class="agent-card-stat-label">Offices</span><span class="agent-card-stat-value">${agent.performance.offices}</span></div>` : ''}
           ${agent.performance.listed ? `<div class="agent-card-stat"><span class="agent-card-stat-label">Properties Listed</span><span class="agent-card-stat-value">${agent.performance.listed}</span></div>` : ''}
+          ${agent.performance.managed ? `<div class="agent-card-stat"><span class="agent-card-stat-label">Under Management</span><span class="agent-card-stat-value">${agent.performance.managed}</span></div>` : ''}
         </div>
 
+        ${hiddenFeesAlertHTML(agent.fees)}
         ${services ? `<div class="agent-card-services">${services}</div>` : ''}
-        ${regBadgesHTML(agent.regulatory)}
+        ${complianceStatusHTML(agent.regulatory)}
+        ${naeaBadgeHTML(agent.regulatory)}
+        ${portalBadgesHTML(agent.portals)}
         ${areasList ? `<div class="agent-card-location" style="margin-top:2px">${ICONS.mapPin}<span>${areasList}</span></div>` : ''}
         ${socialIconsHTML(agent.social)}
 

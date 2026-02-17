@@ -733,6 +733,107 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   width: auto !important;
   border-radius: 2px;
 }
+
+/* ---------- Hidden Fees Alert ---------- */
+.hidden-fees-alert {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--warning-light);
+  color: #92400e;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  border-left: 3px solid var(--warning);
+}
+.hidden-fees-alert-compact {
+  padding: 4px 8px;
+}
+.hidden-fees-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  color: var(--warning);
+}
+.hidden-fees-icon svg { width: 14px; height: 14px; }
+.hidden-fees-card {
+  border-color: var(--warning) !important;
+  border-width: 2px !important;
+}
+.hidden-fees-inline {
+  color: #92400e;
+  font-weight: 600;
+}
+
+/* ---------- Portal Coverage Badges ---------- */
+.portal-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+.portal-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: var(--bg);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* ---------- Compliance Not Displayed ---------- */
+.compliance-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.compliance-not-displayed {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
+  background: #f8f8f8;
+  color: var(--text-muted);
+  border: 1px dashed var(--border);
+  cursor: help;
+}
+.compliance-not-displayed svg { width: 12px; height: 12px; }
+.compliance-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: var(--sp-4);
+  padding: var(--sp-3);
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.compliance-disclaimer svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 2px; }
+
+/* ---------- Guaranteed Rent Badge ---------- */
+.guaranteed-rent-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.guaranteed-rent-badge svg { width: 12px; height: 12px; }
+
+/* ---------- No Tenant Fees Badge ---------- */
+.no-tenant-fees-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.no-tenant-fees-badge svg { width: 12px; height: 12px; }
 /* Regulatory logo in profile checklist */
 .reg-check-logo {
   display: inline-flex;

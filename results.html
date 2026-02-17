@@ -86,6 +86,7 @@
               <div class="filter-section-title">Compliance</div>
               <label class="filter-option"><input type="checkbox" id="filter-arla"> ARLA Propertymark</label>
               <label class="filter-option"><input type="checkbox" id="filter-cmp"> Client Money Protection</label>
+              <label class="filter-option"><input type="checkbox" id="filter-guaranteed-rent"> Offers Guaranteed Rent</label>
             </div>
 
             <div class="filter-section">
@@ -237,6 +238,7 @@
       if (trust && parseInt(trust.value) > 50) f.minTrust = parseInt(trust.value);
       if (document.getElementById('filter-arla')?.checked) f.arla = true;
       if (document.getElementById('filter-cmp')?.checked) f.cmp = true;
+      if (document.getElementById('filter-guaranteed-rent')?.checked) f.guaranteedRent = true;
       if (document.getElementById('filter-reviews')?.checked) f.hasReviews = true;
       if (document.getElementById('filter-fees')?.checked) f.hasFees = true;
       return f;

@@ -60,7 +60,7 @@
   <script type="module">
     import { loadData, getAgent, getData } from './js/data.js';
     import { renderHeader, renderFooter, renderAuthModal, initScrollTop, initTrustTooltip } from './js/ui.js';
-    import { getParam, lsGet, lsSet, debounce, ICONS, trustScoreClass, starsHTML, reviewPlatformsHTML, fmtFee, fmtAgentType, initials } from './js/utils.js';
+    import { getParam, lsGet, lsSet, debounce, ICONS, trustScoreClass, starsHTML, reviewPlatformsHTML, fmtFee, fmtAgentType, initials, portalBadgesHTML, naeaBadgeHTML } from './js/utils.js';
     import { initAuth, bindAuthEvents } from './js/auth.js';
 
     renderHeader('compare');
@@ -136,19 +136,29 @@
         { label: 'Management Fee', fn: a => a.fees.full_management || (a.fees.mgmt_pct ? a.fees.mgmt_pct + '%' : '-') },
         { label: 'Tenant Find Fee', fn: a => a.fees.tenant_find || '-' },
         { label: 'Guaranteed Rent', fn: a => a.fees.guaranteed_rent || (a.guaranteed_rent ? 'Available' : '-') },
+        { label: 'Rent Collection', fn: a => a.fees.rent_collection || '-' },
+        { label: 'Minimum Fee', fn: a => a.fees.minimum || '-' },
+        { label: 'No Tenant Fees', fn: a => a.fees.no_tenant_fees ? `<span class="badge badge-green">Yes</span>` : '-' },
         { label: 'VAT Inclusive', fn: a => a.fees.vat_inclusive === true ? 'Yes' : a.fees.vat_inclusive === false ? 'No' : '-' },
-        { label: 'Renewal Fee', fn: a => a.fees.renewal || '-' },
-        { label: 'Setup Fee', fn: a => a.fees.setup || '-' },
+        { label: 'Renewal Fee', fn: a => a.fees.renewal ? `<span class="hidden-fees-inline">${a.fees.renewal}</span>` : '<span class="text-muted">None</span>' },
+        { label: 'Setup Fee', fn: a => a.fees.setup ? `<span class="hidden-fees-inline">${a.fees.setup}</span>` : '<span class="text-muted">None</span>' },
+        { label: 'Additional Fees', fn: a => {
+          const extras = [a.fees.renewal, a.fees.setup, a.fees.inventory].filter(Boolean);
+          return extras.length ? `<span class="badge badge-amber">${extras.length} extra fee${extras.length > 1 ? 's' : ''}</span>` : `<span class="badge badge-green">No extra fees</span>`;
+        }},
         { label: 'Service Tiers', fn: a => a.service_tiers.length ? a.service_tiers.join(', ') : '-' },
         { label: 'ARLA', fn: a => a.regulatory.arla ? `<span class="badge badge-green">Yes</span>` : a.regulatory.arla === false ? `<span class="badge badge-red">No</span>` : '-' },
+        { label: 'NAEA', fn: a => a.regulatory.naea ? `<span class="badge badge-green">Yes</span>` : a.regulatory.naea === false ? `<span class="badge badge-red">No</span>` : '-' },
         { label: 'Client Money Protection', fn: a => a.regulatory.cmp ? `<span class="badge badge-green">Yes</span>` : a.regulatory.cmp === false ? `<span class="badge badge-red">No</span>` : '-' },
         { label: 'Property Ombudsman', fn: a => a.regulatory.tpo ? `<span class="badge badge-green">Yes</span>` : a.regulatory.tpo === false ? `<span class="badge badge-red">No</span>` : '-' },
+        { label: 'PI Insurance', fn: a => a.regulatory.pi_insurance ? `<span class="badge badge-green">Yes</span>` : a.regulatory.pi_insurance === false ? `<span class="badge badge-red">No</span>` : '-' },
         { label: 'Deposit Protection', fn: a => a.regulatory.deposit || '-' },
         { label: 'Years in Business', fn: a => a.performance.years || '-' },
         { label: 'Offices', fn: a => a.performance.offices || '-' },
         { label: 'Properties Listed', fn: a => a.performance.listed || '-' },
+        { label: 'Under Management', fn: a => a.performance.managed ? a.performance.managed.toLocaleString() : '-' },
         { label: 'Avg Time to Let', fn: a => a.performance.avg_time_to_let ? a.performance.avg_time_to_let + ' days' : '-' },
-        { label: 'Portals', fn: a => a.portals.length ? a.portals.join(', ') : '-' },
+        { label: 'Portals', fn: a => a.portals.length ? portalBadgesHTML(a.portals, 'sm') : '-' },
         { label: 'Areas Covered', fn: a => a.areas.length ? a.areas.slice(0, 5).join(', ') : '-' },
         { label: 'Social Media', fn: a => {
           const count = Object.values(a.social).filter(Boolean).length;

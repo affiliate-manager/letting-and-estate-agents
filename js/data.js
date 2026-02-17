@@ -126,6 +126,9 @@ function applyFilters(results, filters) {
     if (filters.arla && !agent.regulatory.arla) return false;
     if (filters.cmp && !agent.regulatory.cmp) return false;
 
+    // Guaranteed rent
+    if (filters.guaranteedRent && !agent.guaranteed_rent) return false;
+
     // Experience level filter
     if (filters.experience && agent.experience !== filters.experience) return false;
 
