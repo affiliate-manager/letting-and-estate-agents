@@ -214,11 +214,15 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   text-decoration: none;
   flex-shrink: 0;
 }
-.ll-topbar-brand .lendlord-logo { height: 18px; width: auto; }
+.ll-topbar-brand .lendlord-logo { height: 24px; width: auto; }
+@media (min-width: 768px) {
+  .ll-topbar-brand .lendlord-logo { height: 28px; }
+}
 .ll-topbar-nav {
   display: none;
   align-items: center;
   gap: 20px;
+  margin-left: 32px;
 }
 .ll-topbar-nav > a {
   color: rgba(255,255,255,0.72);
@@ -373,17 +377,8 @@ h4 { font-size: 1.1rem; font-weight: 600; }
 .site-header .container {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   height: 100%;
-}
-.logo {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-}
-.logo .lendlord-logo { height: 32px; width: auto; flex-shrink: 0; }
-@media (min-width: 768px) {
-  .logo .lendlord-logo { height: 38px; }
 }
 
 .nav-links {

@@ -99,6 +99,9 @@ function renderLendlordTopbar() {
   bar.id = 'lendlord-topbar';
   bar.innerHTML = `
     <div class="container">
+      <a href="https://lendlord.io/" class="ll-topbar-brand" target="_blank" rel="noopener">
+        ${ICONS.lendlordLogoWhite}
+      </a>
       <nav class="ll-topbar-nav">
         ${LL_MENU.map(renderMenuItem).join('')}
       </nav>
@@ -130,9 +133,6 @@ export function renderHeader(activePage = '') {
 
   header.innerHTML = `
     <div class="container">
-      <a href="index.html" class="logo">
-        ${ICONS.lendlordLogo}
-      </a>
       <nav class="nav-links">
         ${pages.map(p => `<a href="${p.href}" class="${activePage === p.id ? 'active' : ''}">${p.label}</a>`).join('')}
       </nav>
