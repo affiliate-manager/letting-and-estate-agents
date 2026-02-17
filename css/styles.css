@@ -67,6 +67,7 @@
   --header-h: 64px;
   --max-w: 1280px;
   --sidebar-w: 280px;
+  --nav-brand-w: 200px;
 }
 
 /* ---------- Reset ---------- */
@@ -213,6 +214,7 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   align-items: center;
   text-decoration: none;
   flex-shrink: 0;
+  width: var(--nav-brand-w, auto);
 }
 .ll-topbar-brand .lendlord-logo { height: 24px; width: auto; }
 @media (min-width: 768px) {
@@ -222,7 +224,6 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   display: none;
   align-items: center;
   gap: 20px;
-  margin-left: 32px;
 }
 .ll-topbar-nav > a {
   color: rgba(255,255,255,0.72);
@@ -379,7 +380,6 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   align-items: center;
   justify-content: flex-start;
   height: 100%;
-  gap: var(--sp-6);
 }
 .site-header-brand {
   display: flex;
@@ -387,6 +387,7 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   gap: 6px;
   text-decoration: none;
   flex-shrink: 0;
+  width: var(--nav-brand-w, auto);
 }
 .site-header-brand-name {
   font-size: 1.05rem;
@@ -401,11 +402,7 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   white-space: nowrap;
 }
 .site-header-divider {
-  width: 1px;
-  height: 20px;
-  background: var(--border);
-  flex-shrink: 0;
-  align-self: center;
+  display: none;
 }
 @media (min-width: 768px) {
   .site-header-brand-name { font-size: 1.15rem; }
