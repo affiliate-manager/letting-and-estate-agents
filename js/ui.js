@@ -122,7 +122,7 @@ export function renderHeader(activePage = '') {
   if (!header) return;
 
   const pages = [
-    { id: 'home', label: 'Home', href: 'index.html' },
+    { id: 'home', label: 'Agent Finder', href: 'index.html' },
     { id: 'compare', label: 'Compare', href: 'compare.html' },
     { id: 'areas', label: 'Area Insights', href: 'area.html' },
     { id: 'portfolio', label: 'Portfolio', href: 'portfolio.html' },
