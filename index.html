@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lendlord - Find the Best Lettings & Estate Agent for Your Property</title>
-  <meta name="description" content="Compare 999+ UK lettings & estate agents by postcode. See trust scores, fees, reviews and regulatory compliance. Free and transparent.">
+  <meta name="description" content="Compare 4,900+ UK lettings & estate agents by postcode. See trust scores, fees, reviews and regulatory compliance. Free and transparent.">
   <meta property="og:title" content="Lendlord - UK Lettings & Estate Agent Comparison">
   <meta property="og:description" content="Find the right lettings or estate agent for your property. Compare fees, reviews, services and more.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,7 +21,7 @@
   <section class="hero">
     <div class="container">
       <h1>Find the Right Lettings & Estate Agent for Your Property</h1>
-      <p>Compare 999+ UK lettings & estate agents. See fees, reviews, trust scores and regulatory compliance - all in one place.</p>
+      <p>Compare <span id="hero-agent-count">4,900</span>+ UK lettings & estate agents. See fees, reviews, trust scores and regulatory compliance - all in one place.</p>
 
       <div class="search-wrapper" id="hero-search">
         <div class="search-input-wrap">
@@ -42,7 +42,7 @@
       <div class="trust-strip" id="trust-strip">
         <div class="trust-strip-item">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-          <span><strong id="stat-agents">999</strong> Verified Agents</span>
+          <span><strong id="stat-agents">4,937</strong> Verified Agents</span>
         </div>
         <div class="trust-strip-item">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -221,7 +221,7 @@
     <div class="container">
       <div class="stats-bar" id="stats-bar">
         <div class="stat-item">
-          <div class="stat-value" id="stat-total">999</div>
+          <div class="stat-value" id="stat-total">4,937</div>
           <div class="stat-label">Lettings & Estate Agents</div>
         </div>
         <div class="stat-item">
@@ -359,6 +359,7 @@
         if (el('stat-total')) el('stat-total').textContent = s.totalAgents.toLocaleString();
         if (el('stat-reviewed')) el('stat-reviewed').textContent = s.withReviews.toLocaleString();
         if (el('stat-postcodes')) el('stat-postcodes').textContent = s.postcodeAreas.toLocaleString();
+        if (el('hero-agent-count')) el('hero-agent-count').textContent = Math.floor(s.totalAgents / 100) * 100 > 0 ? (Math.floor(s.totalAgents / 100) * 100).toLocaleString() : s.totalAgents.toLocaleString();
       }
     }).catch(err => console.warn('[Home] Data preload failed:', err));
   </script>
