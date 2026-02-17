@@ -155,6 +155,7 @@ export function fmtFee(agent) {
 export function fmtLocation(agent) {
   const parts = [];
   if (agent.address) parts.push(agent.address);
+  if (agent.city && (!agent.address || !agent.address.toLowerCase().includes(agent.city.toLowerCase()))) parts.push(agent.city);
   if (agent.postcode) parts.push(agent.postcode);
   return parts.join(', ') || 'UK';
 }
@@ -299,6 +300,54 @@ export function websiteScoreHTML(score) {
     </div>
     <span class="text-xs font-semibold" style="min-width:32px;text-align:right">${score}/10</span>
   </div>`;
+}
+
+/* ---------- Data Completeness mini-bar ---------- */
+export function dataCompletenessHTML(agent) {
+  if (!agent) return '';
+  const richness = agent.data_richness || 0;
+  const max = 35;
+  const pct = Math.min(Math.round((richness / max) * 100), 100);
+  const label = pct >= 70 ? 'Rich' : pct >= 40 ? 'Moderate' : 'Limited';
+  const color = pct >= 70 ? 'var(--accent)' : pct >= 40 ? 'var(--warning)' : 'var(--text-muted)';
+  return `<div class="data-completeness" title="Data completeness: ${pct}% — ${richness} of ${max} fields populated">
+    <span class="data-completeness-label">Data: <strong style="color:${color}">${label}</strong></span>
+    <div class="data-completeness-bar"><div class="data-completeness-fill" style="width:${pct}%;background:${color}"></div></div>
+  </div>`;
+}
+
+/* ---------- Fee summary for cards (both fees) ---------- */
+export function fmtFeeSummaryHTML(fees) {
+  if (!fees) return '';
+  const parts = [];
+  if (fees.tenant_find) parts.push({ label: 'Tenant Find', value: fees.tenant_find });
+  if (fees.full_management) parts.push({ label: 'Full Mgmt', value: fees.full_management });
+  else if (fees.mgmt_pct) parts.push({ label: 'Full Mgmt', value: fees.mgmt_pct + '%' });
+  if (fees.guaranteed_rent) parts.push({ label: 'Guaranteed Rent', value: fees.guaranteed_rent });
+  if (!parts.length) return '';
+  return `<div class="agent-card-stats">${parts.map(p =>
+    `<div class="agent-card-stat"><span class="agent-card-stat-label">${p.label}</span><span class="agent-card-stat-value">${p.value}</span></div>`
+  ).join('')}</div>`;
+}
+
+/* ---------- Areas covered summary ---------- */
+export function areasCoveredHTML(areas) {
+  if (!areas || !areas.length) return '';
+  const shown = areas.slice(0, 3).join(', ');
+  const extra = areas.length > 3 ? ` <span class="text-muted text-xs">+${areas.length - 3} more</span>` : '';
+  return `<div class="agent-card-location" style="margin-top:2px">${ICONS.mapPin}<span>${shown}${extra}</span></div>`;
+}
+
+/* ---------- Fee type label ---------- */
+export function feeTypeBadgeHTML(feeType) {
+  if (!feeType) return '';
+  const map = {
+    percentage: { label: 'Percentage-based', cls: 'badge-blue' },
+    fixed: { label: 'Fixed Fee', cls: 'badge-green' },
+    tiered: { label: 'Tiered Pricing', cls: 'badge-amber' },
+  };
+  const info = map[feeType.toLowerCase()] || { label: feeType, cls: 'badge-gray' };
+  return `<span class="badge ${info.cls}">${info.label}</span>`;
 }
 
 /* ---------- URL helpers ---------- */

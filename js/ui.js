@@ -3,7 +3,7 @@
    ========================================================================== */
 
 import { SITE_NAME, FREE_RESULTS, SORT_OPTIONS, AGENT_TYPES } from './config.js';
-import { ICONS, trustScoreClass, starsHTML, reviewPlatformsHTML, regBadgesHTML, fmtFee, fmtLocation, fmtAgentType, categoryBadgeHTML, experienceBadgeHTML, brandAgeHTML, initials, socialIconsHTML, hiddenFeesAlertHTML, portalBadgesHTML, complianceStatusHTML, guaranteedRentBadgeHTML, noTenantFeesBadgeHTML, naeaBadgeHTML, confidenceBadgeHTML } from './utils.js';
+import { ICONS, trustScoreClass, starsHTML, reviewPlatformsHTML, regBadgesHTML, fmtFee, fmtLocation, fmtAgentType, categoryBadgeHTML, experienceBadgeHTML, brandAgeHTML, initials, socialIconsHTML, hiddenFeesAlertHTML, portalBadgesHTML, complianceStatusHTML, guaranteedRentBadgeHTML, noTenantFeesBadgeHTML, naeaBadgeHTML, confidenceBadgeHTML, dataCompletenessHTML, fmtFeeSummaryHTML, areasCoveredHTML } from './utils.js';
 
 /* ---------- Header ---------- */
 export function renderHeader(activePage = '') {
@@ -107,7 +107,23 @@ export function renderAgentCard(agent, index, isBlurred = false) {
     ? agent.service_tiers.slice(0, 3).map(s => `<span class="tag">${s}</span>`).join('')
     : agent.services.slice(0, 3).map(s => `<span class="tag">${s}</span>`).join('');
 
-  const areasList = agent.areas.slice(0, 3).join(', ');
+  // Location line: postcode + city
+  const locationParts = [agent.postcode || 'UK'];
+  if (agent.city) locationParts.push(agent.city);
+  else if (agent.address) locationParts.push(agent.address.split(',').pop().trim());
+  const locationText = locationParts.join(' - ');
+
+  // Fee summary: show all available fees (tenant find, full mgmt, guaranteed rent)
+  const feeSummary = fmtFeeSummaryHTML(agent.fees);
+
+  // Performance stats (only shown if no fee summary takes all the space)
+  const perfStats = [];
+  if (agent.performance.years) perfStats.push(`<div class="agent-card-stat"><span class="agent-card-stat-label">Branch Age</span><span class="agent-card-stat-value">${agent.performance.years}y</span></div>`);
+  if (agent.performance.brand_age) perfStats.push(`<div class="agent-card-stat"><span class="agent-card-stat-label">Brand Heritage</span><span class="agent-card-stat-value">${agent.performance.brand_age}y</span></div>`);
+  if (agent.performance.offices) perfStats.push(`<div class="agent-card-stat"><span class="agent-card-stat-label">Offices</span><span class="agent-card-stat-value">${agent.performance.offices}</span></div>`);
+  if (agent.performance.managed) perfStats.push(`<div class="agent-card-stat"><span class="agent-card-stat-label">Under Mgmt</span><span class="agent-card-stat-value">${agent.performance.managed.toLocaleString()}</span></div>`);
+  if (agent.performance.listed) perfStats.push(`<div class="agent-card-stat"><span class="agent-card-stat-label">Listed</span><span class="agent-card-stat-value">${agent.performance.listed}</span></div>`);
+  if (agent.performance.avg_time_to_let) perfStats.push(`<div class="agent-card-stat"><span class="agent-card-stat-label">Avg Time to Let</span><span class="agent-card-stat-value">${agent.performance.avg_time_to_let}d</span></div>`);
 
   return `
     <div class="card ${blurClass} fade-in-up" data-agent-id="${agent.id}" style="animation-delay:${Math.min(index, 8) * 60}ms">
@@ -119,7 +135,7 @@ export function renderAgentCard(agent, index, isBlurred = false) {
             <div class="agent-card-name">${agent.name}</div>
             <div class="agent-card-location">
               ${ICONS.mapPin}
-              <span>${agent.postcode || 'UK'}${agent.address ? ' - ' + agent.address.split(',').pop().trim() : ''}</span>
+              <span>${locationText}</span>
             </div>
           </div>
           <div class="trust-score-wrap">
@@ -139,22 +155,17 @@ export function renderAgentCard(agent, index, isBlurred = false) {
         </div>
         ${reviewPlatformsHTML(agent.reviews)}
 
-        <div class="agent-card-stats">
-          ${fee ? `<div class="agent-card-stat"><span class="agent-card-stat-label">Management Fee</span><span class="agent-card-stat-value">${fee}</span></div>` : ''}
-          ${agent.performance.years ? `<div class="agent-card-stat"><span class="agent-card-stat-label">Branch Age</span><span class="agent-card-stat-value">${agent.performance.years} years</span></div>` : ''}
-          ${agent.performance.brand_age ? `<div class="agent-card-stat"><span class="agent-card-stat-label">Brand Heritage</span><span class="agent-card-stat-value">${agent.performance.brand_age} years</span></div>` : ''}
-          ${agent.performance.offices ? `<div class="agent-card-stat"><span class="agent-card-stat-label">Offices</span><span class="agent-card-stat-value">${agent.performance.offices}</span></div>` : ''}
-          ${agent.performance.listed ? `<div class="agent-card-stat"><span class="agent-card-stat-label">Properties Listed</span><span class="agent-card-stat-value">${agent.performance.listed}</span></div>` : ''}
-          ${agent.performance.managed ? `<div class="agent-card-stat"><span class="agent-card-stat-label">Under Management</span><span class="agent-card-stat-value">${agent.performance.managed}</span></div>` : ''}
-        </div>
+        ${feeSummary}
+        ${perfStats.length ? `<div class="agent-card-stats">${perfStats.join('')}</div>` : ''}
 
         ${hiddenFeesAlertHTML(agent.fees)}
         ${services ? `<div class="agent-card-services">${services}</div>` : ''}
         ${complianceStatusHTML(agent.regulatory)}
         ${naeaBadgeHTML(agent.regulatory)}
         ${portalBadgesHTML(agent.portals)}
-        ${areasList ? `<div class="agent-card-location" style="margin-top:2px">${ICONS.mapPin}<span>${areasList}</span></div>` : ''}
+        ${areasCoveredHTML(agent.areas)}
         ${socialIconsHTML(agent.social)}
+        ${dataCompletenessHTML(agent)}
 
         <div class="agent-card-footer">
           <a href="agent.html?id=${agent.id}" class="btn btn-primary btn-sm">View Profile</a>

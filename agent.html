@@ -87,7 +87,7 @@
   <script type="module">
     import { loadData, getAgent } from './js/data.js';
     import { renderHeader, renderFooter, renderAuthModal, initScrollTop, initTrustTooltip } from './js/ui.js';
-    import { ICONS, trustScoreClass, starsHTML, reviewPlatformsHTML, regBadgesHTML, socialIconsHTML, fmtAgentType, categoryBadgeHTML, experienceBadgeHTML, brandAgeHTML, fmtLocation, initials, getParam, portalBadgesHTML, hiddenFeesAlertHTML, complianceStatusHTML, guaranteedRentBadgeHTML, noTenantFeesBadgeHTML, naeaBadgeHTML, confidenceBadgeHTML, websiteScoreHTML } from './js/utils.js';
+    import { ICONS, trustScoreClass, starsHTML, reviewPlatformsHTML, regBadgesHTML, socialIconsHTML, fmtAgentType, categoryBadgeHTML, experienceBadgeHTML, brandAgeHTML, fmtLocation, initials, getParam, portalBadgesHTML, hiddenFeesAlertHTML, complianceStatusHTML, guaranteedRentBadgeHTML, noTenantFeesBadgeHTML, naeaBadgeHTML, confidenceBadgeHTML, websiteScoreHTML, feeTypeBadgeHTML } from './js/utils.js';
     import { REGULATORY_LABELS } from './js/config.js';
     import { initAuth, bindAuthEvents } from './js/auth.js';
     import { initHooks, trackProfileView } from './js/hooks.js';
@@ -290,6 +290,9 @@
     const f = agent.fees;
     const hasFees = f.tenant_find || f.full_management || f.guaranteed_rent || f.mgmt_pct || f.detail;
 
+    // Compute average fee for comparison context
+    const avgMgmtFee = data && data.stats && data.stats.avgMgmtFee ? data.stats.avgMgmtFee : null;
+
     if (hasFees) {
       // Main fee table (core fees only)
       let tableRows = '';
@@ -300,13 +303,33 @@
       if (f.letting_pct) tableRows += `<tr><td>Letting Fee %</td><td class="font-semibold">${f.letting_pct}%</td></tr>`;
       if (f.vat_inclusive != null) tableRows += `<tr><td>VAT Inclusive</td><td>${f.vat_inclusive ? 'Yes' : 'No'}</td></tr>`;
 
+      // Fee comparison context
+      let feeCompareNote = '';
+      if (f.mgmt_pct && avgMgmtFee) {
+        const diff = f.mgmt_pct - avgMgmtFee;
+        if (Math.abs(diff) >= 0.5) {
+          const direction = diff < 0 ? 'below' : 'above';
+          const color = diff < 0 ? 'var(--accent)' : 'var(--warning)';
+          feeCompareNote = `<div class="fee-compare-note" style="margin-top:var(--sp-3);padding:var(--sp-3);background:var(--bg);border-radius:var(--radius);display:flex;align-items:center;gap:var(--sp-2)">
+            ${ICONS.trendUp}
+            <span class="text-sm">Management fee is <strong style="color:${color}">${Math.abs(diff).toFixed(1)}% ${direction}</strong> the national average of ${avgMgmtFee}%</span>
+          </div>`;
+        } else {
+          feeCompareNote = `<div class="fee-compare-note" style="margin-top:var(--sp-3);padding:var(--sp-3);background:var(--bg);border-radius:var(--radius);display:flex;align-items:center;gap:var(--sp-2)">
+            ${ICONS.check}
+            <span class="text-sm">Management fee is <strong>in line</strong> with the national average of ${avgMgmtFee}%</span>
+          </div>`;
+        }
+      }
+
       feesHTML.push(`
         <div class="data-card" style="grid-column:1/-1">
-          <div class="data-card-title">${ICONS.pound} Fee Structure</div>
+          <div class="data-card-title">${ICONS.pound} Fee Structure ${feeTypeBadgeHTML(f.fee_type)}</div>
           <table class="fee-table">
             <thead><tr><th>Service</th><th>Fee</th></tr></thead>
             <tbody>${tableRows}</tbody>
           </table>
+          ${feeCompareNote}
         </div>
       `);
 
