@@ -42,14 +42,12 @@
   <!-- Area Content -->
   <section class="section" style="padding-top:var(--sp-6)">
     <div class="container">
-      <!-- Popular areas (shown when no area selected) -->
-      <div id="popular-areas">
-        <div class="section-header" style="text-align:left;margin-bottom:var(--sp-6)">
-          <h2>Popular Areas</h2>
-          <p>Browse letting & estate agent data by popular postcode areas</p>
-        </div>
-        <div class="features-grid" id="popular-grid"></div>
-      </div>
+
+      <!-- Area insights panel (shown when area selected) -->
+      <div id="area-insights-panel" style="display:none"></div>
+
+      <!-- Top agents bar (shown when area selected) -->
+      <div id="top-agents-bar" style="display:none"></div>
 
       <!-- Agent list (shown when area selected) -->
       <div id="area-agents" style="display:none">
@@ -70,15 +68,36 @@
         </div>
         <div class="cards-grid" id="area-cards-grid"></div>
       </div>
+
+      <!-- Nearby areas (shown when area selected) -->
+      <div id="nearby-areas" style="display:none"></div>
+
+      <!-- Popular areas (shown when no area selected) -->
+      <div id="popular-areas">
+        <div class="section-header" style="text-align:left;margin-bottom:var(--sp-6)">
+          <h2>Popular Areas</h2>
+          <p>Browse letting & estate agent data by popular postcode areas</p>
+        </div>
+        <div class="features-grid" id="popular-grid"></div>
+      </div>
+
+      <!-- Recently viewed areas -->
+      <div id="recent-areas" style="display:none">
+        <div class="section-header" style="text-align:left;margin-bottom:var(--sp-4);margin-top:var(--sp-8)">
+          <h2>Recently Viewed</h2>
+        </div>
+        <div class="features-grid" id="recent-grid"></div>
+      </div>
+
     </div>
   </section>
 
   <footer class="site-footer" id="site-footer"></footer>
 
   <script type="module">
-    import { loadData, getAreaStats, sortResults, getSuggestions, getData } from './js/data.js';
+    import { loadData, getAreaStats, getNearbyAreas, sortResults, getSuggestions, getData } from './js/data.js';
     import { renderHeader, renderFooter, renderAuthModal, renderCardsGrid, initScrollTop, initTrustTooltip } from './js/ui.js';
-    import { getParam, setParams, debounce, ICONS, fmtAgentType, lsGet } from './js/utils.js';
+    import { getParam, setParams, debounce, ICONS, fmtAgentType, lsGet, lsSet, trustScoreClass, starsHTML, initials } from './js/utils.js';
     import { initAuth, bindAuthEvents, isAuthenticated } from './js/auth.js';
 
     renderHeader('areas');
@@ -95,7 +114,70 @@
     const searchInput = document.getElementById('area-search');
     const suggestionsEl = document.getElementById('area-suggestions');
 
-    // Show popular areas
+    const TYPE_LABELS = { high_street: 'High Street', online: 'Online', hybrid: 'Hybrid' };
+    const CAT_LABELS = { letting: 'Letting', estate: 'Estate', both: 'Both', unknown: 'Unknown' };
+    const CAT_COLORS = { letting: 'var(--primary)', estate: 'var(--warning)', both: 'var(--accent)', unknown: 'var(--text-muted)' };
+
+    // ── Recently viewed helper ──
+    function getRecentAreas() { return lsGet('af_recent_areas', []); }
+    function addRecentArea(outcode) {
+      let recent = getRecentAreas().filter(a => a !== outcode);
+      recent.unshift(outcode);
+      if (recent.length > 8) recent = recent.slice(0, 8);
+      lsSet('af_recent_areas', recent);
+    }
+
+    // ── Horizontal bar helper ──
+    function hBar(label, value, total, color) {
+      const pct = total ? Math.round((value / total) * 100) : 0;
+      return `<div class="ai-hbar-row">
+        <span class="ai-hbar-label">${label}</span>
+        <div class="ai-hbar-track"><div class="ai-hbar-fill" style="width:${pct}%;background:${color}"></div></div>
+        <span class="ai-hbar-val">${value} <span class="text-muted">(${pct}%)</span></span>
+      </div>`;
+    }
+
+    // ── Popular area card ──
+    function renderPopularCard(outcode, count) {
+      const stats = getAreaStats(outcode);
+      if (!stats) return '';
+      const trustPct = Math.min(((stats.avgTrust - 50) / 50) * 100, 100);
+      const trustColor = stats.avgTrust >= 75 ? 'var(--accent)' : stats.avgTrust >= 65 ? 'var(--warning)' : 'var(--text-muted)';
+      const feesBadge = stats.withFees ? `<span class="badge badge-green text-xs">${stats.withFees} with fees</span>` : '';
+      const catParts = Object.entries(stats.categories).filter(([k]) => k !== 'unknown').map(([k, v]) =>
+        `<span class="text-xs" style="color:${CAT_COLORS[k] || 'inherit'}">${CAT_LABELS[k] || k}: ${v}</span>`
+      ).join(' · ');
+
+      return `
+        <a href="area.html?postcode=${outcode}" class="feature-card area-popular-card" style="text-decoration:none;cursor:pointer">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <h3 style="color:var(--primary);margin:0">${outcode}</h3>
+            <span class="text-xs text-muted">${count} agent${count !== 1 ? 's' : ''}</span>
+          </div>
+          <div class="ai-mini-stats">
+            <div class="ai-mini-stat">
+              <span class="ai-mini-label">Trust</span>
+              <div class="ai-mini-bar"><div style="width:${trustPct}%;background:${trustColor}"></div></div>
+              <span class="ai-mini-val">${stats.avgTrust}</span>
+            </div>
+            ${stats.avgFee ? `<div class="ai-mini-stat">
+              <span class="ai-mini-label">Fee</span>
+              <span class="ai-mini-val font-semibold">${stats.avgFee}%</span>
+            </div>` : ''}
+            ${stats.avgRating ? `<div class="ai-mini-stat">
+              <span class="ai-mini-label">Rating</span>
+              <span class="ai-mini-val">${stats.avgRating}</span>
+            </div>` : ''}
+          </div>
+          <div style="display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-2)">
+            ${feesBadge}
+            ${stats.withArla ? `<span class="badge badge-blue text-xs">${stats.withArla} ARLA</span>` : ''}
+          </div>
+          ${catParts ? `<div style="margin-top:var(--sp-1)">${catParts}</div>` : ''}
+        </a>`;
+    }
+
+    // ── Show popular areas ──
     function showPopularAreas() {
       const postcodeIndex = data.postcodeIndex;
       const sorted = Object.entries(postcodeIndex)
@@ -103,22 +185,53 @@
         .sort((a, b) => b.count - a.count)
         .slice(0, 12);
 
-      document.getElementById('popular-grid').innerHTML = sorted.map(({ outcode, count }) => {
-        const stats = getAreaStats(outcode);
-        return `
-          <a href="area.html?postcode=${outcode}" class="feature-card" style="text-decoration:none;cursor:pointer">
-            <h3 style="color:var(--primary)">${outcode}</h3>
-            <div style="display:flex;gap:var(--sp-4);margin-top:var(--sp-2)">
-              <span class="text-sm text-secondary">${count} agent${count !== 1 ? 's' : ''}</span>
-              ${stats && stats.avgTrust ? `<span class="text-sm text-secondary">Avg Trust: ${stats.avgTrust}</span>` : ''}
-              ${stats && stats.avgFee ? `<span class="text-sm text-secondary">Avg Fee: ${stats.avgFee}%</span>` : ''}
-            </div>
-          </a>
-        `;
-      }).join('');
+      document.getElementById('popular-grid').innerHTML = sorted.map(({ outcode, count }) =>
+        renderPopularCard(outcode, count)
+      ).join('');
+
+      // Recently viewed
+      showRecentAreas();
     }
 
-    // Show area details
+    // ── Show recent areas ──
+    function showRecentAreas() {
+      const recent = getRecentAreas();
+      const container = document.getElementById('recent-areas');
+      if (!recent.length) { container.style.display = 'none'; return; }
+
+      container.style.display = '';
+      document.getElementById('recent-grid').innerHTML = recent
+        .filter(o => data.postcodeIndex[o])
+        .map(o => renderPopularCard(o, data.postcodeIndex[o].length))
+        .join('');
+    }
+
+    // ── Build insights array ──
+    function buildInsights(stats) {
+      const insights = [];
+      const { avgFee, nationalAvgFee, avgTrust, nationalAvgTrust, withArla, withFees, withCmp, agentCount, avgYears, outcode } = stats;
+
+      if (avgFee && nationalAvgFee) {
+        const diff = parseFloat(avgFee) - nationalAvgFee;
+        if (diff < -1) insights.push({ icon: ICONS.trendUp, color: 'var(--accent)', text: `Average management fee in ${outcode} is <strong>${Math.abs(diff).toFixed(1)}% lower</strong> than the national average of ${nationalAvgFee}%` });
+        else if (diff > 1) insights.push({ icon: ICONS.info, color: 'var(--warning)', text: `Average management fee in ${outcode} is <strong>${diff.toFixed(1)}% higher</strong> than the national average of ${nationalAvgFee}%` });
+        else insights.push({ icon: ICONS.check, color: 'var(--accent)', text: `Management fees in ${outcode} are <strong>in line</strong> with the national average of ${nationalAvgFee}%` });
+      }
+      if (nationalAvgTrust && avgTrust) {
+        if (avgTrust > nationalAvgTrust + 5) insights.push({ icon: ICONS.shieldCheck, color: 'var(--accent)', text: `Agent trust scores in ${outcode} are <strong>above average</strong> (${avgTrust} vs national ${nationalAvgTrust})` });
+        else if (avgTrust < nationalAvgTrust - 5) insights.push({ icon: ICONS.info, color: 'var(--warning)', text: `Agent trust scores in ${outcode} are <strong>below average</strong> (${avgTrust} vs national ${nationalAvgTrust})` });
+      }
+      if (withArla && agentCount) {
+        const pct = Math.round((withArla / agentCount) * 100);
+        if (pct >= 40) insights.push({ icon: ICONS.shieldCheck, color: 'var(--accent)', text: `<strong>${pct}%</strong> of agents in ${outcode} are ARLA Propertymark members` });
+      }
+      if (withFees) insights.push({ icon: ICONS.pound, color: 'var(--primary)', text: `<strong>${withFees}</strong> of ${agentCount} agents have published fee data` });
+      if (avgYears) insights.push({ icon: ICONS.clock, color: 'var(--text-secondary)', text: `Average branch age in ${outcode} is <strong>${avgYears} years</strong>` });
+
+      return insights;
+    }
+
+    // ── Show area details ──
     function showArea(outcode) {
       outcode = outcode.toUpperCase().trim();
       const stats = getAreaStats(outcode);
@@ -128,16 +241,22 @@
         document.getElementById('area-subtitle').textContent = 'Try a different postcode area.';
         document.getElementById('area-stats-grid').classList.add('hidden');
         document.getElementById('area-agents').style.display = 'none';
+        document.getElementById('area-insights-panel').style.display = 'none';
+        document.getElementById('top-agents-bar').style.display = 'none';
+        document.getElementById('nearby-areas').style.display = 'none';
         document.getElementById('popular-areas').style.display = '';
+        document.getElementById('recent-areas').style.display = 'none';
         return;
       }
+
+      addRecentArea(outcode);
 
       // Update hero
       document.getElementById('area-title').textContent = `${outcode} Area Insights`;
       document.getElementById('area-subtitle').textContent = `${stats.agentCount} letting & estate agent${stats.agentCount !== 1 ? 's' : ''} operating in the ${outcode} postcode area`;
       document.title = `${outcode} Letting & Estate Agents - Lendlord`;
 
-      // Stats grid
+      // ── Stats grid (expanded) ──
       const statsGrid = document.getElementById('area-stats-grid');
       statsGrid.classList.remove('hidden');
       statsGrid.innerHTML = `
@@ -157,31 +276,149 @@
           <div class="stat-value">${stats.avgRating || 'N/A'}</div>
           <div class="stat-label">Avg Rating</div>
         </div>
+        <div class="area-stat-card">
+          <div class="stat-value">${stats.avgYears || 'N/A'}</div>
+          <div class="stat-label">Avg Years</div>
+        </div>
+        <div class="area-stat-card">
+          <div class="stat-value">${stats.withFees}</div>
+          <div class="stat-label">With Fee Data</div>
+        </div>
+        <div class="area-stat-card">
+          <div class="stat-value">${stats.withArla}</div>
+          <div class="stat-label">ARLA Members</div>
+        </div>
+        <div class="area-stat-card">
+          <div class="stat-value">${stats.withReviews}</div>
+          <div class="stat-label">With Reviews</div>
+        </div>
       `;
 
-      // Agent types breakdown
-      const types = stats.agentTypes;
-      if (Object.keys(types).length > 0) {
-        const typeLabels = { high_street: 'High Street', online: 'Online', hybrid: 'Hybrid' };
-        const typeInfo = Object.entries(types).map(([t, c]) => `${typeLabels[t] || t}: ${c}`).join(' | ');
-        document.getElementById('area-subtitle').textContent += ` (${typeInfo})`;
+      // ── Insights panel ──
+      const insightsPanel = document.getElementById('area-insights-panel');
+      const insights = buildInsights(stats);
+      const typesTotal = stats.agentCount;
+      const catsFiltered = Object.entries(stats.categories).filter(([k]) => k !== 'unknown');
+
+      let breakdownHTML = '';
+      // Agent type breakdown
+      if (Object.keys(stats.agentTypes).length > 0) {
+        breakdownHTML += `<div class="ai-breakdown-section">
+          <div class="ai-breakdown-title">Agent Type</div>
+          ${Object.entries(stats.agentTypes).map(([t, c]) => hBar(TYPE_LABELS[t] || t, c, typesTotal, 'var(--primary)')).join('')}
+        </div>`;
+      }
+      // Category breakdown
+      if (catsFiltered.length > 0) {
+        breakdownHTML += `<div class="ai-breakdown-section">
+          <div class="ai-breakdown-title">Category</div>
+          ${catsFiltered.map(([k, v]) => hBar(CAT_LABELS[k] || k, v, typesTotal, CAT_COLORS[k] || 'var(--primary)')).join('')}
+        </div>`;
+      }
+      // Fee range
+      let feeRangeHTML = '';
+      if (stats.minFee !== null && stats.maxFee !== null && stats.avgFee) {
+        const range = stats.maxFee - stats.minFee;
+        const avgPos = range > 0 ? ((parseFloat(stats.avgFee) - stats.minFee) / range * 100) : 50;
+        feeRangeHTML = `<div class="ai-breakdown-section">
+          <div class="ai-breakdown-title">Fee Range</div>
+          <div class="ai-fee-range">
+            <div class="ai-fee-range-track">
+              <div class="ai-fee-range-marker" style="left:${avgPos}%" title="Area average: ${stats.avgFee}%"></div>
+            </div>
+            <div class="ai-fee-range-labels">
+              <span>${stats.minFee}%</span>
+              <span class="font-semibold" style="color:var(--primary)">Avg ${stats.avgFee}%</span>
+              <span>${stats.maxFee}%</span>
+            </div>
+          </div>
+        </div>`;
       }
 
-      // Show agents
+      if (insights.length || breakdownHTML || feeRangeHTML) {
+        insightsPanel.style.display = '';
+        insightsPanel.innerHTML = `
+          <div class="ai-panel">
+            ${insights.length ? `<div class="ai-insights">
+              ${insights.map(i => `<div class="ai-insight-item">
+                <span class="ai-insight-icon" style="color:${i.color}">${i.icon}</span>
+                <span class="text-sm">${i.text}</span>
+              </div>`).join('')}
+            </div>` : ''}
+            ${breakdownHTML || feeRangeHTML ? `<div class="ai-breakdowns">${breakdownHTML}${feeRangeHTML}</div>` : ''}
+          </div>`;
+      } else {
+        insightsPanel.style.display = 'none';
+      }
+
+      // ── Top 3 agents ──
+      const topBar = document.getElementById('top-agents-bar');
+      if (stats.topAgents.length) {
+        topBar.style.display = '';
+        topBar.innerHTML = `
+          <div class="ai-top-agents">
+            <div class="ai-top-title">${ICONS.award} Top Agents in ${outcode}</div>
+            <div class="ai-top-grid">
+              ${stats.topAgents.map((a, i) => {
+                const logo = a.logo
+                  ? `<img src="${a.logo}" alt="" class="ai-top-logo" onerror="this.outerHTML='<div class=\\'ai-top-logo-placeholder\\'>${initials(a.name)}</div>'">`
+                  : `<div class="ai-top-logo-placeholder">${initials(a.name)}</div>`;
+                return `<a href="agent.html?id=${a.id}" class="ai-top-card">
+                  <div class="ai-top-rank">#${i + 1}</div>
+                  ${logo}
+                  <div class="ai-top-info">
+                    <div class="font-semibold text-sm" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.name}</div>
+                    <div style="display:flex;align-items:center;gap:var(--sp-2)">
+                      <div class="trust-score ${trustScoreClass(a.trust_score)} trust-score-sm">${a.trust_score}</div>
+                      ${a.reviews.avg ? `<span class="text-xs text-muted">${a.reviews.avg} rating</span>` : ''}
+                    </div>
+                  </div>
+                </a>`;
+              }).join('')}
+            </div>
+          </div>`;
+      } else {
+        topBar.style.display = 'none';
+      }
+
+      // ── Agents list ──
       document.getElementById('popular-areas').style.display = 'none';
+      document.getElementById('recent-areas').style.display = 'none';
       document.getElementById('area-agents').style.display = '';
       document.getElementById('area-agent-count').innerHTML = `<strong>${stats.agentCount}</strong> agents in ${outcode}`;
 
       renderCardsGrid(stats.agents, 'area-cards-grid');
 
-      // Sort
-      document.getElementById('area-sort').addEventListener('change', (e) => {
+      // Sort (remove old listener by cloning)
+      const sortEl = document.getElementById('area-sort');
+      const newSort = sortEl.cloneNode(true);
+      sortEl.parentNode.replaceChild(newSort, sortEl);
+      newSort.addEventListener('change', (e) => {
         const sorted = sortResults(stats.agents, e.target.value);
         renderCardsGrid(sorted, 'area-cards-grid');
       });
+
+      // ── Nearby areas ──
+      const nearbyContainer = document.getElementById('nearby-areas');
+      const nearby = getNearbyAreas(outcode, 6);
+      if (nearby.length) {
+        nearbyContainer.style.display = '';
+        nearbyContainer.innerHTML = `
+          <div style="margin-top:var(--sp-8)">
+            <div class="section-header" style="text-align:left;margin-bottom:var(--sp-4)">
+              <h2>Nearby Areas</h2>
+              <p>Other postcode areas in the ${outcode.replace(/[0-9]/g, '')} region</p>
+            </div>
+            <div class="features-grid">
+              ${nearby.map(n => renderPopularCard(n.outcode, n.count)).join('')}
+            </div>
+          </div>`;
+      } else {
+        nearbyContainer.style.display = 'none';
+      }
     }
 
-    // Search
+    // ── Search ──
     function doSearch() {
       const val = searchInput.value.trim();
       if (val) {
@@ -196,20 +433,31 @@
       if (e.key === 'Escape') suggestionsEl.classList.remove('open');
     });
 
-    // Suggestions
+    // ── Enhanced suggestions ──
     const showSugg = debounce(val => {
-      if (val.length < 2) { suggestionsEl.classList.remove('open'); return; }
+      if (val.length < 1) { suggestionsEl.classList.remove('open'); return; }
       const q = val.toUpperCase();
       const matches = Object.keys(data.postcodeIndex)
         .filter(k => k.startsWith(q))
+        .sort((a, b) => data.postcodeIndex[b].length - data.postcodeIndex[a].length)
         .slice(0, 8)
-        .map(k => ({ text: k, count: data.postcodeIndex[k].length }));
+        .map(k => {
+          const s = getAreaStats(k);
+          return { text: k, count: data.postcodeIndex[k].length, avgTrust: s ? s.avgTrust : null, avgFee: s ? s.avgFee : null, withFees: s ? s.withFees : 0 };
+        });
 
       if (!matches.length) { suggestionsEl.classList.remove('open'); return; }
       suggestionsEl.innerHTML = matches.map(m => `
         <div class="suggestion-item" data-value="${m.text}">
-          <span>${m.text}</span>
-          <span class="suggestion-type">${m.count} agents</span>
+          <div style="display:flex;align-items:center;gap:var(--sp-2)">
+            <span class="font-semibold">${m.text}</span>
+            <span class="text-xs text-muted">${m.count} agents</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:var(--sp-2)">
+            ${m.avgTrust ? `<span class="text-xs text-muted">Trust: ${m.avgTrust}</span>` : ''}
+            ${m.avgFee ? `<span class="text-xs text-muted">Fee: ${m.avgFee}%</span>` : ''}
+            ${m.withFees ? `<span class="badge badge-green text-xs" style="padding:1px 6px">${m.withFees} fees</span>` : ''}
+          </div>
         </div>
       `).join('');
       suggestionsEl.classList.add('open');
@@ -221,13 +469,13 @@
           doSearch();
         });
       });
-    }, 200);
+    }, 150);
     searchInput.addEventListener('input', e => showSugg(e.target.value));
     document.addEventListener('click', e => {
       if (!e.target.closest('.search-wrapper')) suggestionsEl.classList.remove('open');
     });
 
-    // Check URL params
+    // ── Init ──
     const postcodeParam = getParam('postcode');
     if (postcodeParam) {
       searchInput.value = postcodeParam;

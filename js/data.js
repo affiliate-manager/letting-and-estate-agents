@@ -250,6 +250,18 @@ export function getAreaStats(outcode) {
   const years = agents.filter(a => a.performance.years).map(a => a.performance.years);
   const types = {};
   agents.forEach(a => { if (a.agent_type) types[a.agent_type] = (types[a.agent_type] || 0) + 1; });
+  const categories = {};
+  agents.forEach(a => { if (a.category) categories[a.category] = (categories[a.category] || 0) + 1; });
+
+  const withFees = agents.filter(a => a.fees.tenant_find || a.fees.full_management || a.fees.mgmt_pct || a.fees.detail).length;
+  const withArla = agents.filter(a => a.regulatory.arla).length;
+  const withCmp = agents.filter(a => a.regulatory.cmp).length;
+  const withReviews = agents.filter(a => a.reviews.avg).length;
+
+  const topAgents = [...agents].sort((a, b) => (b.trust_score + b.data_richness) - (a.trust_score + a.data_richness)).slice(0, 3);
+
+  const nationalAvgFee = _data.stats && _data.stats.avgMgmtFee ? _data.stats.avgMgmtFee : null;
+  const nationalAvgTrust = _data.stats && _data.stats.avgTrustScore ? _data.stats.avgTrustScore : null;
 
   return {
     outcode,
@@ -257,8 +269,31 @@ export function getAreaStats(outcode) {
     avgTrust: agents.length ? Math.round(agents.reduce((s, a) => s + a.trust_score, 0) / agents.length) : 0,
     avgRating: ratings.length ? (ratings.reduce((s, r) => s + r, 0) / ratings.length).toFixed(1) : null,
     avgFee: fees.length ? (fees.reduce((s, f) => s + f, 0) / fees.length).toFixed(1) : null,
+    minFee: fees.length ? Math.min(...fees) : null,
+    maxFee: fees.length ? Math.max(...fees) : null,
     avgYears: years.length ? Math.round(years.reduce((s, y) => s + y, 0) / years.length) : null,
     agentTypes: types,
+    categories,
+    withFees,
+    withArla,
+    withCmp,
+    withReviews,
+    topAgents,
+    nationalAvgFee,
+    nationalAvgTrust,
     agents,
   };
+}
+
+/**
+ * Get nearby outcodes (simple prefix matching)
+ */
+export function getNearbyAreas(outcode, limit = 6) {
+  if (!_data || !_data.postcodeIndex) return [];
+  const prefix = outcode.replace(/[0-9]/g, '');
+  return Object.keys(_data.postcodeIndex)
+    .filter(k => k !== outcode && k.startsWith(prefix))
+    .map(k => ({ outcode: k, count: _data.postcodeIndex[k].length }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
 }
