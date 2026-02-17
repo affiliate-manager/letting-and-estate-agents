@@ -6,9 +6,18 @@ let _data = null;
 
 export async function loadData() {
   if (_data) return _data;
-  const resp = await fetch('data/agents.json');
-  _data = await resp.json();
-  return _data;
+  try {
+    const resp = await fetch('data/agents.json');
+    if (!resp.ok) {
+      console.error('[Data] Failed to load agents.json:', resp.status, resp.statusText);
+      return null;
+    }
+    _data = await resp.json();
+    return _data;
+  } catch (err) {
+    console.error('[Data] Error loading agents.json:', err);
+    return null;
+  }
 }
 
 export function getData() {

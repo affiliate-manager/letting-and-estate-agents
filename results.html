@@ -206,7 +206,13 @@
 
     // Load data
     renderSkeletons('cards-grid');
-    const data = await loadData();
+    let data = null;
+    try {
+      data = await loadData();
+    } catch (err) {
+      console.error('[Results] Data load failed:', err);
+      document.getElementById('cards-grid').innerHTML = '<div class="empty-state" style="grid-column:1/-1"><h3>Data loading error</h3><p>Unable to load agent data. Please try refreshing the page.</p></div>';
+    }
 
     // Perform search
     function performSearch(query) {

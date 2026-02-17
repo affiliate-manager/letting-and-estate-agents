@@ -18,7 +18,13 @@
   <section class="profile-hero" id="profile-hero">
     <div class="container">
       <div class="profile-header" id="profile-header">
-        <!-- Rendered by JS -->
+        <div class="loading-state" id="profile-loading">
+          <div class="skeleton" style="width:64px;height:64px;border-radius:50%"></div>
+          <div style="flex:1">
+            <div class="skeleton" style="height:24px;width:200px;margin-bottom:8px;border-radius:4px"></div>
+            <div class="skeleton" style="height:16px;width:150px;border-radius:4px"></div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -91,26 +97,35 @@
     renderAuthModal();
     initScrollTop();
     initTrustTooltip();
+    window.showAuthModal = () => document.getElementById('auth-modal').classList.add('open');
 
+    (async () => {
     await initAuth();
     bindAuthEvents();
     trackProfileView();
     initHooks();
 
-    window.showAuthModal = () => document.getElementById('auth-modal').classList.add('open');
+    let data = null;
+    try {
+      data = await loadData();
+    } catch (err) {
+      console.error('[Agent] Data load failed:', err);
+    }
 
-    const data = await loadData();
     const agentId = parseInt(getParam('id'));
-    const agent = getAgent(agentId);
+    const agent = data ? getAgent(agentId) : null;
 
     if (!agent) {
+      const msg = data
+        ? "The agent you're looking for doesn't exist."
+        : 'Unable to load agent data. Please try refreshing the page.';
       document.getElementById('profile-header').innerHTML = `
         <div class="empty-state">
-          <h3>Agent not found</h3>
-          <p>The agent you're looking for doesn't exist.</p>
+          <h3>${data ? 'Agent not found' : 'Data loading error'}</h3>
+          <p>${msg}</p>
           <a href="index.html" class="btn btn-primary" style="margin-top:var(--sp-4)">Back to Search</a>
         </div>`;
-      throw new Error('Agent not found');
+      return;
     }
 
     // Update page title
@@ -283,7 +298,7 @@
       if (f.guaranteed_rent) tableRows += `<tr><td>Guaranteed Rent</td><td class="font-semibold">${f.guaranteed_rent}</td></tr>`;
       if (f.mgmt_pct) tableRows += `<tr><td>Management Fee %</td><td class="font-semibold">${f.mgmt_pct}%</td></tr>`;
       if (f.letting_pct) tableRows += `<tr><td>Letting Fee %</td><td class="font-semibold">${f.letting_pct}%</td></tr>`;
-      if (f.vat_inclusive !== null) tableRows += `<tr><td>VAT Inclusive</td><td>${f.vat_inclusive ? 'Yes' : 'No'}</td></tr>`;
+      if (f.vat_inclusive != null) tableRows += `<tr><td>VAT Inclusive</td><td>${f.vat_inclusive ? 'Yes' : 'No'}</td></tr>`;
 
       feesHTML.push(`
         <div class="data-card" style="grid-column:1/-1">
@@ -667,6 +682,7 @@
         </div>
       `;
     }
+    })();
   </script>
 
 </body>

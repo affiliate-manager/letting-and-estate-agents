@@ -270,23 +270,10 @@
     renderAuthModal();
     initScrollTop();
 
-    // Initialize auth
-    await initAuth();
-    bindAuthEvents();
+    // Initialize auth (non-blocking)
+    initAuth().then(() => bindAuthEvents()).catch(err => console.warn('[Auth] Init failed:', err));
 
-    // Load data and update stats
-    const data = await loadData();
-    if (data && data.stats) {
-      const s = data.stats;
-      const el = id => document.getElementById(id);
-      if (el('stat-agents')) el('stat-agents').textContent = s.totalAgents.toLocaleString();
-      if (el('stat-areas')) el('stat-areas').textContent = s.postcodeAreas.toLocaleString();
-      if (el('stat-total')) el('stat-total').textContent = s.totalAgents.toLocaleString();
-      if (el('stat-reviewed')) el('stat-reviewed').textContent = s.withReviews.toLocaleString();
-      if (el('stat-postcodes')) el('stat-postcodes').textContent = s.postcodeAreas.toLocaleString();
-    }
-
-    // Search functionality
+    // Search functionality — register event listeners IMMEDIATELY (before data loads)
     const searchInput = document.getElementById('hero-search-input');
     const searchBtn = document.getElementById('hero-search-btn');
     const suggestionsEl = document.getElementById('hero-suggestions');
@@ -342,6 +329,19 @@
     window.showAuthModal = () => {
       document.getElementById('auth-modal').classList.add('open');
     };
+
+    // Load data in background (non-blocking) — updates stats and enables autocomplete
+    loadData().then(data => {
+      if (data && data.stats) {
+        const s = data.stats;
+        const el = id => document.getElementById(id);
+        if (el('stat-agents')) el('stat-agents').textContent = s.totalAgents.toLocaleString();
+        if (el('stat-areas')) el('stat-areas').textContent = s.postcodeAreas.toLocaleString();
+        if (el('stat-total')) el('stat-total').textContent = s.totalAgents.toLocaleString();
+        if (el('stat-reviewed')) el('stat-reviewed').textContent = s.withReviews.toLocaleString();
+        if (el('stat-postcodes')) el('stat-postcodes').textContent = s.postcodeAreas.toLocaleString();
+      }
+    }).catch(err => console.warn('[Home] Data preload failed:', err));
   </script>
 
 </body>

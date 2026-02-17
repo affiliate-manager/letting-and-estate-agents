@@ -2168,6 +2168,23 @@ h4 { font-size: 1.1rem; font-weight: 600; }
 .scroll-top:hover { background: var(--primary-light); }
 .scroll-top svg { width: 20px; height: 20px; }
 
+/* ---------- Loading State ---------- */
+.loading-state {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-6) 0;
+}
+.loading-state .skeleton {
+  background: linear-gradient(90deg, var(--border-light) 25%, var(--bg) 50%, var(--border-light) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+@keyframes skeleton-pulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 /* ---------- Print Styles ---------- */
 @media print {
   .site-header, .site-footer, .hook-banner, .scroll-top, .filter-mobile-btn { display: none !important; }
