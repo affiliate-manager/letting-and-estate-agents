@@ -254,8 +254,7 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   display: none;
   position: absolute;
   top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
   background: #1B2A4A;
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 8px;
@@ -264,6 +263,11 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   min-width: 200px;
   flex-direction: column;
   z-index: 200;
+}
+/* Keep right-side dropdowns from overflowing the viewport */
+.ll-topbar-item:nth-last-child(-n+2) .ll-topbar-dropdown {
+  left: auto;
+  right: 0;
 }
 .ll-topbar-item:hover .ll-topbar-dropdown { display: flex; }
 .ll-topbar-dropdown::before {
