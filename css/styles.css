@@ -206,7 +206,6 @@ h4 { font-size: 1.1rem; font-weight: 600; }
 #lendlord-topbar .container {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   height: 100%;
 }
 .ll-topbar-brand {
@@ -330,6 +329,7 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   display: none;
   align-items: center;
   gap: 12px;
+  margin-left: auto;
 }
 .ll-topbar-link {
   color: rgba(255,255,255,0.72);
