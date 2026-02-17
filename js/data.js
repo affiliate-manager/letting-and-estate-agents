@@ -172,6 +172,14 @@ export function sortResults(agents, sortBy = 'trust') {
     case 'fees_low':
       arr.sort((a, b) => (a.fees.mgmt_pct || 999) - (b.fees.mgmt_pct || 999));
       break;
+    case 'has_fees':
+      arr.sort((a, b) => {
+        const aHas = (a.fees.tenant_find || a.fees.full_management || a.fees.mgmt_pct || a.fees.detail) ? 1 : 0;
+        const bHas = (b.fees.tenant_find || b.fees.full_management || b.fees.mgmt_pct || b.fees.detail) ? 1 : 0;
+        if (bHas !== aHas) return bHas - aHas;
+        return (b.trust_score + b.data_richness) - (a.trust_score + a.data_richness);
+      });
+      break;
     case 'years':
       arr.sort((a, b) => (b.performance.years || 0) - (a.performance.years || 0));
       break;

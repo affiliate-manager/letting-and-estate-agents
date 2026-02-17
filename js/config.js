@@ -33,6 +33,7 @@ export const SORT_OPTIONS = [
   { value: 'trust', label: 'Trust Score' },
   { value: 'reviews', label: 'Most Reviews' },
   { value: 'rating', label: 'Highest Rated' },
+  { value: 'has_fees', label: 'Has Fee Data' },
   { value: 'fees_low', label: 'Lowest Fees' },
   { value: 'years', label: 'Most Experienced' },
   { value: 'name', label: 'Name (A-Z)' },
