@@ -170,21 +170,23 @@ export function renderFooter() {
           </div>
         </div>
         <div>
-          <h4 class="footer-heading">Resources</h4>
+          <h4 class="footer-heading">Lendlord</h4>
           <div class="footer-links">
-            <a href="#">Letting Guide</a>
-            <a href="#">Fee Calculator</a>
-            <a href="#">Regulatory Check</a>
-            <a href="#">Blog</a>
+            <a href="https://lendlord.io/solutions/invest/property-sourcing" target="_blank" rel="noopener">Property Sourcing</a>
+            <a href="https://lendlord.io/solutions/invest/deal-analyser" target="_blank" rel="noopener">Deal Analyser</a>
+            <a href="https://lendlord.io/solutions/manage/portfolio-management" target="_blank" rel="noopener">Portfolio Management</a>
+            <a href="https://lendlord.io/solutions/finance/bridging-finance" target="_blank" rel="noopener">Bridging Finance</a>
+            <a href="https://lendlord.io/solutions/finance/mortgages" target="_blank" rel="noopener">Mortgages</a>
+            <a href="https://lendlord.io/blog/" target="_blank" rel="noopener">Blog</a>
           </div>
         </div>
         <div>
           <h4 class="footer-heading">Legal</h4>
           <div class="footer-links">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-            <a href="#">Cookie Policy</a>
-            <a href="#">Contact Us</a>
+            <a href="https://lendlord.io/privacy-policy/" target="_blank" rel="noopener">Privacy Policy</a>
+            <a href="https://lendlord.io/terms-conditions/" target="_blank" rel="noopener">Terms &amp; Conditions</a>
+            <a href="https://lendlord.io/cookies-policy/" target="_blank" rel="noopener">Cookie Policy</a>
+            <a href="https://lendlord.io/help-center/" target="_blank" rel="noopener">Help Center</a>
           </div>
         </div>
       </div>
