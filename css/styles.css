@@ -220,14 +220,103 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   align-items: center;
   gap: 20px;
 }
-.ll-topbar-nav a {
+.ll-topbar-nav > a {
   color: rgba(255,255,255,0.72);
   text-decoration: none;
   font-weight: 500;
   transition: color var(--duration) var(--ease);
   white-space: nowrap;
 }
-.ll-topbar-nav a:hover { color: #fff; }
+.ll-topbar-nav > a:hover { color: #fff; }
+
+/* Dropdown trigger item */
+.ll-topbar-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.ll-topbar-trigger {
+  color: rgba(255,255,255,0.72);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  transition: color var(--duration) var(--ease);
+}
+.ll-topbar-trigger:hover { color: #fff; }
+.ll-chevron { width: 12px; height: 12px; transition: transform var(--duration) var(--ease); }
+.ll-topbar-item:hover .ll-chevron { transform: rotate(180deg); }
+
+/* Dropdown panel */
+.ll-topbar-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1B2A4A;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+  padding: 12px 0;
+  min-width: 200px;
+  flex-direction: column;
+  z-index: 200;
+}
+.ll-topbar-item:hover .ll-topbar-dropdown { display: flex; }
+.ll-topbar-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 0;
+  right: 0;
+  height: 8px;
+}
+.ll-topbar-dropdown a {
+  color: rgba(255,255,255,0.75);
+  text-decoration: none;
+  padding: 6px 16px;
+  font-size: 0.78rem;
+  font-weight: 400;
+  white-space: nowrap;
+  transition: background var(--duration) var(--ease), color var(--duration) var(--ease);
+}
+.ll-topbar-dropdown a:hover {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+}
+
+/* Grouped dropdown (Features, Tools) */
+.ll-topbar-dropdown-grouped {
+  flex-direction: row;
+  padding: 16px;
+  gap: 20px;
+  min-width: auto;
+}
+.ll-topbar-dropdown-grouped a {
+  padding: 4px 0;
+}
+.ll-topbar-dropdown-grouped a:hover {
+  background: none;
+  color: #fff;
+}
+.ll-topbar-dropdown-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+}
+.ll-topbar-dropdown-group-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.45);
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
 .ll-topbar-actions {
   display: none;
   align-items: center;

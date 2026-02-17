@@ -6,24 +6,101 @@ import { SITE_NAME, FREE_RESULTS, SORT_OPTIONS, AGENT_TYPES } from './config.js'
 import { ICONS, trustScoreClass, starsHTML, reviewPlatformsHTML, regBadgesHTML, fmtFee, fmtLocation, fmtAgentType, categoryBadgeHTML, experienceBadgeHTML, brandAgeHTML, initials, socialIconsHTML, hiddenFeesAlertHTML, portalBadgesHTML, complianceStatusHTML, guaranteedRentBadgeHTML, noTenantFeesBadgeHTML, naeaBadgeHTML, confidenceBadgeHTML, dataCompletenessHTML, fmtFeeSummaryHTML, areasCoveredHTML } from './utils.js';
 
 /* ---------- Lendlord.io Top Bar ---------- */
+const CHEVRON_DOWN = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="ll-chevron"><polyline points="6 9 12 15 18 9"/></svg>`;
+
+const LL_MENU = [
+  { label: 'Features', groups: [
+    { title: 'Invest', items: [
+      { label: 'Property Sourcing', href: 'https://lendlord.io/solutions/invest/property-sourcing' },
+      { label: 'Deal Analyser', href: 'https://lendlord.io/solutions/invest/deal-analyser' },
+      { label: 'Flip Analyser', href: 'https://lendlord.io/solutions/invest/pipeline-management' },
+      { label: 'Property Analysis Sharing', href: 'https://lendlord.io/solutions/invest/property-sourcing' },
+    ]},
+    { title: 'Manage', items: [
+      { label: 'Portfolio Management', href: 'https://lendlord.io/solutions/manage/portfolio-management' },
+      { label: 'Document Management', href: 'https://lendlord.io/solutions/manage/portfolio-management' },
+      { label: 'Tenancy Management', href: 'https://lendlord.io/solutions/manage/tenancies-management' },
+      { label: 'Tenancy Agreement Templates', href: 'https://lendlord.io/solutions/manage/tenancies-management' },
+      { label: 'Due Dates & Insights', href: 'https://lendlord.io/solutions/manage/portfolio-management' },
+    ]},
+    { title: 'Accounting', items: [
+      { label: 'Cash Flow Tracking', href: 'https://lendlord.io/solutions/manage/cash-flow-tracking' },
+      { label: 'Open Banking', href: 'https://lendlord.io/solutions/manage/cash-flow-tracking' },
+      { label: 'Invoice Generator', href: 'https://lendlord.io/solutions/manage/cash-flow-tracking' },
+      { label: 'Making Tax Digital', href: 'https://lendlord.io/solutions/manage/cash-flow-tracking' },
+    ]},
+  ]},
+  { label: 'Source', items: [
+    { label: 'Auction Properties', href: 'https://lendlord.io/solutions/invest/property-sourcing' },
+    { label: 'Agent Listings', href: 'https://lendlord.io/solutions/invest/property-sourcing' },
+  ]},
+  { label: 'Finance', items: [
+    { label: 'Bridging Finance', href: 'https://lendlord.io/solutions/finance/bridging-finance' },
+    { label: 'Bridging Application', href: 'https://lendlord.io/solutions/finance/bridging-finance' },
+    { label: 'Mortgages', href: 'https://lendlord.io/solutions/finance/mortgages' },
+    { label: 'Online Mortgage Broker', href: 'https://lendlord.io/solutions/finance/mortgages' },
+    { label: 'Buy to Let Remortgage', href: 'https://lendlord.io/solutions/finance/mortgages' },
+  ]},
+  { label: 'Tools', groups: [
+    { title: 'Data', items: [
+      { label: 'Lendlord AI', href: 'https://lendlord.io/tools/' },
+      { label: 'Postcode Information', href: 'https://lendlord.io/tools/' },
+      { label: "Renters' Right Bill Act", href: 'https://lendlord.io/tools/' },
+      { label: 'HMO Data', href: 'https://lendlord.io/tools/' },
+    ]},
+    { title: 'Calculators', items: [
+      { label: 'Buy to Let Calculator', href: 'https://lendlord.io/tools/' },
+      { label: 'Flip Calculator', href: 'https://lendlord.io/tools/' },
+      { label: 'BRRR Calculator', href: 'https://lendlord.io/tools/' },
+      { label: 'Buy to Let Mortgage Calculator', href: 'https://lendlord.io/tools/' },
+    ]},
+    { title: 'Landlord Surveys', items: [
+      { label: 'Autumn 25 Budget Sentiment', href: 'https://lendlord.io/tools/' },
+    ]},
+  ]},
+  { label: 'Blog', href: 'https://lendlord.io/blog/' },
+  { label: 'Plans', items: [
+    { label: 'United Kingdom Plans', href: 'https://lendlord.io/plans/' },
+    { label: 'Canada Plans', href: 'https://lendlord.io/plans/' },
+    { label: 'United States Plans', href: 'https://lendlord.io/plans/' },
+  ]},
+];
+
 function renderLendlordTopbar() {
   if (document.getElementById('lendlord-topbar')) return;
 
-  const links = [
-    { label: 'Invest', href: 'https://lendlord.io/solutions/invest/property-sourcing' },
-    { label: 'Manage', href: 'https://lendlord.io/solutions/manage/portfolio-management' },
-    { label: 'Finance', href: 'https://lendlord.io/solutions/finance/bridging-finance' },
-    { label: 'Tools', href: 'https://lendlord.io/tools/' },
-    { label: 'Blog', href: 'https://lendlord.io/blog/' },
-    { label: 'Plans', href: 'https://lendlord.io/plans/' },
-  ];
+  function renderMenuItem(item) {
+    const hasDropdown = item.items || item.groups;
+    if (!hasDropdown) {
+      return `<a href="${item.href}" target="_blank" rel="noopener">${item.label}</a>`;
+    }
+
+    let dropdownHTML = '';
+    if (item.groups) {
+      dropdownHTML = `<div class="ll-topbar-dropdown ll-topbar-dropdown-grouped">
+        ${item.groups.map(g => `<div class="ll-topbar-dropdown-group">
+          <div class="ll-topbar-dropdown-group-title">${g.title}</div>
+          ${g.items.map(i => `<a href="${i.href}" target="_blank" rel="noopener">${i.label}</a>`).join('')}
+        </div>`).join('')}
+      </div>`;
+    } else {
+      dropdownHTML = `<div class="ll-topbar-dropdown">
+        ${item.items.map(i => `<a href="${i.href}" target="_blank" rel="noopener">${i.label}</a>`).join('')}
+      </div>`;
+    }
+
+    return `<div class="ll-topbar-item">
+      <span class="ll-topbar-trigger">${item.label} ${CHEVRON_DOWN}</span>
+      ${dropdownHTML}
+    </div>`;
+  }
 
   const bar = document.createElement('div');
   bar.id = 'lendlord-topbar';
   bar.innerHTML = `
     <div class="container">
       <nav class="ll-topbar-nav">
-        ${links.map(l => `<a href="${l.href}" target="_blank" rel="noopener">${l.label}</a>`).join('')}
+        ${LL_MENU.map(renderMenuItem).join('')}
       </nav>
       <div class="ll-topbar-actions">
         <a href="https://app.lendlord.io/login" class="ll-topbar-link" target="_blank" rel="noopener">Log In</a>
