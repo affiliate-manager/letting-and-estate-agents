@@ -5,8 +5,45 @@
 import { SITE_NAME, FREE_RESULTS, SORT_OPTIONS, AGENT_TYPES } from './config.js';
 import { ICONS, trustScoreClass, starsHTML, reviewPlatformsHTML, regBadgesHTML, fmtFee, fmtLocation, fmtAgentType, categoryBadgeHTML, experienceBadgeHTML, brandAgeHTML, initials, socialIconsHTML, hiddenFeesAlertHTML, portalBadgesHTML, complianceStatusHTML, guaranteedRentBadgeHTML, noTenantFeesBadgeHTML, naeaBadgeHTML, confidenceBadgeHTML, dataCompletenessHTML, fmtFeeSummaryHTML, areasCoveredHTML } from './utils.js';
 
+/* ---------- Lendlord.io Top Bar ---------- */
+function renderLendlordTopbar() {
+  if (document.getElementById('lendlord-topbar')) return;
+
+  const links = [
+    { label: 'Invest', href: 'https://lendlord.io/solutions/invest/property-sourcing' },
+    { label: 'Manage', href: 'https://lendlord.io/solutions/manage/portfolio-management' },
+    { label: 'Finance', href: 'https://lendlord.io/solutions/finance/bridging-finance' },
+    { label: 'Tools', href: 'https://lendlord.io/tools/' },
+    { label: 'Blog', href: 'https://lendlord.io/blog/' },
+    { label: 'Plans', href: 'https://lendlord.io/plans/' },
+  ];
+
+  const bar = document.createElement('div');
+  bar.id = 'lendlord-topbar';
+  bar.innerHTML = `
+    <div class="container">
+      <a href="https://lendlord.io/" class="ll-topbar-brand" target="_blank" rel="noopener">
+        ${ICONS.lendlordLogoWhite}
+      </a>
+      <nav class="ll-topbar-nav">
+        ${links.map(l => `<a href="${l.href}" target="_blank" rel="noopener">${l.label}</a>`).join('')}
+      </nav>
+      <div class="ll-topbar-actions">
+        <a href="https://app.lendlord.io/login" class="ll-topbar-link" target="_blank" rel="noopener">Log In</a>
+        <a href="https://app.lendlord.io/signup" class="ll-topbar-signup" target="_blank" rel="noopener">Sign Up</a>
+      </div>
+      <a href="https://lendlord.io/" class="ll-topbar-mobile-link" target="_blank" rel="noopener">
+        ${ICONS.arrowRight} lendlord.io
+      </a>
+    </div>
+  `;
+  document.body.insertBefore(bar, document.body.firstChild);
+}
+
 /* ---------- Header ---------- */
 export function renderHeader(activePage = '') {
+  renderLendlordTopbar();
+
   const header = document.getElementById('site-header');
   if (!header) return;
 

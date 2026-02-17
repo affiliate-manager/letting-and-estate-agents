@@ -195,6 +195,79 @@ h4 { font-size: 1.1rem; font-weight: 600; }
 .block { display: block; }
 .relative { position: relative; }
 
+/* ---------- Lendlord.io Top Bar ---------- */
+#lendlord-topbar {
+  background: #1B2A4A;
+  height: 36px;
+  font-size: 0.78rem;
+  z-index: 101;
+}
+#lendlord-topbar .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+.ll-topbar-brand {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.ll-topbar-brand .lendlord-logo { height: 18px; width: auto; }
+.ll-topbar-nav {
+  display: none;
+  align-items: center;
+  gap: 20px;
+}
+.ll-topbar-nav a {
+  color: rgba(255,255,255,0.72);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--duration) var(--ease);
+  white-space: nowrap;
+}
+.ll-topbar-nav a:hover { color: #fff; }
+.ll-topbar-actions {
+  display: none;
+  align-items: center;
+  gap: 12px;
+}
+.ll-topbar-link {
+  color: rgba(255,255,255,0.72);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--duration) var(--ease);
+}
+.ll-topbar-link:hover { color: #fff; }
+.ll-topbar-signup {
+  color: #fff;
+  background: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: var(--radius-full);
+  transition: background var(--duration) var(--ease);
+}
+.ll-topbar-signup:hover { background: var(--primary-light); }
+.ll-topbar-mobile-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(255,255,255,0.72);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.78rem;
+  margin-left: auto;
+}
+.ll-topbar-mobile-link svg { width: 14px; height: 14px; }
+.ll-topbar-mobile-link:hover { color: #fff; }
+@media (min-width: 768px) {
+  .ll-topbar-nav { display: flex; }
+  .ll-topbar-actions { display: flex; }
+  .ll-topbar-mobile-link { display: none; }
+}
+
 /* ---------- Header ---------- */
 .site-header {
   background: var(--surface);
