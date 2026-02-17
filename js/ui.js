@@ -43,6 +43,7 @@ const LL_MENU = [
   ]},
   { label: 'Tools', groups: [
     { title: 'Data', items: [
+      { label: 'Agent Finder', href: 'https://lendlord.io/letting-and-estate-agents' },
       { label: 'Lendlord AI', href: 'https://lendlord.io/tools/' },
       { label: 'Postcode Information', href: 'https://lendlord.io/tools/' },
       { label: "Renters' Right Bill Act", href: 'https://lendlord.io/tools/' },
