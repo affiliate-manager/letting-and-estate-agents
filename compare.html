@@ -47,6 +47,14 @@
         </div>
       </div>
 
+      <div id="sample-banner" class="card" style="display:none;background:var(--primary-bg);border:1px solid var(--primary);margin-bottom:var(--sp-4);padding:var(--sp-3) var(--sp-4);border-radius:var(--radius)">
+        <div style="display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="width:20px;height:20px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <span class="text-sm" style="flex:1"><strong>Sample comparison</strong> — showing 3 random agents with fee data. Search above to compare your own agents.</span>
+          <button class="btn btn-outline btn-sm" id="clear-sample-btn">Clear &amp; Start Fresh</button>
+        </div>
+      </div>
+
       <div id="compare-empty" class="empty-state">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:64px;height:64px;opacity:0.4"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
         <h3>Add agents to compare</h3>
@@ -76,11 +84,24 @@
 
     // Get compare list from URL or localStorage
     let compareIds = [];
+    let isSample = false;
     const idsParam = getParam('ids');
     if (idsParam) {
       compareIds = idsParam.split(',').map(Number).filter(id => !isNaN(id) && getAgent(id));
     } else {
       compareIds = lsGet('af_compare', []);
+    }
+
+    // If no agents selected, show a sample comparison of 3 random agents with fee data
+    if (compareIds.length === 0 && data && data.agents) {
+      const agentsWithFees = data.agents.filter(a =>
+        a.fees && (a.fees.tenant_find || a.fees.full_management || a.fees.mgmt_pct || a.fees.detail)
+      );
+      if (agentsWithFees.length >= 3) {
+        const shuffled = agentsWithFees.sort(() => Math.random() - 0.5);
+        compareIds = shuffled.slice(0, 3).map(a => a.id);
+        isSample = true;
+      }
     }
 
     function renderSlots() {
@@ -180,13 +201,6 @@
       tbody.innerHTML = html;
     }
 
-    window.removeAgent = (index) => {
-      compareIds.splice(index, 1);
-      lsSet('af_compare', compareIds);
-      renderSlots();
-      renderComparison();
-    };
-
     // Agent search
     const searchInput = document.getElementById('agent-search');
     const suggestionsEl = document.getElementById('agent-suggestions');
@@ -211,6 +225,10 @@
         item.addEventListener('click', () => {
           const id = parseInt(item.dataset.id);
           if (compareIds.length < 3 && !compareIds.includes(id)) {
+            if (isSample) {
+              isSample = false;
+              document.getElementById('sample-banner').style.display = 'none';
+            }
             compareIds.push(id);
             lsSet('af_compare', compareIds);
             renderSlots();
@@ -226,6 +244,34 @@
     document.addEventListener('click', e => {
       if (!e.target.closest('.search-wrapper')) suggestionsEl.classList.remove('open');
     });
+
+    // Show sample banner if applicable
+    if (isSample) {
+      document.getElementById('sample-banner').style.display = '';
+      document.getElementById('clear-sample-btn').addEventListener('click', () => {
+        compareIds = [];
+        isSample = false;
+        lsSet('af_compare', []);
+        document.getElementById('sample-banner').style.display = 'none';
+        renderSlots();
+        renderComparison();
+        document.getElementById('agent-search').focus();
+      });
+    }
+
+    // Hide sample banner when user manually adds/removes agents
+    const origRemove = window.removeAgent;
+
+    window.removeAgent = (index) => {
+      compareIds.splice(index, 1);
+      if (isSample) {
+        isSample = false;
+        document.getElementById('sample-banner').style.display = 'none';
+      }
+      lsSet('af_compare', compareIds);
+      renderSlots();
+      renderComparison();
+    };
 
     // Initial render
     renderSlots();
