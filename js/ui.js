@@ -135,9 +135,10 @@ export function renderHeader(activePage = '') {
   header.innerHTML = `
     <div class="container">
       <a href="index.html" class="site-header-brand">
-        ${ICONS.agentFinderLogo}
-        <span>Agent Finder</span>
+        <span class="site-header-brand-name">Agent Finder</span>
+        <span class="site-header-brand-sub">by Lendlord</span>
       </a>
+      <span class="site-header-divider"></span>
       <nav class="nav-links">
         ${pages.map(p => `<a href="${p.href}" class="${activePage === p.id ? 'active' : ''}">${p.label}</a>`).join('')}
       </nav>

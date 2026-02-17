@@ -383,25 +383,32 @@ h4 { font-size: 1.1rem; font-weight: 600; }
 }
 .site-header-brand {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: baseline;
+  gap: 6px;
   text-decoration: none;
   flex-shrink: 0;
 }
-.site-header-brand .af-logo-icon {
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
-}
-.site-header-brand span {
-  font-size: 1.1rem;
+.site-header-brand-name {
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--text-primary);
   white-space: nowrap;
 }
+.site-header-brand-sub {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.site-header-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  flex-shrink: 0;
+  align-self: center;
+}
 @media (min-width: 768px) {
-  .site-header-brand .af-logo-icon { width: 32px; height: 32px; }
-  .site-header-brand span { font-size: 1.25rem; }
+  .site-header-brand-name { font-size: 1.15rem; }
 }
 
 .nav-links {
