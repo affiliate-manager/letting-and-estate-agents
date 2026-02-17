@@ -22,9 +22,6 @@ function renderLendlordTopbar() {
   bar.id = 'lendlord-topbar';
   bar.innerHTML = `
     <div class="container">
-      <a href="https://lendlord.io/" class="ll-topbar-brand" target="_blank" rel="noopener">
-        ${ICONS.lendlordLogoWhite}
-      </a>
       <nav class="ll-topbar-nav">
         ${links.map(l => `<a href="${l.href}" target="_blank" rel="noopener">${l.label}</a>`).join('')}
       </nav>
@@ -63,13 +60,11 @@ export function renderHeader(activePage = '') {
         ${pages.map(p => `<a href="${p.href}" class="${activePage === p.id ? 'active' : ''}">${p.label}</a>`).join('')}
       </nav>
       <div class="header-actions">
-        <button class="btn btn-sm btn-outline" id="auth-btn" onclick="window.showAuthModal && window.showAuthModal()">Sign In</button>
         <button class="menu-btn" onclick="document.querySelector('.mobile-nav').classList.toggle('open')" aria-label="Menu">${ICONS.menu}</button>
       </div>
     </div>
     <nav class="mobile-nav">
       ${pages.map(p => `<a href="${p.href}" class="${activePage === p.id ? 'active' : ''}">${p.label}</a>`).join('')}
-      <a href="#" onclick="window.showAuthModal && window.showAuthModal(); return false;">Sign In / Sign Up</a>
     </nav>
   `;
 }
