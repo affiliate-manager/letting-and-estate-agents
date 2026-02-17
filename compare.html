@@ -201,24 +201,104 @@
       tbody.innerHTML = html;
     }
 
-    // Agent search
+    // Agent search with rich autocomplete
     const searchInput = document.getElementById('agent-search');
     const suggestionsEl = document.getElementById('agent-suggestions');
 
+    const SICONS = {
+      pin:      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
+      map:      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>',
+      building: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>',
+      home:     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+    };
+
+    function findAgentMatches(val) {
+      if (val.length < 2) return [];
+      const q = val.trim();
+      const qLower = q.toLowerCase();
+      const qUpper = q.toUpperCase();
+      const results = [];
+      const seenIds = new Set(compareIds);
+
+      // 1 — Match by postcode/outcode prefix
+      if (data.postcodeIndex) {
+        for (const [outcode, ids] of Object.entries(data.postcodeIndex)) {
+          if (outcode.startsWith(qUpper)) {
+            for (const id of ids) {
+              if (!seenIds.has(id) && results.length < 20) {
+                results.push({ agent: data.agents[id], via: 'postcode', viaLabel: outcode });
+                seenIds.add(id);
+              }
+            }
+          }
+        }
+      }
+
+      // 2 — Match by area name
+      if (data.areaIndex) {
+        for (const [area, ids] of Object.entries(data.areaIndex)) {
+          const match = qLower.length <= 3
+            ? area.startsWith(qLower) || area.includes(' ' + qLower)
+            : area.includes(qLower);
+          if (match) {
+            for (const id of ids) {
+              if (!seenIds.has(id) && results.length < 20) {
+                const titleArea = area.replace(/\b\w/g, c => c.toUpperCase());
+                results.push({ agent: data.agents[id], via: 'area', viaLabel: titleArea });
+                seenIds.add(id);
+              }
+            }
+          }
+        }
+      }
+
+      // 3 — Match by agent name
+      for (const agent of data.agents) {
+        if (seenIds.has(agent.id)) continue;
+        if (agent.name && agent.name.toLowerCase().includes(qLower)) {
+          results.push({ agent, via: 'name', viaLabel: '' });
+          seenIds.add(agent.id);
+        }
+        if (results.length >= 20) break;
+      }
+
+      // 4 — Match by address
+      for (const agent of data.agents) {
+        if (seenIds.has(agent.id)) continue;
+        if (agent.address && agent.address.toLowerCase().includes(qLower)) {
+          const parts = agent.address.split(',').map(p => p.trim()).filter(Boolean);
+          const addrSnippet = parts.slice(0, 2).join(', ');
+          results.push({ agent, via: 'address', viaLabel: addrSnippet });
+          seenIds.add(agent.id);
+        }
+        if (results.length >= 20) break;
+      }
+
+      return results.slice(0, 12);
+    }
+
     const showSuggestions = debounce(val => {
       if (val.length < 2 || compareIds.length >= 3) { suggestionsEl.classList.remove('open'); return; }
-      const q = val.toLowerCase();
-      const matches = data.agents.filter(a =>
-        a.name.toLowerCase().includes(q) && !compareIds.includes(a.id)
-      ).slice(0, 8);
-
+      const matches = findAgentMatches(val);
       if (!matches.length) { suggestionsEl.classList.remove('open'); return; }
-      suggestionsEl.innerHTML = matches.map(a => `
-        <div class="suggestion-item" data-id="${a.id}">
-          <span>${a.name}</span>
-          <span class="suggestion-type">${a.postcode || ''}</span>
-        </div>
-      `).join('');
+
+      let lastVia = '';
+      suggestionsEl.innerHTML = matches.map(m => {
+        const a = m.agent;
+        const icon = m.via === 'postcode' ? SICONS.pin : m.via === 'area' ? SICONS.map : m.via === 'address' ? SICONS.home : SICONS.building;
+        let sep = '';
+        if (m.via !== lastVia) {
+          lastVia = m.via;
+          const labels = { postcode: 'By Postcode', area: 'By Area', name: 'By Name', address: 'By Address' };
+          sep = `<div class="suggestion-divider">${labels[m.via] || m.via}</div>`;
+        }
+        return `${sep}<div class="suggestion-item" data-id="${a.id}">
+          ${icon}
+          <span class="suggestion-text">${a.name}</span>
+          <span class="suggestion-sub">${a.postcode || a.outcode || ''}</span>
+          <span class="suggestion-meta"><span class="suggestion-type">${m.viaLabel || (a.postcode || '')}</span></span>
+        </div>`;
+      }).join('');
       suggestionsEl.classList.add('open');
 
       suggestionsEl.querySelectorAll('.suggestion-item').forEach(item => {
