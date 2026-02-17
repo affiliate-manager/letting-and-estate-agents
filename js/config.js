@@ -75,4 +75,4 @@ export const COUPONS = {
 
 // Site name
 export const SITE_NAME = 'Lendlord';
-export const SITE_TAGLINE = 'Find the Right Letting & Estate Agent for Your Property';
+export const SITE_TAGLINE = 'Find the Right Lettings & Estate Agent for Your Property';

@@ -198,43 +198,109 @@ export function getSuggestions(query) {
   const q = query.trim();
   const qUpper = q.toUpperCase();
   const qLower = q.toLowerCase();
-  const suggestions = [];
+  const qEsc = qLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-  // Postcode matches
+  const postcodes = [];
+  const areas = [];
+  const agents = [];
+  const addresses = [];
+
+  // 1 — Postcode / outcode prefix matches (e.g. "SW" → SW1, SW1A, …)
   for (const outcode of Object.keys(_data.postcodeIndex)) {
     if (outcode.startsWith(qUpper)) {
-      const count = _data.postcodeIndex[outcode].length;
-      suggestions.push({
+      postcodes.push({
         text: outcode,
         type: 'postcode',
-        count,
+        count: _data.postcodeIndex[outcode].length,
         value: outcode,
+        icon: 'pin',
       });
     }
-    if (suggestions.length >= 5) break;
+    if (postcodes.length >= 6) break;
   }
 
-  // Area name matches (word-boundary aware)
+  // 2 — Full postcode matches when query has both letters and digits (e.g. "B17 9")
+  if (/\d/.test(q) && /[a-zA-Z]/.test(q) && q.length >= 3) {
+    const fullPcMap = {};
+    for (const agent of _data.agents) {
+      if (agent.postcode && agent.postcode.toUpperCase().startsWith(qUpper)) {
+        const pc = agent.postcode.toUpperCase();
+        if (!fullPcMap[pc]) fullPcMap[pc] = 0;
+        fullPcMap[pc]++;
+      }
+    }
+    const fullPcs = Object.entries(fullPcMap).sort((a, b) => b[1] - a[1]).slice(0, 4);
+    for (const [pc, cnt] of fullPcs) {
+      if (!postcodes.some(p => p.text === pc)) {
+        postcodes.push({ text: pc, type: 'postcode', count: cnt, value: pc.split(' ')[0], icon: 'pin' });
+      }
+    }
+  }
+
+  // 3 — Area name matches (contains-based, word-boundary for short queries)
   const seenAreas = new Set();
-  const sugRe = new RegExp('(^|\\s)' + qLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
   for (const area of Object.keys(_data.areaIndex)) {
-    if (sugRe.test(area) && !seenAreas.has(area) && area.length > 2) {
-      const titleCase = area.charAt(0).toUpperCase() + area.slice(1);
+    if (area.length <= 2) continue;
+    const match = qLower.length <= 3
+      ? area.startsWith(qLower) || area.includes(' ' + qLower)
+      : area.includes(qLower);
+    if (match && !seenAreas.has(area)) {
+      const titleCase = area.replace(/\b\w/g, c => c.toUpperCase());
       const count = _data.areaIndex[area].length;
       if (count >= 1) {
-        suggestions.push({
-          text: titleCase,
-          type: 'area',
-          count,
-          value: area,
-        });
+        areas.push({ text: titleCase, type: 'area', count, value: area, icon: 'map' });
         seenAreas.add(area);
       }
     }
-    if (suggestions.length >= 10) break;
+    if (areas.length >= 5) break;
   }
 
-  return suggestions.slice(0, 8);
+  // 4 — Agent name matches (substring)
+  for (const agent of _data.agents) {
+    if (agent.name && agent.name.toLowerCase().includes(qLower)) {
+      agents.push({
+        text: agent.name,
+        sub: agent.postcode || agent.outcode || '',
+        type: 'agent',
+        count: 1,
+        value: agent.name,
+        icon: 'building',
+      });
+    }
+    if (agents.length >= 4) break;
+  }
+
+  // 5 — Address matches (street, city — substring)
+  const seenAddr = new Set();
+  for (const agent of _data.agents) {
+    if (!agent.address) continue;
+    if (agent.address.toLowerCase().includes(qLower)) {
+      const parts = agent.address.split(',').map(p => p.trim()).filter(Boolean);
+      const displayAddr = parts.length > 1 ? parts.slice(0, 2).join(', ') : parts[0];
+      const key = displayAddr.toLowerCase();
+      if (!seenAddr.has(key)) {
+        addresses.push({
+          text: displayAddr,
+          sub: agent.postcode || agent.outcode || '',
+          type: 'address',
+          count: 1,
+          value: agent.outcode || (agent.postcode ? agent.postcode.split(' ')[0] : ''),
+          icon: 'home',
+        });
+        seenAddr.add(key);
+      }
+    }
+    if (addresses.length >= 4) break;
+  }
+
+  // Combine: postcodes → areas → addresses → agents
+  const combined = [];
+  if (postcodes.length) combined.push(...postcodes.slice(0, 5));
+  if (areas.length) combined.push(...areas.slice(0, 4));
+  if (addresses.length) combined.push(...addresses.slice(0, 3));
+  if (agents.length) combined.push(...agents.slice(0, 3));
+
+  return combined.slice(0, 14);
 }
 
 /**

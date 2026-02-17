@@ -164,7 +164,7 @@ export function renderFooter() {
           <a href="index.html" class="logo" style="color:#fff">
             ${ICONS.lendlordLogoWhite}
           </a>
-          <p>The UK's most transparent letting & estate agent comparison platform. Find, compare and choose with confidence.</p>
+          <p>The UK's most transparent lettings & estate agent comparison platform. Find, compare and choose with confidence.</p>
         </div>
         <div>
           <h4 class="footer-heading">Platform</h4>

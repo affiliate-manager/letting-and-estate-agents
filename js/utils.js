@@ -168,9 +168,9 @@ export function fmtAgentType(type) {
 
 export function categoryBadgeHTML(category) {
   const map = {
-    letting: { label: 'Letting Agent', cls: 'badge-green' },
+    letting: { label: 'Lettings Agent', cls: 'badge-green' },
     estate:  { label: 'Estate Agent', cls: 'badge-orange' },
-    both:    { label: 'Letting & Estate', cls: 'badge-purple' },
+    both:    { label: 'Lettings & Estate', cls: 'badge-purple' },
   };
   const info = map[category];
   if (!info) return '';

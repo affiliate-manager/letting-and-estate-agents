@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Agent Profile - Lendlord</title>
-  <meta name="description" content="Detailed letting agent profile with fees, reviews, regulatory compliance and more.">
+  <meta name="description" content="Detailed lettings agent profile with fees, reviews, regulatory compliance and more.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -300,7 +300,7 @@
       if (f.full_management) tableRows += `<tr><td>Full Management</td><td class="font-semibold">${f.full_management}</td></tr>`;
       if (f.guaranteed_rent) tableRows += `<tr><td>Guaranteed Rent</td><td class="font-semibold">${f.guaranteed_rent}</td></tr>`;
       if (f.mgmt_pct) tableRows += `<tr><td>Management Fee %</td><td class="font-semibold">${f.mgmt_pct}%</td></tr>`;
-      if (f.letting_pct) tableRows += `<tr><td>Letting Fee %</td><td class="font-semibold">${f.letting_pct}%</td></tr>`;
+      if (f.letting_pct) tableRows += `<tr><td>Lettings Fee %</td><td class="font-semibold">${f.letting_pct}%</td></tr>`;
       if (f.vat_inclusive != null) tableRows += `<tr><td>VAT Inclusive</td><td>${f.vat_inclusive ? 'Yes' : 'No'}</td></tr>`;
 
       // Fee comparison context
@@ -342,7 +342,7 @@
         feesHTML.push(`
           <div class="data-card hidden-fees-card" style="grid-column:1/-1">
             <div class="data-card-title" style="color:var(--warning)">${ICONS.info} Additional Fees to Consider</div>
-            <p class="text-sm text-secondary" style="margin-bottom:var(--sp-3)">These fees may apply on top of the standard management or letting fee.</p>
+            <p class="text-sm text-secondary" style="margin-bottom:var(--sp-3)">These fees may apply on top of the standard management or lettings fee.</p>
             <table class="fee-table">
               <thead><tr><th>Fee Type</th><th>Amount</th></tr></thead>
               <tbody>

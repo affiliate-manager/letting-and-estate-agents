@@ -1,5 +1,5 @@
 /* ==========================================================================
-   UK Letting Agent Finder - Main Stylesheet
+   UK Lettings Agent Finder - Main Stylesheet
    Mobile-first responsive design
    ========================================================================== */
 
@@ -1261,20 +1261,31 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   left: 0;
   right: 0;
   background: var(--surface);
+  color: var(--text);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
   z-index: 50;
-  max-height: 300px;
+  max-height: 420px;
   overflow-y: auto;
   display: none;
 }
 .search-suggestions.open { display: block; }
+.suggestion-divider {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  padding: 8px var(--sp-4) 4px;
+  border-top: 1px solid var(--border);
+}
+.suggestion-divider:first-child { border-top: none; }
 .suggestion-item {
   display: flex;
   align-items: center;
   gap: var(--sp-3);
-  padding: var(--sp-3) var(--sp-4);
+  padding: var(--sp-2) var(--sp-4);
   cursor: pointer;
   transition: background var(--duration) var(--ease);
   font-size: 0.9rem;
@@ -1289,10 +1300,40 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   color: var(--text-muted);
   flex-shrink: 0;
 }
-.suggestion-type {
+.suggestion-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.suggestion-sub {
   font-size: 0.75rem;
   color: var(--text-muted);
+}
+.suggestion-meta {
   margin-left: auto;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.suggestion-count {
+  font-size: 0.7rem;
+  color: var(--primary);
+  background: var(--primary-bg, rgba(99,102,241,0.08));
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.suggestion-type {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  background: var(--bg);
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
 }
 
 /* ---------- Hero Section ---------- */
@@ -1302,13 +1343,15 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   padding: var(--sp-12) 0;
   text-align: center;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+  z-index: 2;
 }
 .hero::before {
   content: '';
   position: absolute;
   inset: 0;
   background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
 }
 .hero h1 {
   color: #fff;
@@ -1327,6 +1370,7 @@ h4 { font-size: 1.1rem; font-weight: 600; }
 .hero .search-wrapper {
   margin: 0 auto;
   position: relative;
+  z-index: 60;
 }
 .hero .search-input-wrap {
   border-color: rgba(255,255,255,0.2);
@@ -1383,6 +1427,8 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   padding: var(--sp-8) 0 var(--sp-6);
   background: var(--bg);
   border-bottom: 1px solid var(--border-light);
+  position: relative;
+  z-index: 1;
 }
 .as-seen-label {
   text-align: center;

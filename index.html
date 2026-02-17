@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lendlord - Find the Best Letting & Estate Agent for Your Property</title>
-  <meta name="description" content="Compare 999+ UK letting & estate agents by postcode. See trust scores, fees, reviews and regulatory compliance. Free and transparent.">
-  <meta property="og:title" content="Lendlord - UK Letting & Estate Agent Comparison">
-  <meta property="og:description" content="Find the right letting or estate agent for your property. Compare fees, reviews, services and more.">
+  <title>Lendlord - Find the Best Lettings & Estate Agent for Your Property</title>
+  <meta name="description" content="Compare 999+ UK lettings & estate agents by postcode. See trust scores, fees, reviews and regulatory compliance. Free and transparent.">
+  <meta property="og:title" content="Lendlord - UK Lettings & Estate Agent Comparison">
+  <meta property="og:description" content="Find the right lettings or estate agent for your property. Compare fees, reviews, services and more.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -20,8 +20,8 @@
   <!-- Hero Section -->
   <section class="hero">
     <div class="container">
-      <h1>Find the Right Letting & Estate Agent for Your Property</h1>
-      <p>Compare 999+ UK letting & estate agents. See fees, reviews, trust scores and regulatory compliance - all in one place.</p>
+      <h1>Find the Right Lettings & Estate Agent for Your Property</h1>
+      <p>Compare 999+ UK lettings & estate agents. See fees, reviews, trust scores and regulatory compliance - all in one place.</p>
 
       <div class="search-wrapper" id="hero-search">
         <div class="search-input-wrap">
@@ -30,7 +30,7 @@
             type="text"
             class="search-input"
             id="hero-search-input"
-            placeholder="Enter a postcode or area (e.g. SW1, Manchester, B17)"
+            placeholder="Search by postcode, address, area or agent name..."
             autocomplete="off"
             aria-label="Search by postcode or area"
           >
@@ -142,7 +142,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
           </div>
           <h3>Search Your Postcode</h3>
-          <p>Enter your property's postcode to find letting & estate agents operating in your area</p>
+          <p>Enter your property's postcode to find lettings & estate agents operating in your area</p>
         </div>
         <div class="step-card">
           <div class="step-icon green">
@@ -222,7 +222,7 @@
       <div class="stats-bar" id="stats-bar">
         <div class="stat-item">
           <div class="stat-value" id="stat-total">999</div>
-          <div class="stat-label">Letting & Estate Agents</div>
+          <div class="stat-label">Lettings & Estate Agents</div>
         </div>
         <div class="stat-item">
           <div class="stat-value" id="stat-reviewed">582</div>
@@ -243,7 +243,7 @@
   <!-- CTA -->
   <section class="section">
     <div class="container" style="text-align:center">
-      <h2>Ready to Find Your Perfect Letting or Estate Agent?</h2>
+      <h2>Ready to Find Your Perfect Lettings or Estate Agent?</h2>
       <p class="text-secondary" style="max-width:480px;margin:var(--sp-3) auto var(--sp-6)">
         Search by postcode to see agents near your property, compare their fees, read reviews and check compliance - all free.
       </p>
@@ -298,13 +298,32 @@
         suggestionsEl.classList.remove('open');
         return;
       }
-      suggestionsEl.innerHTML = results.map(s => `
-        <div class="suggestion-item" data-value="${s.value}">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-          <span>${s.text}</span>
-          <span class="suggestion-type">${s.type} (${s.count})</span>
-        </div>
-      `).join('');
+      const SICONS = {
+        pin:      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
+        map:      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>',
+        building: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>',
+        home:     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+      };
+      const SLABELS = { postcode: 'postcode', area: 'area', agent: 'agent', address: 'address' };
+
+      let lastType = '';
+      suggestionsEl.innerHTML = results.map(s => {
+        const icon = SICONS[s.icon] || SICONS.pin;
+        const countLabel = s.count > 1 ? `<span class="suggestion-count">${s.count} agents</span>` : '';
+        const subLabel = s.sub ? `<span class="suggestion-sub">${s.sub}</span>` : '';
+        const typeTag = `<span class="suggestion-type">${SLABELS[s.type] || s.type}</span>`;
+        let sep = '';
+        if (s.type !== lastType) {
+          lastType = s.type;
+          sep = `<div class="suggestion-divider">${SLABELS[s.type] || s.type}s</div>`;
+        }
+        return `${sep}<div class="suggestion-item" data-value="${s.value}">
+          ${icon}
+          <span class="suggestion-text">${s.text}</span>
+          ${subLabel}
+          <span class="suggestion-meta">${countLabel || typeTag}</span>
+        </div>`;
+      }).join('');
       suggestionsEl.classList.add('open');
 
       suggestionsEl.querySelectorAll('.suggestion-item').forEach(item => {

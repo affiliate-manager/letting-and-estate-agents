@@ -20,7 +20,7 @@
       <div style="max-width:640px">
         <h1 id="area-title">Local Market Intelligence</h1>
         <p style="color:rgba(255,255,255,0.8);margin-top:var(--sp-2)" id="area-subtitle">
-          Explore letting & estate agent data by postcode area. See who operates where, average fees and agent quality.
+          Explore lettings & estate agent data by postcode area. See who operates where, average fees and agent quality.
         </p>
       </div>
 
@@ -76,7 +76,7 @@
       <div id="popular-areas">
         <div class="section-header" style="text-align:left;margin-bottom:var(--sp-6)">
           <h2>Popular Areas</h2>
-          <p>Browse letting & estate agent data by popular postcode areas</p>
+          <p>Browse lettings & estate agent data by popular postcode areas</p>
         </div>
         <div class="features-grid" id="popular-grid"></div>
       </div>
@@ -115,7 +115,7 @@
     const suggestionsEl = document.getElementById('area-suggestions');
 
     const TYPE_LABELS = { high_street: 'High Street', online: 'Online', hybrid: 'Hybrid' };
-    const CAT_LABELS = { letting: 'Letting', estate: 'Estate', both: 'Both', unknown: 'Unknown' };
+    const CAT_LABELS = { letting: 'Lettings', estate: 'Estate', both: 'Both', unknown: 'Unknown' };
     const CAT_COLORS = { letting: 'var(--primary)', estate: 'var(--warning)', both: 'var(--accent)', unknown: 'var(--text-muted)' };
 
     // ── Recently viewed helper ──
@@ -253,8 +253,8 @@
 
       // Update hero
       document.getElementById('area-title').textContent = `${outcode} Area Insights`;
-      document.getElementById('area-subtitle').textContent = `${stats.agentCount} letting & estate agent${stats.agentCount !== 1 ? 's' : ''} operating in the ${outcode} postcode area`;
-      document.title = `${outcode} Letting & Estate Agents - Lendlord`;
+      document.getElementById('area-subtitle').textContent = `${stats.agentCount} lettings & estate agent${stats.agentCount !== 1 ? 's' : ''} operating in the ${outcode} postcode area`;
+      document.title = `${outcode} Lettings & Estate Agents - Lendlord`;
 
       // ── Stats grid (expanded) ──
       const statsGrid = document.getElementById('area-stats-grid');
