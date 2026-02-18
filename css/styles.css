@@ -3968,6 +3968,18 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   .contact-gate-card{padding:var(--sp-3)}
   .slot-auth-gate{padding:var(--sp-3)}
   .slot-auth-gate p{font-size:.78rem}
+
+  /* F. Hero — prevent h1 clipping on mobile */
+  .hero{padding:var(--sp-6) 0 var(--sp-8)}
+  .hero h1{font-size:1.55rem;margin-bottom:var(--sp-3)}
+  .hero p{font-size:.9rem;margin-bottom:var(--sp-5)}
+
+  /* G. Review source strips — wrap on narrow screens */
+  .review-source-strip{flex-wrap:wrap;gap:8px}
+  .review-source-logos{flex-wrap:wrap;gap:12px;height:auto;justify-content:center}
+  .review-source-item svg{height:22px !important}
+  .review-source-sep{display:none}
+  .review-source-label{width:100%;text-align:center;margin-bottom:2px}
 }
 
 /* ---------- Print Styles ---------- */
