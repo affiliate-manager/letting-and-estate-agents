@@ -1748,6 +1748,26 @@ h4 { font-size: 1.1rem; font-weight: 600; }
 }
 
 /* ---------- Agent Profile Page ---------- */
+/* Back link */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  cursor: pointer;
+  margin-bottom: var(--sp-3);
+  transition: color 0.2s;
+  border: none;
+  background: none;
+  padding: 0;
+}
+.back-link:hover { color: var(--brand-orange); }
+.back-link svg { width: 16px; height: 16px; transition: transform 0.2s; }
+.back-link:hover svg { transform: translateX(-2px); }
+
 .profile-hero {
   background: var(--surface);
   border-bottom: 1px solid var(--border-light);
