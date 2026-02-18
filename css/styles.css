@@ -18,6 +18,9 @@
   --warning-light: #fef3c7;
   --danger: #ef4444;
   --danger-light: #fee2e2;
+  --brand-orange: #FF9C00;
+  --brand-orange-light: #FFF3E0;
+  --brand-orange-rgb: 255, 156, 0;
   --bg: #f0f4f8;
   --surface: #ffffff;
   --text: #1a202c;
@@ -2002,8 +2005,12 @@ h4 { font-size: 1.1rem; font-weight: 600; }
 /* ---------- Compare Page ---------- */
 .compare-header {
   background: var(--surface);
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: 2px solid var(--brand-orange-light);
   padding: var(--sp-5) 0;
+}
+.compare-header ~ .section .search-input:focus {
+  border-color: var(--brand-orange);
+  box-shadow: 0 0 0 3px rgba(var(--brand-orange-rgb), 0.12);
 }
 .compare-agents {
   display: flex;
@@ -2032,6 +2039,7 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   background: var(--surface);
   border-style: solid;
   border-color: var(--border-light);
+  border-left: 3px solid var(--brand-orange);
 }
 .compare-table {
   width: 100%;
@@ -2057,8 +2065,8 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   min-width: 180px;
   vertical-align: top;
 }
-.compare-table tr:hover td { background: var(--primary-bg); }
-.compare-winner { font-weight: 700; color: var(--accent-dark); }
+.compare-table tr:hover td { background: var(--brand-orange-light); }
+.compare-winner { font-weight: 700; color: #e08600; }
 
 /* ---------- Compare Smart Filters ---------- */
 .cf-filters-wrap {
@@ -2073,7 +2081,7 @@ h4 { font-size: 1.1rem; font-weight: 600; }
 .cf-filters-label {
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--brand-orange);
   margin-right: 4px;
   white-space: nowrap;
 }
@@ -2097,8 +2105,8 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   line-height: 1.2;
 }
 .cf-chip:hover {
-  border-color: var(--primary-light);
-  background: var(--primary-bg);
+  border-color: rgba(var(--brand-orange-rgb), 0.5);
+  background: var(--brand-orange-light);
 }
 .cf-chip svg:not(.cf-caret) {
   width: 14px;
@@ -2113,9 +2121,9 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   transition: transform var(--duration) var(--ease);
 }
 .cf-chip.active {
-  background: var(--primary);
+  background: var(--brand-orange);
   color: #fff;
-  border-color: var(--primary);
+  border-color: var(--brand-orange);
 }
 .cf-chip.active svg { color: #fff; }
 .cf-chip.active .cf-caret { transform: rotate(180deg); }
@@ -2155,7 +2163,7 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   font-size: 0.8rem;
   outline: none;
 }
-.cf-dd-search:focus { border-color: var(--primary); }
+.cf-dd-search:focus { border-color: var(--brand-orange); box-shadow: 0 0 0 3px rgba(var(--brand-orange-rgb), 0.12); }
 .cf-dd-list {
   max-height: 200px;
   overflow-y: auto;
@@ -2165,7 +2173,7 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--text-muted);
+  color: var(--brand-orange);
   padding: 8px 12px 3px;
   border-top: 1px solid var(--border-light);
 }
@@ -2179,7 +2187,7 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   cursor: pointer;
   transition: background var(--duration) var(--ease);
 }
-.cf-dd-item:hover { background: var(--bg); }
+.cf-dd-item:hover { background: var(--brand-orange-light); }
 .cf-dd-item-highlight {
   background: var(--primary-bg);
   border-top: 1px solid var(--border-light);
@@ -2206,8 +2214,8 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   cursor: pointer;
   transition: background var(--duration) var(--ease);
 }
-.cf-dd-radio:hover { background: var(--bg); }
-.cf-dd-radio input { accent-color: var(--primary); }
+.cf-dd-radio:hover { background: var(--brand-orange-light); }
+.cf-dd-radio input { accent-color: var(--brand-orange); }
 
 /* Filtered results panel */
 .cf-results-header {
@@ -2221,7 +2229,7 @@ h4 { font-size: 1.1rem; font-weight: 600; }
 #cf-results-count {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--text);
+  color: var(--brand-orange);
 }
 .cf-results-sort {
   display: flex;
@@ -2237,6 +2245,19 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   font-size: 0.78rem;
   background: var(--surface);
   color: var(--text);
+}
+.cf-results-sort select:focus {
+  border-color: var(--brand-orange);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(var(--brand-orange-rgb), 0.12);
+}
+#cf-show-more {
+  border-color: var(--brand-orange);
+  color: var(--brand-orange);
+}
+#cf-show-more:hover {
+  background: var(--brand-orange);
+  color: #fff;
 }
 .cf-results-grid {
   display: grid;
@@ -2257,8 +2278,8 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   transition: border-color var(--duration) var(--ease), box-shadow var(--duration) var(--ease);
 }
 .cf-result-card:hover {
-  border-color: var(--primary-light);
-  box-shadow: var(--shadow);
+  border-color: rgba(var(--brand-orange-rgb), 0.4);
+  box-shadow: 0 2px 10px rgba(var(--brand-orange-rgb), 0.08);
 }
 .cf-result-card.disabled {
   opacity: 0.45;
@@ -2294,18 +2315,19 @@ h4 { font-size: 1.1rem; font-weight: 600; }
 .cf-rc-add {
   flex-shrink: 0;
   padding: 5px 10px;
-  border: 1px solid var(--primary);
+  border: 1.5px solid var(--brand-orange);
   border-radius: var(--radius);
   background: transparent;
-  color: var(--primary);
+  color: var(--brand-orange);
   font-size: 0.72rem;
   font-weight: 600;
   cursor: pointer;
   transition: all var(--duration) var(--ease);
 }
 .cf-rc-add:hover {
-  background: var(--primary);
+  background: var(--brand-orange);
   color: #fff;
+  box-shadow: 0 2px 8px rgba(var(--brand-orange-rgb), 0.25);
 }
 .cf-slots-full-msg {
   display: flex;
@@ -2364,14 +2386,14 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   transition: all 0.35s ease;
 }
 .cmp-step.done .cmp-step-dot {
-  background: var(--primary);
-  border-color: var(--primary);
+  background: var(--brand-orange);
+  border-color: var(--brand-orange);
   color: #fff;
 }
 .cmp-step.current .cmp-step-dot {
-  border-color: var(--primary);
-  color: var(--primary);
-  box-shadow: 0 0 0 4px var(--primary-bg);
+  border-color: var(--brand-orange);
+  color: var(--brand-orange);
+  box-shadow: 0 0 0 4px var(--brand-orange-light);
 }
 .cmp-step-line {
   width: 48px;
@@ -2381,7 +2403,7 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   transition: background 0.35s ease;
 }
 .cmp-step-line.done {
-  background: var(--primary);
+  background: var(--brand-orange);
 }
 .cmp-progress-label {
   font-size: 0.85rem;
@@ -2400,12 +2422,12 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 .cmp-slot-hint:hover {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-bg);
+  border-color: var(--brand-orange);
+  box-shadow: 0 0 0 3px var(--brand-orange-light);
 }
 .cmp-slot-icon {
-  color: var(--primary);
-  opacity: 0.6;
+  color: var(--brand-orange);
+  opacity: 0.65;
   transition: opacity 0.2s;
 }
 .cmp-slot-hint:hover .cmp-slot-icon {
@@ -2427,12 +2449,12 @@ h4 { font-size: 1.1rem; font-weight: 600; }
 
 /* Pulse on first empty slot */
 @keyframes slotPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--primary-rgb, 230, 126, 34), 0.25); }
-  50% { box-shadow: 0 0 0 8px rgba(var(--primary-rgb, 230, 126, 34), 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--brand-orange-rgb), 0.3); }
+  50% { box-shadow: 0 0 0 10px rgba(var(--brand-orange-rgb), 0); }
 }
 .cmp-slot-pulse {
   animation: slotPulse 2.5s ease-in-out infinite;
-  border-color: var(--primary) !important;
+  border-color: var(--brand-orange) !important;
 }
 
 /* Empty hero */
@@ -2454,7 +2476,7 @@ h4 { font-size: 1.1rem; font-weight: 600; }
 .cmp-popular-title {
   font-size: 0.9rem;
   font-weight: 700;
-  color: var(--text-secondary);
+  color: var(--brand-orange);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin-bottom: var(--sp-3);
@@ -2476,20 +2498,20 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
 }
 .cmp-popular-card:hover {
-  border-color: var(--primary);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  border-color: var(--brand-orange);
+  box-shadow: 0 2px 12px rgba(var(--brand-orange-rgb), 0.12);
   transform: translateY(-2px);
 }
 .cmp-popular-icon {
   width: 38px;
   height: 38px;
-  background: var(--primary-bg);
+  background: var(--brand-orange-light);
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: var(--primary);
+  color: var(--brand-orange);
 }
 .cmp-popular-icon svg {
   width: 18px;
