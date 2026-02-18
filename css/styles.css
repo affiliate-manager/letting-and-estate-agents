@@ -2592,13 +2592,35 @@ h4 { font-size: 1.1rem; font-weight: 600; }
 .area-hero .container { position: relative; z-index: 1; }
 
 /* Breadcrumb */
+/* Area back button */
+.area-back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.8);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s;
+}
+.area-back-btn svg { width: 18px; height: 18px; }
+.area-back-btn:hover {
+  background: var(--brand-orange);
+  border-color: var(--brand-orange);
+  color: #fff;
+  transform: translateX(-2px);
+}
+
 .area-breadcrumb {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 0.78rem;
   color: rgba(255,255,255,0.6);
-  margin-bottom: var(--sp-3);
 }
 .area-breadcrumb a { color: rgba(255,255,255,0.7); text-decoration: none; }
 .area-breadcrumb a:hover { color: #fff; }
