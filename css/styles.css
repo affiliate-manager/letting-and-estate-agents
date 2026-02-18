@@ -205,6 +205,8 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   height: 36px;
   font-size: 0.78rem;
   z-index: 101;
+  position: sticky;
+  top: 0;
 }
 #lendlord-topbar .container {
   display: flex;
@@ -374,7 +376,7 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   position: sticky;
-  top: 0;
+  top: 36px;
   z-index: 100;
   height: var(--header-h);
 }
@@ -470,7 +472,7 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   display: none;
   position: fixed;
   inset: 0;
-  top: var(--header-h);
+  top: calc(var(--header-h) + 36px);
   background: var(--surface);
   z-index: 99;
   padding: var(--sp-6);
