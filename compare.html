@@ -166,6 +166,16 @@
             <tbody id="compare-tbody"></tbody>
           </table>
         </div>
+        <div class="cmp-action-bar" id="cmp-action-bar">
+          <button class="cmp-action-btn" id="save-comparison-btn" onclick="window.saveComparison && window.saveComparison()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save Comparison
+          </button>
+          <button class="cmp-action-btn" id="email-comparison-btn" onclick="window.emailComparison && window.emailComparison()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            Email This Report
+          </button>
+        </div>
       </div>
 
       <div id="compare-empty">
@@ -189,8 +199,8 @@
 
   <script type="module">
     import { loadData, getAgent, getData } from './js/data.js';
-    import { renderHeader, renderFooter, renderAuthModal, initScrollTop, initTrustTooltip } from './js/ui.js';
-    import { getParam, lsGet, lsSet, debounce, ICONS, trustScoreClass, starsHTML, reviewPlatformsHTML, fmtFee, fmtAgentType, initials, portalBadgesHTML, naeaBadgeHTML } from './js/utils.js';
+    import { renderHeader, renderFooter, renderAuthModal, initScrollTop, initTrustTooltip, initExitIntent } from './js/ui.js';
+    import { getParam, lsGet, lsSet, debounce, ICONS, trustScoreClass, starsHTML, reviewPlatformsHTML, fmtFee, fmtAgentType, initials, portalBadgesHTML, naeaBadgeHTML, showToast } from './js/utils.js';
     import { initAuth, bindAuthEvents } from './js/auth.js';
 
     renderHeader('compare');
@@ -200,6 +210,7 @@
     initTrustTooltip();
     await initAuth();
     bindAuthEvents();
+    initExitIntent();
     window.showAuthModal = () => document.getElementById('auth-modal').classList.add('open');
 
     const data = await loadData();
@@ -272,12 +283,27 @@
           const hint = SLOT_HINTS[i];
           const pulse = firstEmpty ? ' cmp-slot-pulse' : '';
           firstEmpty = false;
-          html += `
-            <div class="compare-slot cmp-slot-hint${pulse}" onclick="document.getElementById('agent-search').focus()">
-              <div class="cmp-slot-icon">${hint.icon}</div>
-              <div class="cmp-slot-title">${hint.title}</div>
-              <div class="cmp-slot-sub">${hint.sub}</div>
-            </div>`;
+          const isThirdSlotGated = i === 2 && !(window._isAuthenticated && window._isAuthenticated());
+          if (isThirdSlotGated) {
+            html += `
+              <div class="compare-slot cmp-slot-hint" style="position:relative;cursor:pointer" onclick="window.showAuthModal && window.showAuthModal()">
+                <div class="slot-auth-gate">
+                  ${ICONS.lock}
+                  <p><strong>Sign up free</strong> to unlock 3-way comparisons</p>
+                  <button class="btn btn-primary btn-sm">Sign Up Free</button>
+                </div>
+                <div class="cmp-slot-icon" style="opacity:.3">${hint.icon}</div>
+                <div class="cmp-slot-title" style="opacity:.3">${hint.title}</div>
+                <div class="cmp-slot-sub" style="opacity:.3">${hint.sub}</div>
+              </div>`;
+          } else {
+            html += `
+              <div class="compare-slot cmp-slot-hint${pulse}" onclick="document.getElementById('agent-search').focus()">
+                <div class="cmp-slot-icon">${hint.icon}</div>
+                <div class="cmp-slot-title">${hint.title}</div>
+                <div class="cmp-slot-sub">${hint.sub}</div>
+              </div>`;
+          }
         }
       }
       slotsEl.innerHTML = html;
@@ -993,6 +1019,26 @@
         });
       });
     }
+
+    // -- Save / Email Comparison CTAs --
+    window.saveComparison = function() {
+      if (!window._isAuthenticated || !window._isAuthenticated()) {
+        window.showAuthModal && window.showAuthModal();
+        return;
+      }
+      const saved = lsGet('af_saved_comparisons') || [];
+      saved.push({ ids: [...compareIds], date: new Date().toISOString() });
+      lsSet('af_saved_comparisons', saved);
+      showToast('Comparison saved! You can revisit it anytime.');
+    };
+
+    window.emailComparison = function() {
+      if (!window._isAuthenticated || !window._isAuthenticated()) {
+        window.showAuthModal && window.showAuthModal();
+        return;
+      }
+      showToast('Comparison report will be sent to your email.');
+    };
 
     // Initial render
     renderSlots();

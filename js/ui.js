@@ -315,6 +315,17 @@ export function renderCardsGrid(agents, containerId, showAll = false) {
 
   let html = '';
   agents.forEach((agent, i) => {
+    // Insert inline sign-up card at position 4 for unauthenticated users
+    if (i === FREE_RESULTS && !isAuthed && agents.length > FREE_RESULTS) {
+      html += `
+        <div class="signup-card-inline fade-in-up" style="animation-delay:${Math.min(i, 8) * 60}ms">
+          <div class="lock-icon">${ICONS.lock}</div>
+          <h3>You're viewing ${FREE_RESULTS} of ${agents.length} agents</h3>
+          <p>Create a free account to unlock all results, save agents, and compare fees</p>
+          <button class="btn btn-primary" onclick="window.showAuthModal && window.showAuthModal()">Sign Up Free</button>
+          <div class="social-proof">${ICONS.users} 4,900+ agents compared daily</div>
+        </div>`;
+    }
     const blurred = i >= limit;
     html += renderAgentCard(agent, i, blurred);
   });
@@ -445,6 +456,46 @@ export function renderAuthModal() {
   div.addEventListener('click', (e) => {
     if (e.target === div) div.classList.remove('open');
   });
+}
+
+/* ---------- Exit-Intent Modal (Desktop Only, Session-Limited) ---------- */
+export function initExitIntent() {
+  if (window._isAuthenticated && window._isAuthenticated()) return;
+  if (sessionStorage.getItem('af_exit_shown')) return;
+  if ('ontouchstart' in window) return; // skip mobile
+
+  let triggered = false;
+  const handler = (e) => {
+    if (triggered) return;
+    if (e.clientY > 5) return; // only trigger near top of viewport
+    triggered = true;
+    sessionStorage.setItem('af_exit_shown', '1');
+    document.removeEventListener('mouseout', handler);
+
+    const overlay = document.createElement('div');
+    overlay.className = 'exit-modal-overlay';
+    overlay.innerHTML = `
+      <div class="exit-modal">
+        <button class="exit-modal-close" onclick="this.closest('.exit-modal-overlay').remove()">&times;</button>
+        <h2>Before you go &mdash; save your research</h2>
+        <p class="exit-subtitle">Create a free account to keep everything you've found</p>
+        <ul class="exit-benefits">
+          <li>${ICONS.check} <span>Unlimited agent results in every area</span></li>
+          <li>${ICONS.heart} <span>Save agents to your shortlist</span></li>
+          <li>${ICONS.compare} <span>Full 3-way agent comparisons</span></li>
+          <li>${ICONS.bell} <span>Get notified when fees change</span></li>
+        </ul>
+        <button class="btn btn-primary exit-cta" onclick="this.closest('.exit-modal-overlay').remove();window.showAuthModal && window.showAuthModal()">Create Free Account</button>
+        <button class="exit-skip" onclick="this.closest('.exit-modal-overlay').remove()">No thanks, I'll continue browsing</button>
+      </div>`;
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.remove();
+    });
+    document.body.appendChild(overlay);
+  };
+
+  // Delay listener to avoid triggering immediately on page load
+  setTimeout(() => document.addEventListener('mouseout', handler), 3000);
 }
 
 /* ---------- Compare Bar (bottom sticky) ---------- */

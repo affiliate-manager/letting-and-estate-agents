@@ -152,12 +152,12 @@
 
   <script type="module">
     import { loadData, getAreaStats, getNearbyAreas, sortResults, getSuggestions, getData } from './js/data.js';
-    import { renderHeader, renderFooter, renderAuthModal, renderCardsGrid, initScrollTop, initTrustTooltip } from './js/ui.js';
-    import { getParam, setParams, debounce, ICONS, fmtAgentType, lsGet, lsSet, trustScoreClass, starsHTML, initials } from './js/utils.js';
+    import { renderHeader, renderFooter, renderAuthModal, renderCardsGrid, initScrollTop, initTrustTooltip, initExitIntent } from './js/ui.js';
+    import { getParam, setParams, debounce, ICONS, fmtAgentType, lsGet, lsSet, trustScoreClass, starsHTML, initials, showToast } from './js/utils.js';
     import { initAuth, bindAuthEvents, isAuthenticated } from './js/auth.js';
 
     renderHeader('areas'); renderFooter(); renderAuthModal(); initScrollTop(); initTrustTooltip();
-    await initAuth(); bindAuthEvents();
+    await initAuth(); bindAuthEvents(); initExitIntent();
     window.showAuthModal = () => document.getElementById('auth-modal').classList.add('open');
     window._isAuthenticated = isAuthenticated;
 
@@ -382,19 +382,38 @@
           else if (wizPri === 'reviews') cands = cands.filter(a => a.reviews && a.reviews.count).sort((a, b) => (b.reviews.count || 0) - (a.reviews.count || 0));
           else if (wizPri === 'arla') cands = cands.filter(a => a.regulatory && a.regulatory.arla).sort((a, b) => b.trust_score - a.trust_score);
           const best = cands[0];
+          const wizAuthed = window._isAuthenticated && window._isAuthenticated();
           if (best) {
             const logo = best.logo
               ? `<img src="${best.logo}" alt="" style="width:44px;height:44px;border-radius:10px;object-fit:contain;background:#fff;padding:2px" onerror="this.style.display='none'">`
               : `<div style="width:44px;height:44px;border-radius:10px;background:var(--brand-orange-light);color:var(--brand-orange);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem">${initials(best.name)}</div>`;
-            body = `<div class="area-wizard-result"><div style="display:flex;align-items:center;gap:var(--sp-3)">
-              ${logo}<div style="flex:1;min-width:0"><div class="font-semibold" style="margin-bottom:2px">${best.name}</div>
-              <div style="display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap">
-                <div class="trust-score ${trustScoreClass(best.trust_score)} trust-score-sm">${best.trust_score}</div>
-                ${best.fees && best.fees.mgmt_pct ? `<span class="text-xs text-muted">Fee: ${best.fees.mgmt_pct}%</span>` : ''}
-                ${best.reviews && best.reviews.avg ? `<span class="text-xs text-muted">Rating: ${best.reviews.avg}</span>` : ''}
-              </div></div>
-              <a href="agent.html?id=${best.id}" class="btn btn-sm" style="background:var(--brand-orange);color:#fff;border:none;white-space:nowrap">View Profile</a>
-            </div></div>`;
+            if (wizAuthed) {
+              body = `<div class="area-wizard-result"><div style="display:flex;align-items:center;gap:var(--sp-3)">
+                ${logo}<div style="flex:1;min-width:0"><div class="font-semibold" style="margin-bottom:2px">${best.name}</div>
+                <div style="display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap">
+                  <div class="trust-score ${trustScoreClass(best.trust_score)} trust-score-sm">${best.trust_score}</div>
+                  ${best.fees && best.fees.mgmt_pct ? `<span class="text-xs text-muted">Fee: ${best.fees.mgmt_pct}%</span>` : ''}
+                  ${best.reviews && best.reviews.avg ? `<span class="text-xs text-muted">Rating: ${best.reviews.avg}</span>` : ''}
+                </div></div>
+                <a href="agent.html?id=${best.id}" class="btn btn-sm" style="background:var(--brand-orange);color:#fff;border:none;white-space:nowrap">View Profile</a>
+              </div></div>`;
+            } else {
+              body = `<div class="area-wizard-result" style="position:relative;overflow:hidden">
+                <div style="display:flex;align-items:center;gap:var(--sp-3);filter:blur(5px);pointer-events:none;user-select:none">
+                  ${logo}<div style="flex:1;min-width:0"><div class="font-semibold" style="margin-bottom:2px">${best.name}</div>
+                  <div style="display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap">
+                    <div class="trust-score trust-score-sm">--</div>
+                    <span class="text-xs text-muted">Fee: --%</span>
+                  </div></div>
+                  <span class="btn btn-sm" style="background:#ccc;color:#fff;border:none">View</span>
+                </div>
+                <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.85);border-radius:var(--radius);text-align:center;gap:var(--sp-2);padding:var(--sp-3)">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="var(--brand-orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  <p style="font-size:.85rem;margin:0;font-weight:600">Sign up free to see your personalised recommendation</p>
+                  <button class="btn btn-primary btn-sm" onclick="window.showAuthModal && window.showAuthModal()">Sign Up Free</button>
+                </div>
+              </div>`;
+            }
           } else {
             body = `<p class="text-sm text-secondary">No agents match your criteria.</p>`;
           }
@@ -507,9 +526,17 @@
         <div class="area-grade-badge ${cls}" title="Area quality grade">${grade}</div>
         <div class="area-rank-badge"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg> #${rank} of ${total} areas</div>
         <button class="area-share-btn" id="area-share-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share</button>
-        <button class="area-share-btn" id="area-pin-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> ${compareAreas.includes(outcode) ? 'Pinned' : 'Pin to Compare'}</button>`;
+        <button class="area-share-btn" id="area-pin-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> ${compareAreas.includes(outcode) ? 'Pinned' : 'Pin to Compare'}</button>
+        <button class="area-export-btn" id="area-export-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export Report</button>`;
       document.getElementById('area-share-btn').addEventListener('click', () => shareArea(outcode));
       document.getElementById('area-pin-btn').addEventListener('click', () => { if (!compareAreas.includes(outcode)) addCompareArea(outcode); });
+      document.getElementById('area-export-btn').addEventListener('click', () => {
+        if (window._isAuthenticated && window._isAuthenticated()) {
+          showToast('Generating area report for ' + outcode + '...');
+        } else {
+          window.showAuthModal && window.showAuthModal();
+        }
+      });
       document.getElementById('area-locate-btn').style.display = 'none';
 
       // Stats grid with count-up

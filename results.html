@@ -176,7 +176,7 @@
 
   <script type="module">
     import { loadData, searchAgents, sortResults, getSuggestions, getAreaStats } from './js/data.js';
-    import { renderHeader, renderFooter, renderAuthModal, renderCardsGrid, renderSkeletons, renderCompareBar, initScrollTop, initTrustTooltip } from './js/ui.js';
+    import { renderHeader, renderFooter, renderAuthModal, renderCardsGrid, renderSkeletons, renderCompareBar, initScrollTop, initTrustTooltip, initExitIntent } from './js/ui.js';
     import { getParam, setParams, debounce, lsGet, lsSet, ssGet, ssSet, ICONS } from './js/utils.js';
     import { initAuth, bindAuthEvents, isAuthenticated } from './js/auth.js';
     import { initHooks } from './js/hooks.js';
@@ -193,6 +193,7 @@
     await initAuth();
     bindAuthEvents();
     initHooks();
+    initExitIntent();
 
     // State
     let allResults = [];
@@ -461,6 +462,24 @@
 
     // Auth modal
     window.showAuthModal = () => document.getElementById('auth-modal').classList.add('open');
+
+    // -- Sticky Sign-Up Bar (unauthenticated only, dismissible) --
+    function initStickySignupBar() {
+      if (window._isAuthenticated && window._isAuthenticated()) return;
+      if (lsGet('af_sticky_dismissed')) return;
+      const bar = document.createElement('div');
+      bar.className = 'sticky-signup-bar';
+      bar.id = 'sticky-signup-bar';
+      bar.innerHTML = `
+        <div class="bar-inner">
+          <span class="bar-text">Unlock <strong>all agents</strong> in your area &mdash; it's free</span>
+          <button class="btn btn-primary btn-sm" onclick="window.showAuthModal && window.showAuthModal()">Sign Up Free</button>
+          <button class="bar-dismiss" onclick="document.getElementById('sticky-signup-bar').classList.add('hidden');localStorage.setItem('af_sticky_dismissed','1')" title="Dismiss">&times;</button>
+        </div>`;
+      document.body.appendChild(bar);
+      setTimeout(() => bar.style.opacity = '1', 300);
+    }
+    initStickySignupBar();
 
     // Initial search
     if (q) performSearch(q);

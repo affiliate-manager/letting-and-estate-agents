@@ -90,8 +90,8 @@
 
   <script type="module">
     import { loadData, getAgent } from './js/data.js';
-    import { renderHeader, renderFooter, renderAuthModal, initScrollTop, initTrustTooltip } from './js/ui.js';
-    import { ICONS, trustScoreClass, starsHTML, reviewPlatformsHTML, regBadgesHTML, socialIconsHTML, fmtAgentType, categoryBadgeHTML, experienceBadgeHTML, brandAgeHTML, fmtLocation, initials, getParam, portalBadgesHTML, hiddenFeesAlertHTML, complianceStatusHTML, guaranteedRentBadgeHTML, noTenantFeesBadgeHTML, naeaBadgeHTML, confidenceBadgeHTML, websiteScoreHTML, feeTypeBadgeHTML } from './js/utils.js';
+    import { renderHeader, renderFooter, renderAuthModal, initScrollTop, initTrustTooltip, initExitIntent } from './js/ui.js';
+    import { ICONS, trustScoreClass, starsHTML, reviewPlatformsHTML, regBadgesHTML, socialIconsHTML, fmtAgentType, categoryBadgeHTML, experienceBadgeHTML, brandAgeHTML, fmtLocation, initials, getParam, portalBadgesHTML, hiddenFeesAlertHTML, complianceStatusHTML, guaranteedRentBadgeHTML, noTenantFeesBadgeHTML, naeaBadgeHTML, confidenceBadgeHTML, websiteScoreHTML, feeTypeBadgeHTML, showToast, lsGet, lsSet } from './js/utils.js';
     import { REGULATORY_LABELS } from './js/config.js';
     import { initAuth, bindAuthEvents } from './js/auth.js';
     import { initHooks, trackProfileView } from './js/hooks.js';
@@ -107,6 +107,7 @@
     await initAuth();
     bindAuthEvents();
     trackProfileView();
+    initExitIntent();
     initHooks();
 
     let data = null;
@@ -157,9 +158,14 @@
               ${agent.special_offers ? `<span class="badge badge-amber">Special Offer</span>` : ''}
             </div>
           </div>
-          <div class="trust-score-wrap">
-            <div class="trust-score ${trustScoreClass(agent.trust_score)}" style="width:64px;height:64px;font-size:1.3rem">${agent.trust_score}</div>
-            <span class="trust-score-label" style="font-size:0.7rem">Trust <span class="trust-info-trigger" data-trust-tooltip>?</span></span>
+          <div style="display:flex;align-items:center;gap:var(--sp-3)">
+            <button class="save-agent-btn" id="save-agent-btn" onclick="window.toggleSaveAgent && window.toggleSaveAgent(${agent.id})" title="Save to shortlist">
+              ${ICONS.heart} <span>Save</span>
+            </button>
+            <div class="trust-score-wrap">
+              <div class="trust-score ${trustScoreClass(agent.trust_score)}" style="width:64px;height:64px;font-size:1.3rem">${agent.trust_score}</div>
+              <span class="trust-score-label" style="font-size:0.7rem">Trust <span class="trust-info-trigger" data-trust-tooltip>?</span></span>
+            </div>
           </div>
         </div>
 
@@ -287,6 +293,21 @@
       `);
     }
 
+    // Download Report CTA at bottom of overview
+    window._downloadReport = function() {
+      if (window._isAuthenticated && window._isAuthenticated()) showToast('Generating PDF report...');
+      else window.showAuthModal && window.showAuthModal();
+    };
+    ovHTML.push(`
+      <div class="download-report-cta" style="grid-column:1/-1" onclick="window._downloadReport()">
+        ${ICONS.download}
+        <div class="dl-info">
+          <h4>Download Agent Report</h4>
+          <p>${isAuthed ? 'Get a detailed PDF report for ' + agent.name : 'Sign up free to download detailed agent reports'}</p>
+        </div>
+        <span class="btn btn-outline btn-sm">${isAuthed ? 'Download PDF' : 'Sign Up Free'}</span>
+      </div>
+    `);
     document.getElementById('overview-grid').innerHTML = ovHTML.join('');
 
     // -- Fees Tab --
@@ -464,6 +485,21 @@
         </div>
       `);
     }
+    // Fee Alert CTA
+    window._enableFeeAlert = function() {
+      if (window._isAuthenticated && window._isAuthenticated()) showToast('Fee alert enabled for ' + agent.name);
+      else window.showAuthModal && window.showAuthModal();
+    };
+    feesHTML.push(`
+      <div class="fee-alert-card" style="grid-column:1/-1">
+        <div class="fee-alert-icon">${ICONS.bell}</div>
+        <div class="fee-alert-text">
+          <h4>Get Fee Alerts for ${agent.name}</h4>
+          <p>Be the first to know when this agent updates their fees</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="window._enableFeeAlert && window._enableFeeAlert()">${isAuthed ? 'Enable Alert' : 'Sign Up to Enable'}</button>
+      </div>
+    `);
     document.getElementById('fees-grid').innerHTML = feesHTML.join('');
 
     // -- Reviews Tab --
@@ -640,29 +676,42 @@
     }
     document.getElementById('performance-grid').innerHTML = perfHTML.join('');
 
-    // -- Contact Tab --
+    // -- Contact Tab (with soft gate on phone/email for unauthed users) --
     const contHTML = [];
     const contactItems = [];
-    if (agent.phone) contactItems.push({ icon: ICONS.phone, label: 'Phone', value: agent.phone, link: `tel:${agent.phone}` });
-    if (agent.email) contactItems.push({ icon: ICONS.mail, label: 'Email', value: agent.email, link: `mailto:${agent.email}` });
-    if (agent.url) contactItems.push({ icon: ICONS.globe, label: 'Website', value: agent.url, link: agent.url.startsWith('http') ? agent.url : 'https://' + agent.url });
-    if (agent.address) contactItems.push({ icon: ICONS.mapPin, label: 'Address', value: `${agent.address}${agent.postcode ? ', ' + agent.postcode : ''}` });
+    const isAuthed = window._isAuthenticated && window._isAuthenticated();
+    const maskValue = (val) => val.length > 4 ? val.slice(0, -3) + '***' : val.slice(0, 1) + '***';
+
+    if (agent.phone) contactItems.push({ icon: ICONS.phone, label: 'Phone', value: agent.phone, link: `tel:${agent.phone}`, gated: true });
+    if (agent.email) contactItems.push({ icon: ICONS.mail, label: 'Email', value: agent.email, link: `mailto:${agent.email}`, gated: true });
+    if (agent.url) contactItems.push({ icon: ICONS.globe, label: 'Website', value: agent.url, link: agent.url.startsWith('http') ? agent.url : 'https://' + agent.url, gated: false });
+    if (agent.address) contactItems.push({ icon: ICONS.mapPin, label: 'Address', value: `${agent.address}${agent.postcode ? ', ' + agent.postcode : ''}`, gated: false });
 
     if (contactItems.length) {
       contHTML.push(`
         <div class="data-card">
           <div class="data-card-title">${ICONS.phone} Contact Information</div>
           <div style="display:flex;flex-direction:column;gap:var(--sp-3)">
-            ${contactItems.map(c => `
+            ${contactItems.map(c => {
+              const shouldMask = c.gated && !isAuthed;
+              const displayVal = shouldMask ? maskValue(c.value) : c.value;
+              const maskedClass = shouldMask ? 'contact-masked' : '';
+              return `
               <div style="display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-2) 0">
                 <div style="color:var(--primary)">${c.icon}</div>
                 <div>
                   <div class="text-xs text-muted">${c.label}</div>
-                  ${c.link ? `<a href="${c.link}" target="_blank" rel="noopener" class="font-semibold">${c.value}</a>` : `<span class="font-semibold">${c.value}</span>`}
+                  ${!shouldMask && c.link ? `<a href="${c.link}" target="_blank" rel="noopener" class="font-semibold">${displayVal}</a>` : `<span class="font-semibold ${maskedClass}">${displayVal}</span>`}
                 </div>
-              </div>
-            `).join('')}
+              </div>`;
+            }).join('')}
           </div>
+          ${!isAuthed && contactItems.some(c => c.gated) ? `
+          <div class="contact-gate-card">
+            <div style="font-weight:600;font-size:.9rem">${ICONS.lock} Full Contact Details</div>
+            <p>Sign up free to reveal phone numbers and email addresses</p>
+            <button class="btn btn-primary btn-sm" onclick="window.showAuthModal && window.showAuthModal()">Sign Up Free</button>
+          </div>` : ''}
         </div>
       `);
     }
@@ -709,6 +758,40 @@
         </div>
       `;
     }
+
+    // -- Save/Shortlist Logic --
+    function getShortlist() { return lsGet('af_shortlist') || []; }
+    function setShortlist(list) { lsSet('af_shortlist', list); }
+    function isSaved(id) { return getShortlist().includes(id); }
+
+    window.toggleSaveAgent = function(id) {
+      if (!window._isAuthenticated || !window._isAuthenticated()) {
+        window.showAuthModal && window.showAuthModal();
+        return;
+      }
+      let list = getShortlist();
+      if (list.includes(id)) {
+        list = list.filter(x => x !== id);
+        showToast('Removed from shortlist');
+      } else {
+        list.push(id);
+        showToast('Saved to shortlist');
+      }
+      setShortlist(list);
+      updateSaveBtn(id);
+    };
+
+    function updateSaveBtn(id) {
+      const btn = document.getElementById('save-agent-btn');
+      if (!btn) return;
+      const saved = isSaved(id);
+      btn.classList.toggle('saved', saved);
+      btn.innerHTML = saved
+        ? `${ICONS.heartFilled} <span>Saved</span>`
+        : `${ICONS.heart} <span>Save</span>`;
+    }
+    updateSaveBtn(agent.id);
+
     })();
   </script>
 
