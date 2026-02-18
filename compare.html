@@ -36,13 +36,110 @@
       </div>
 
       <!-- Search to add agents -->
-      <div id="add-agent-section" style="margin-bottom:var(--sp-6)">
+      <div id="add-agent-section" style="margin-bottom:var(--sp-4)">
         <div class="search-wrapper" style="max-width:480px">
           <div class="search-input-wrap">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             <input type="text" class="search-input" id="agent-search" placeholder="Search agent by address, postcode, name..." autocomplete="off">
           </div>
           <div class="search-suggestions" id="agent-suggestions"></div>
+        </div>
+      </div>
+
+      <!-- Smart Filters -->
+      <div id="smart-filters" class="cf-filters-wrap">
+        <div class="cf-filters-bar">
+          <span class="cf-filters-label">Filters:</span>
+
+          <!-- Location -->
+          <div class="cf-chip-wrap">
+            <button class="cf-chip" data-filter="location">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>Location</span>
+              <svg class="cf-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="cf-dropdown" id="dd-location">
+              <input type="text" class="cf-dd-search" id="loc-search" placeholder="Type postcode or area..." autocomplete="off">
+              <div class="cf-dd-list" id="loc-list"></div>
+            </div>
+          </div>
+
+          <!-- Trust Score -->
+          <div class="cf-chip-wrap">
+            <button class="cf-chip" data-filter="trust">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span>Trust Score</span>
+              <svg class="cf-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="cf-dropdown" id="dd-trust">
+              <label class="cf-dd-radio"><input type="radio" name="cf-trust" value="" checked> Any</label>
+              <label class="cf-dd-radio"><input type="radio" name="cf-trust" value="70"> 70+</label>
+              <label class="cf-dd-radio"><input type="radio" name="cf-trust" value="80"> 80+</label>
+              <label class="cf-dd-radio"><input type="radio" name="cf-trust" value="90"> 90+</label>
+            </div>
+          </div>
+
+          <!-- Toggle chips -->
+          <button class="cf-chip cf-toggle" data-filter="hasFees">Has Fee Data</button>
+          <button class="cf-chip cf-toggle" data-filter="hasReviews">Has Reviews</button>
+          <button class="cf-chip cf-toggle" data-filter="arla">ARLA</button>
+          <button class="cf-chip cf-toggle" data-filter="cmp">CMP</button>
+
+          <!-- Category -->
+          <div class="cf-chip-wrap">
+            <button class="cf-chip" data-filter="category">
+              <span>Category</span>
+              <svg class="cf-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="cf-dropdown" id="dd-category">
+              <label class="cf-dd-radio"><input type="radio" name="cf-cat" value="" checked> Any</label>
+              <label class="cf-dd-radio"><input type="radio" name="cf-cat" value="letting"> Lettings</label>
+              <label class="cf-dd-radio"><input type="radio" name="cf-cat" value="estate"> Estate</label>
+              <label class="cf-dd-radio"><input type="radio" name="cf-cat" value="both"> Both</label>
+            </div>
+          </div>
+
+          <!-- Experience -->
+          <div class="cf-chip-wrap">
+            <button class="cf-chip" data-filter="experience">
+              <span>Experience</span>
+              <svg class="cf-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="cf-dropdown" id="dd-experience">
+              <label class="cf-dd-radio"><input type="radio" name="cf-exp" value="" checked> Any</label>
+              <label class="cf-dd-radio"><input type="radio" name="cf-exp" value="growing"> Growing</label>
+              <label class="cf-dd-radio"><input type="radio" name="cf-exp" value="established"> Established</label>
+              <label class="cf-dd-radio"><input type="radio" name="cf-exp" value="veteran"> Veteran</label>
+            </div>
+          </div>
+
+          <button class="cf-chip cf-clear" id="cf-clear-all" style="display:none">Clear All</button>
+        </div>
+
+        <!-- Filtered results -->
+        <div id="cf-results-panel" style="display:none">
+          <div class="cf-results-header">
+            <span id="cf-results-count">0 agents match</span>
+            <div class="cf-results-sort">
+              <label>Sort:</label>
+              <select id="cf-sort">
+                <option value="trust">Trust Score</option>
+                <option value="rating">Rating</option>
+                <option value="name">Name</option>
+                <option value="fees">Lowest Fee</option>
+              </select>
+            </div>
+          </div>
+          <div class="cf-results-grid" id="cf-results-grid">
+            <!-- Agent cards rendered by JS -->
+          </div>
+          <div id="cf-results-more" style="display:none;text-align:center;padding:var(--sp-3)">
+            <button class="btn btn-outline btn-sm" id="cf-show-more">Show more</button>
+          </div>
+        </div>
+        <div id="cf-slots-full" class="cf-slots-full-msg" style="display:none">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+          <span>All 3 comparison slots are filled. Remove an agent to add another.</span>
         </div>
       </div>
 
@@ -325,6 +422,308 @@
       if (!e.target.closest('.search-wrapper')) suggestionsEl.classList.remove('open');
     });
 
+    // ===== Smart Filters =====
+    const activeFilters = {
+      location: null,
+      trustMin: null,
+      hasFees: false,
+      hasReviews: false,
+      arla: false,
+      cmp: false,
+      category: null,
+      experience: null,
+    };
+    let cfSortBy = 'trust';
+    let cfPage = 1;
+    const CF_PER_PAGE = 12;
+
+    function hasActiveFilters() {
+      return activeFilters.location || activeFilters.trustMin || activeFilters.hasFees ||
+        activeFilters.hasReviews || activeFilters.arla || activeFilters.cmp ||
+        activeFilters.category || activeFilters.experience;
+    }
+
+    function applyFilters() {
+      if (!data || !data.agents) return [];
+      return data.agents.filter(a => {
+        if (compareIds.includes(a.id)) return false;
+        if (activeFilters.location) {
+          const loc = activeFilters.location.toUpperCase();
+          if (a.outcode !== loc && !(a.outcode && a.outcode.startsWith(loc))) return false;
+        }
+        if (activeFilters.trustMin && a.trust_score < activeFilters.trustMin) return false;
+        if (activeFilters.hasFees && !(a.fees.tenant_find || a.fees.full_management || a.fees.mgmt_pct || a.fees.detail)) return false;
+        if (activeFilters.hasReviews && !a.reviews.avg) return false;
+        if (activeFilters.arla && !a.regulatory.arla) return false;
+        if (activeFilters.cmp && !a.regulatory.cmp) return false;
+        if (activeFilters.category) {
+          if (activeFilters.category === 'letting' && a.category !== 'letting' && a.category !== 'both') return false;
+          if (activeFilters.category === 'estate' && a.category !== 'estate' && a.category !== 'both') return false;
+          if (activeFilters.category === 'both' && a.category !== 'both') return false;
+        }
+        if (activeFilters.experience && a.experience !== activeFilters.experience) return false;
+        return true;
+      });
+    }
+
+    function sortFiltered(agents) {
+      const arr = [...agents];
+      switch (cfSortBy) {
+        case 'trust': arr.sort((a, b) => b.trust_score - a.trust_score); break;
+        case 'rating': arr.sort((a, b) => (b.reviews.avg || 0) - (a.reviews.avg || 0)); break;
+        case 'name': arr.sort((a, b) => a.name.localeCompare(b.name)); break;
+        case 'fees': arr.sort((a, b) => (a.fees.mgmt_pct || 999) - (b.fees.mgmt_pct || 999)); break;
+      }
+      return arr;
+    }
+
+    function renderFilteredResults() {
+      const panel = document.getElementById('cf-results-panel');
+      const grid = document.getElementById('cf-results-grid');
+      const countEl = document.getElementById('cf-results-count');
+      const moreWrap = document.getElementById('cf-results-more');
+      const fullMsg = document.getElementById('cf-slots-full');
+      const clearBtn = document.getElementById('cf-clear-all');
+
+      if (compareIds.length >= 3) {
+        panel.style.display = 'none';
+        fullMsg.style.display = hasActiveFilters() ? '' : 'none';
+        return;
+      }
+      fullMsg.style.display = 'none';
+
+      if (!hasActiveFilters()) {
+        panel.style.display = 'none';
+        clearBtn.style.display = 'none';
+        return;
+      }
+      clearBtn.style.display = '';
+
+      const matched = applyFilters();
+      const sorted = sortFiltered(matched);
+      const visible = sorted.slice(0, cfPage * CF_PER_PAGE);
+
+      countEl.textContent = `${matched.length} agent${matched.length !== 1 ? 's' : ''} match`;
+      panel.style.display = '';
+
+      if (!matched.length) {
+        grid.innerHTML = '<div style="padding:var(--sp-6);text-align:center;color:var(--text-muted);grid-column:1/-1">No agents match your current filters. Try adjusting your criteria.</div>';
+        moreWrap.style.display = 'none';
+        return;
+      }
+
+      grid.innerHTML = visible.map(a => {
+        const trustCls = trustScoreClass(a.trust_score);
+        const badges = [];
+        if (a.regulatory.arla) badges.push('<span class="cf-rc-badge cf-rc-badge-arla">ARLA</span>');
+        if (a.fees.mgmt_pct) badges.push(`<span class="cf-rc-badge cf-rc-badge-fee">${a.fees.mgmt_pct}%</span>`);
+        else if (a.fees.tenant_find || a.fees.full_management) badges.push('<span class="cf-rc-badge cf-rc-badge-fee">Fees</span>');
+        const alreadyAdded = compareIds.includes(a.id);
+        return `<div class="cf-result-card${alreadyAdded ? ' disabled' : ''}" data-agent-id="${a.id}">
+          <div class="trust-score ${trustCls} trust-score-sm" style="flex-shrink:0">${a.trust_score}</div>
+          <div class="cf-rc-info">
+            <div class="cf-rc-name" title="${a.name}">${a.name}</div>
+            <div class="cf-rc-meta">
+              <span>${a.postcode || a.outcode || ''}</span>
+              ${badges.join('')}
+            </div>
+          </div>
+          <button class="cf-rc-add" ${alreadyAdded ? 'disabled' : ''}>+ Add</button>
+        </div>`;
+      }).join('');
+
+      moreWrap.style.display = visible.length < sorted.length ? '' : 'none';
+
+      grid.querySelectorAll('.cf-rc-add').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const card = e.target.closest('.cf-result-card');
+          const id = parseInt(card.dataset.agentId);
+          if (compareIds.length < 3 && !compareIds.includes(id)) {
+            if (isSample) {
+              isSample = false;
+              document.getElementById('sample-banner').style.display = 'none';
+            }
+            compareIds.push(id);
+            lsSet('af_compare', compareIds);
+            renderSlots();
+            renderComparison();
+            renderFilteredResults();
+          }
+        });
+      });
+    }
+
+    // Update chip active states
+    function updateChipStates() {
+      document.querySelectorAll('.cf-toggle').forEach(chip => {
+        const key = chip.dataset.filter;
+        chip.classList.toggle('active', !!activeFilters[key]);
+      });
+      const locChip = document.querySelector('[data-filter="location"]');
+      if (locChip) locChip.classList.toggle('active', !!activeFilters.location);
+      const trustChip = document.querySelector('[data-filter="trust"]');
+      if (trustChip) trustChip.classList.toggle('active', !!activeFilters.trustMin);
+      const catChip = document.querySelector('[data-filter="category"]');
+      if (catChip) catChip.classList.toggle('active', !!activeFilters.category);
+      const expChip = document.querySelector('[data-filter="experience"]');
+      if (expChip) expChip.classList.toggle('active', !!activeFilters.experience);
+    }
+
+    // Toggle chips (Has Fees, Has Reviews, ARLA, CMP)
+    document.querySelectorAll('.cf-toggle').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const key = chip.dataset.filter;
+        activeFilters[key] = !activeFilters[key];
+        cfPage = 1;
+        updateChipStates();
+        renderFilteredResults();
+      });
+    });
+
+    // Dropdown chips
+    function closeAllDropdowns() {
+      document.querySelectorAll('.cf-dropdown').forEach(dd => dd.classList.remove('open'));
+    }
+
+    document.querySelectorAll('.cf-chip-wrap > .cf-chip').forEach(chip => {
+      chip.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const wrap = chip.closest('.cf-chip-wrap');
+        const dd = wrap.querySelector('.cf-dropdown');
+        const isOpen = dd.classList.contains('open');
+        closeAllDropdowns();
+        if (!isOpen) dd.classList.add('open');
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.cf-chip-wrap')) closeAllDropdowns();
+    });
+
+    // Location dropdown — mini search
+    const locSearch = document.getElementById('loc-search');
+    const locList = document.getElementById('loc-list');
+
+    function renderLocList(q) {
+      if (!data || !data.postcodeIndex) return;
+      const qUp = (q || '').trim().toUpperCase();
+      const matches = Object.entries(data.postcodeIndex)
+        .filter(([k]) => !qUp || k.startsWith(qUp))
+        .sort((a, b) => b[1].length - a[1].length)
+        .slice(0, 20);
+      locList.innerHTML = matches.map(([outcode, ids]) =>
+        `<div class="cf-dd-item" data-loc="${outcode}">
+          <span>${outcode}</span>
+          <span class="cf-dd-item-count">${ids.length} agents</span>
+        </div>`
+      ).join('') || '<div style="padding:8px 12px;font-size:0.78rem;color:var(--text-muted)">No matching areas</div>';
+
+      locList.querySelectorAll('.cf-dd-item').forEach(item => {
+        item.addEventListener('click', () => {
+          activeFilters.location = item.dataset.loc;
+          const chip = document.querySelector('[data-filter="location"] span');
+          if (chip) chip.textContent = item.dataset.loc;
+          cfPage = 1;
+          closeAllDropdowns();
+          updateChipStates();
+          renderFilteredResults();
+        });
+      });
+    }
+
+    locSearch.addEventListener('input', () => renderLocList(locSearch.value));
+    locSearch.addEventListener('click', (e) => e.stopPropagation());
+    renderLocList('');
+
+    // Trust score radio
+    document.querySelectorAll('input[name="cf-trust"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        activeFilters.trustMin = radio.value ? parseInt(radio.value) : null;
+        const chip = document.querySelector('[data-filter="trust"] span');
+        if (chip) chip.textContent = radio.value ? `Trust ${radio.value}+` : 'Trust Score';
+        cfPage = 1;
+        closeAllDropdowns();
+        updateChipStates();
+        renderFilteredResults();
+      });
+    });
+
+    // Category radio
+    document.querySelectorAll('input[name="cf-cat"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        activeFilters.category = radio.value || null;
+        const chip = document.querySelector('[data-filter="category"] span');
+        const labels = { letting: 'Lettings', estate: 'Estate', both: 'Both' };
+        if (chip) chip.textContent = radio.value ? labels[radio.value] : 'Category';
+        cfPage = 1;
+        closeAllDropdowns();
+        updateChipStates();
+        renderFilteredResults();
+      });
+    });
+
+    // Experience radio
+    document.querySelectorAll('input[name="cf-exp"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        activeFilters.experience = radio.value || null;
+        const chip = document.querySelector('[data-filter="experience"] span');
+        const labels = { growing: 'Growing', established: 'Established', veteran: 'Veteran' };
+        if (chip) chip.textContent = radio.value ? labels[radio.value] : 'Experience';
+        cfPage = 1;
+        closeAllDropdowns();
+        updateChipStates();
+        renderFilteredResults();
+      });
+    });
+
+    // Sort control
+    document.getElementById('cf-sort').addEventListener('change', (e) => {
+      cfSortBy = e.target.value;
+      cfPage = 1;
+      renderFilteredResults();
+    });
+
+    // Show more button
+    document.getElementById('cf-show-more').addEventListener('click', () => {
+      cfPage++;
+      renderFilteredResults();
+    });
+
+    // Clear all filters
+    document.getElementById('cf-clear-all').addEventListener('click', () => {
+      activeFilters.location = null;
+      activeFilters.trustMin = null;
+      activeFilters.hasFees = false;
+      activeFilters.hasReviews = false;
+      activeFilters.arla = false;
+      activeFilters.cmp = false;
+      activeFilters.category = null;
+      activeFilters.experience = null;
+      cfPage = 1;
+
+      // Reset chip labels
+      const locSpan = document.querySelector('[data-filter="location"] span');
+      if (locSpan) locSpan.textContent = 'Location';
+      const trustSpan = document.querySelector('[data-filter="trust"] span');
+      if (trustSpan) trustSpan.textContent = 'Trust Score';
+      const catSpan = document.querySelector('[data-filter="category"] span');
+      if (catSpan) catSpan.textContent = 'Category';
+      const expSpan = document.querySelector('[data-filter="experience"] span');
+      if (expSpan) expSpan.textContent = 'Experience';
+
+      // Reset radios
+      document.querySelectorAll('.cf-dropdown input[type="radio"][value=""]').forEach(r => r.checked = true);
+      locSearch.value = '';
+      renderLocList('');
+
+      updateChipStates();
+      renderFilteredResults();
+    });
+
+    // Re-render filters when agents are added/removed
+    const _origRenderSlots = renderSlots;
+    const _origRenderComparison = renderComparison;
+
     // Show sample banner if applicable
     if (isSample) {
       document.getElementById('sample-banner').style.display = '';
@@ -351,6 +750,7 @@
       lsSet('af_compare', compareIds);
       renderSlots();
       renderComparison();
+      renderFilteredResults();
     };
 
     // Initial render
