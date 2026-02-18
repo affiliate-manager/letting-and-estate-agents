@@ -19,7 +19,19 @@
       <h1 style="margin-bottom:var(--sp-2)">Compare Lettings & Estate Agents</h1>
       <p class="text-secondary">Select up to 3 agents to compare fees, services and performance side by side</p>
 
-      <div class="compare-agents" id="compare-slots" style="margin-top:var(--sp-6)">
+      <!-- Progress indicator -->
+      <div class="cmp-progress" id="cmp-progress" style="margin-top:var(--sp-5)">
+        <div class="cmp-progress-steps">
+          <div class="cmp-step" id="cmp-step-1"><span class="cmp-step-dot">1</span></div>
+          <div class="cmp-step-line" id="cmp-line-1"></div>
+          <div class="cmp-step" id="cmp-step-2"><span class="cmp-step-dot">2</span></div>
+          <div class="cmp-step-line" id="cmp-line-2"></div>
+          <div class="cmp-step" id="cmp-step-3"><span class="cmp-step-dot">3</span></div>
+        </div>
+        <div class="cmp-progress-label" id="cmp-progress-label">Add your first agent to start comparing</div>
+      </div>
+
+      <div class="compare-agents" id="compare-slots" style="margin-top:var(--sp-4)">
         <!-- Filled by JS -->
       </div>
     </div>
@@ -152,10 +164,19 @@
         </div>
       </div>
 
-      <div id="compare-empty" class="empty-state">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:64px;height:64px;opacity:0.4"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
-        <h3>Add agents to compare</h3>
-        <p>Search for agents above or select them from the search results page</p>
+      <div id="compare-empty">
+        <div class="cmp-empty-hero">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:48px;height:48px;opacity:0.3"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+          <h3 style="margin:var(--sp-2) 0 var(--sp-1)">Compare fees, trust scores, reviews and 25+ data points</h3>
+          <p class="text-sm text-secondary">Search above, use filters, or try a popular comparison below</p>
+        </div>
+
+        <div class="cmp-popular">
+          <h4 class="cmp-popular-title">Popular Comparisons</h4>
+          <div class="cmp-popular-grid" id="cmp-popular-grid">
+            <!-- Filled by JS -->
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -201,9 +222,28 @@
       }
     }
 
+    const SLOT_HINTS = [
+      {
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+        title: 'Your Current Agent',
+        sub: 'Start with who manages your property',
+      },
+      {
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3"/><path d="m15 9 6-6"/></svg>',
+        title: 'An Alternative',
+        sub: 'Add a competitor to compare against',
+      },
+      {
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>',
+        title: 'A Wildcard',
+        sub: 'Discover a top-rated agent',
+      },
+    ];
+
     function renderSlots() {
       const slotsEl = document.getElementById('compare-slots');
       let html = '';
+      let firstEmpty = true;
 
       for (let i = 0; i < 3; i++) {
         if (i < compareIds.length) {
@@ -225,14 +265,45 @@
               </div>
             </div>`;
         } else {
+          const hint = SLOT_HINTS[i];
+          const pulse = firstEmpty ? ' cmp-slot-pulse' : '';
+          firstEmpty = false;
           html += `
-            <div class="compare-slot" onclick="document.getElementById('agent-search').focus()">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px;height:24px;margin-bottom:8px"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-              <span class="text-sm">Add Agent</span>
+            <div class="compare-slot cmp-slot-hint${pulse}" onclick="document.getElementById('agent-search').focus()">
+              <div class="cmp-slot-icon">${hint.icon}</div>
+              <div class="cmp-slot-title">${hint.title}</div>
+              <div class="cmp-slot-sub">${hint.sub}</div>
             </div>`;
         }
       }
       slotsEl.innerHTML = html;
+
+      // Update progress
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const count = compareIds.length;
+      const labels = [
+        'Add your first agent to start comparing',
+        'Great! Add a second agent to see the comparison',
+        'Almost there! Add one more for a full comparison',
+        'All set! Review your comparison below',
+      ];
+      const labelEl = document.getElementById('cmp-progress-label');
+      if (labelEl) labelEl.textContent = labels[count];
+
+      for (let i = 1; i <= 3; i++) {
+        const dot = document.getElementById(`cmp-step-${i}`);
+        if (dot) {
+          dot.classList.toggle('done', i <= count);
+          dot.classList.toggle('current', i === count + 1 && count < 3);
+        }
+        if (i < 3) {
+          const line = document.getElementById(`cmp-line-${i}`);
+          if (line) line.classList.toggle('done', i < count || (i <= count));
+        }
+      }
     }
 
     function renderComparison() {
@@ -838,9 +909,91 @@
       renderFilteredResults();
     };
 
+    // Popular comparisons
+    function buildPopularComparisons() {
+      if (!data || !data.agents) return;
+      const grid = document.getElementById('cmp-popular-grid');
+      if (!grid) return;
+
+      const presets = [
+        {
+          title: 'Top Rated in London',
+          desc: 'Highest trust scores in the capital',
+          icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>',
+          filter: a => a.address && a.address.toLowerCase().includes('london'),
+          sort: (a, b) => b.trust_score - a.trust_score,
+        },
+        {
+          title: 'Lowest Fees',
+          desc: 'Best value management fees',
+          icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+          filter: a => a.fees && a.fees.mgmt_pct && a.fees.mgmt_pct > 0,
+          sort: (a, b) => (a.fees.mgmt_pct || 999) - (b.fees.mgmt_pct || 999),
+        },
+        {
+          title: 'ARLA Certified',
+          desc: 'Regulated & professionally accredited',
+          icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>',
+          filter: a => a.regulatory && a.regulatory.arla && a.reviews && a.reviews.avg,
+          sort: (a, b) => (b.reviews.avg || 0) - (a.reviews.avg || 0),
+        },
+        {
+          title: 'Most Reviewed',
+          desc: 'Agents with the most customer reviews',
+          icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+          filter: a => a.reviews && a.reviews.count && a.reviews.count > 0,
+          sort: (a, b) => (b.reviews.count || 0) - (a.reviews.count || 0),
+        },
+        {
+          title: 'Veteran Agents',
+          desc: 'Most experienced firms (10+ years)',
+          icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+          filter: a => a.experience === 'veteran',
+          sort: (a, b) => b.trust_score - a.trust_score,
+        },
+      ];
+
+      grid.innerHTML = presets.map((p, idx) => {
+        const matched = data.agents.filter(p.filter).sort(p.sort);
+        if (matched.length < 3) return '';
+        const top3 = matched.slice(0, 3);
+        const names = top3.map(a => a.name.split(' - ')[0].split(' ').slice(0, 2).join(' ')).join(', ');
+        return `<div class="cmp-popular-card" data-preset="${idx}">
+          <div class="cmp-popular-icon">${p.icon}</div>
+          <div class="cmp-popular-info">
+            <div class="cmp-popular-name">${p.title}</div>
+            <div class="cmp-popular-desc">${p.desc}</div>
+          </div>
+          <div class="cmp-popular-arrow">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </div>
+        </div>`;
+      }).join('');
+
+      grid.querySelectorAll('.cmp-popular-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const idx = parseInt(card.dataset.preset);
+          const p = presets[idx];
+          const matched = data.agents.filter(p.filter).sort(p.sort).slice(0, 3);
+          if (matched.length >= 2) {
+            if (isSample) {
+              isSample = false;
+              document.getElementById('sample-banner').style.display = 'none';
+            }
+            compareIds = matched.map(a => a.id);
+            lsSet('af_compare', compareIds);
+            renderSlots();
+            renderComparison();
+            renderFilteredResults();
+          }
+        });
+      });
+    }
+
     // Initial render
     renderSlots();
     renderComparison();
+    buildPopularComparisons();
   </script>
 
 </body>
