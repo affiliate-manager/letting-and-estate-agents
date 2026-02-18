@@ -625,47 +625,52 @@
       const raw = (q || '').trim();
       const qUp = raw.toUpperCase();
       const qLow = raw.toLowerCase();
+      const hasDigit = /\d/.test(raw);
       let html = '';
 
-      // Postcode matches
-      if (data.postcodeIndex) {
-        const pcMatches = Object.entries(data.postcodeIndex)
-          .filter(([k]) => !qUp || k.startsWith(qUp))
-          .sort((a, b) => b[1].length - a[1].length)
-          .slice(0, raw.length ? 8 : 12);
+      const PIN_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px;opacity:.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
+      const MAP_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px;opacity:.5"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>';
 
-        if (pcMatches.length) {
-          html += '<div class="cf-dd-section">Postcodes</div>';
-          html += pcMatches.map(([outcode, ids]) =>
-            `<div class="cf-dd-item" data-loc-type="outcode" data-loc-value="${outcode}">
-              <span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px;opacity:.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>${outcode}</span>
-              <span class="cf-dd-item-count">${ids.length} agents</span>
-            </div>`
-          ).join('');
-        }
-      }
-
-      // Area name matches
-      if (data.areaIndex && raw.length >= 2) {
+      // Areas & Cities — shown by default and when typing letters
+      if (data.areaIndex) {
         const areaMatches = Object.entries(data.areaIndex)
           .filter(([area]) => {
             if (area.length <= 2) return false;
+            if (!raw) return true;
             return qLow.length <= 3
               ? area.startsWith(qLow) || area.includes(' ' + qLow)
               : area.includes(qLow);
           })
           .sort((a, b) => b[1].length - a[1].length)
-          .slice(0, 10);
+          .slice(0, raw ? 10 : 15);
 
         if (areaMatches.length) {
           html += '<div class="cf-dd-section">Areas &amp; Cities</div>';
           html += areaMatches.map(([area, ids]) => {
             const title = area.replace(/\b\w/g, c => c.toUpperCase());
             return `<div class="cf-dd-item" data-loc-type="area" data-loc-value="${area}">
-              <span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px;opacity:.5"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>${title}</span>
+              <span>${MAP_ICON}${title}</span>
               <span class="cf-dd-item-count">${ids.length} agents</span>
             </div>`;
           }).join('');
+        }
+      }
+
+      // Postcode matches — shown when user types something (especially with digits)
+      if (data.postcodeIndex && raw.length >= 1) {
+        const pcMatches = Object.entries(data.postcodeIndex)
+          .filter(([k]) => k.startsWith(qUp))
+          .sort((a, b) => b[1].length - a[1].length)
+          .slice(0, hasDigit ? 10 : 6);
+
+        if (pcMatches.length) {
+          html += '<div class="cf-dd-section">Postcodes</div>';
+          html += pcMatches.map(([outcode, ids]) =>
+            `<div class="cf-dd-item" data-loc-type="outcode" data-loc-value="${outcode}">
+              <span>${PIN_ICON}${outcode}</span>
+              <span class="cf-dd-item-count">${ids.length} agents</span>
+            </div>`
+          ).join('');
         }
       }
 
