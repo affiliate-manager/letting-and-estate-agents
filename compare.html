@@ -58,8 +58,8 @@
               <span>Location</span>
               <svg class="cf-caret" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
             </button>
-            <div class="cf-dropdown" id="dd-location">
-              <input type="text" class="cf-dd-search" id="loc-search" placeholder="Type postcode or area..." autocomplete="off">
+            <div class="cf-dropdown cf-dropdown-loc" id="dd-location">
+              <input type="text" class="cf-dd-search" id="loc-search" placeholder="Type postcode, city or area name..." autocomplete="off">
               <div class="cf-dd-list" id="loc-list"></div>
             </div>
           </div>
@@ -445,12 +445,28 @@
 
     function applyFilters() {
       if (!data || !data.agents) return [];
+
+      let locationIds = null;
+      if (activeFilters.location) {
+        const loc = activeFilters.location;
+        if (loc.type === 'outcode') {
+          const ids = data.postcodeIndex[loc.value];
+          locationIds = ids ? new Set(ids) : new Set();
+        } else if (loc.type === 'area') {
+          const ids = data.areaIndex[loc.value];
+          locationIds = ids ? new Set(ids) : new Set();
+        } else if (loc.type === 'prefix') {
+          const allIds = new Set();
+          for (const [outcode, ids] of Object.entries(data.postcodeIndex)) {
+            if (outcode.startsWith(loc.value)) ids.forEach(id => allIds.add(id));
+          }
+          locationIds = allIds;
+        }
+      }
+
       return data.agents.filter(a => {
         if (compareIds.includes(a.id)) return false;
-        if (activeFilters.location) {
-          const loc = activeFilters.location.toUpperCase();
-          if (a.outcode !== loc && !(a.outcode && a.outcode.startsWith(loc))) return false;
-        }
+        if (locationIds && !locationIds.has(a.id)) return false;
         if (activeFilters.trustMin && a.trust_score < activeFilters.trustMin) return false;
         if (activeFilters.hasFees && !(a.fees.tenant_find || a.fees.full_management || a.fees.mgmt_pct || a.fees.detail)) return false;
         if (activeFilters.hasReviews && !a.reviews.avg) return false;
@@ -600,29 +616,93 @@
       if (!e.target.closest('.cf-chip-wrap')) closeAllDropdowns();
     });
 
-    // Location dropdown — mini search
+    // Location dropdown — enhanced search (postcodes + area names)
     const locSearch = document.getElementById('loc-search');
     const locList = document.getElementById('loc-list');
 
     function renderLocList(q) {
-      if (!data || !data.postcodeIndex) return;
-      const qUp = (q || '').trim().toUpperCase();
-      const matches = Object.entries(data.postcodeIndex)
-        .filter(([k]) => !qUp || k.startsWith(qUp))
-        .sort((a, b) => b[1].length - a[1].length)
-        .slice(0, 20);
-      locList.innerHTML = matches.map(([outcode, ids]) =>
-        `<div class="cf-dd-item" data-loc="${outcode}">
-          <span>${outcode}</span>
-          <span class="cf-dd-item-count">${ids.length} agents</span>
-        </div>`
-      ).join('') || '<div style="padding:8px 12px;font-size:0.78rem;color:var(--text-muted)">No matching areas</div>';
+      if (!data) return;
+      const raw = (q || '').trim();
+      const qUp = raw.toUpperCase();
+      const qLow = raw.toLowerCase();
+      let html = '';
+
+      // Postcode matches
+      if (data.postcodeIndex) {
+        const pcMatches = Object.entries(data.postcodeIndex)
+          .filter(([k]) => !qUp || k.startsWith(qUp))
+          .sort((a, b) => b[1].length - a[1].length)
+          .slice(0, raw.length ? 8 : 12);
+
+        if (pcMatches.length) {
+          html += '<div class="cf-dd-section">Postcodes</div>';
+          html += pcMatches.map(([outcode, ids]) =>
+            `<div class="cf-dd-item" data-loc-type="outcode" data-loc-value="${outcode}">
+              <span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px;opacity:.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>${outcode}</span>
+              <span class="cf-dd-item-count">${ids.length} agents</span>
+            </div>`
+          ).join('');
+        }
+      }
+
+      // Area name matches
+      if (data.areaIndex && raw.length >= 2) {
+        const areaMatches = Object.entries(data.areaIndex)
+          .filter(([area]) => {
+            if (area.length <= 2) return false;
+            return qLow.length <= 3
+              ? area.startsWith(qLow) || area.includes(' ' + qLow)
+              : area.includes(qLow);
+          })
+          .sort((a, b) => b[1].length - a[1].length)
+          .slice(0, 10);
+
+        if (areaMatches.length) {
+          html += '<div class="cf-dd-section">Areas &amp; Cities</div>';
+          html += areaMatches.map(([area, ids]) => {
+            const title = area.replace(/\b\w/g, c => c.toUpperCase());
+            return `<div class="cf-dd-item" data-loc-type="area" data-loc-value="${area}">
+              <span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;vertical-align:-2px;margin-right:4px;opacity:.5"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>${title}</span>
+              <span class="cf-dd-item-count">${ids.length} agents</span>
+            </div>`;
+          }).join('');
+        }
+      }
+
+      // Prefix hint when typing letters only, no exact outcode match
+      if (raw.length >= 2 && /^[A-Za-z]+$/.test(raw) && !data.postcodeIndex[qUp]) {
+        const prefixCount = Object.entries(data.postcodeIndex)
+          .filter(([k]) => k.startsWith(qUp))
+          .reduce((sum, [, ids]) => sum + ids.length, 0);
+        if (prefixCount > 0) {
+          html += `<div class="cf-dd-item cf-dd-item-highlight" data-loc-type="prefix" data-loc-value="${qUp}">
+            <span>All <strong>${qUp}*</strong> postcodes</span>
+            <span class="cf-dd-item-count">${prefixCount} agents</span>
+          </div>`;
+        }
+      }
+
+      if (!html) {
+        html = '<div style="padding:10px 12px;font-size:0.78rem;color:var(--text-muted);text-align:center">No matching locations found</div>';
+      }
+
+      locList.innerHTML = html;
 
       locList.querySelectorAll('.cf-dd-item').forEach(item => {
         item.addEventListener('click', () => {
-          activeFilters.location = item.dataset.loc;
+          const locType = item.dataset.locType;
+          const locValue = item.dataset.locValue;
+          activeFilters.location = { type: locType, value: locValue };
+
           const chip = document.querySelector('[data-filter="location"] span');
-          if (chip) chip.textContent = item.dataset.loc;
+          if (locType === 'outcode') {
+            chip.textContent = locValue;
+          } else if (locType === 'area') {
+            chip.textContent = locValue.replace(/\b\w/g, c => c.toUpperCase());
+          } else if (locType === 'prefix') {
+            chip.textContent = locValue + '*';
+          }
+
           cfPage = 1;
           closeAllDropdowns();
           updateChipStates();

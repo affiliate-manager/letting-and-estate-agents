@@ -2160,6 +2160,16 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   max-height: 200px;
   overflow-y: auto;
 }
+.cf-dd-section {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  padding: 8px 12px 3px;
+  border-top: 1px solid var(--border-light);
+}
+.cf-dd-section:first-child { border-top: none; }
 .cf-dd-item {
   display: flex;
   align-items: center;
@@ -2170,9 +2180,22 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   transition: background var(--duration) var(--ease);
 }
 .cf-dd-item:hover { background: var(--bg); }
+.cf-dd-item-highlight {
+  background: var(--primary-bg);
+  border-top: 1px solid var(--border-light);
+  margin-top: 2px;
+}
+.cf-dd-item-highlight:hover { background: rgba(99,102,241,0.12); }
 .cf-dd-item-count {
   font-size: 0.7rem;
   color: var(--text-muted);
+  white-space: nowrap;
+}
+.cf-dropdown-loc {
+  min-width: 280px;
+}
+.cf-dropdown-loc .cf-dd-list {
+  max-height: 260px;
 }
 .cf-dd-radio {
   display: flex;
