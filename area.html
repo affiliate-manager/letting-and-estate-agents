@@ -21,6 +21,7 @@
       <div class="area-breadcrumb" id="area-breadcrumb">
         <a href="index.html">Home</a>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        <span id="area-bc-mid"></span>
         <span id="area-bc-current">Area Insights</span>
       </div>
 
@@ -470,6 +471,8 @@
         document.getElementById('area-title').textContent = `No data for ${outcode}`;
         document.getElementById('area-subtitle').textContent = 'Try a different postcode area.';
         document.getElementById('area-stats-grid').classList.add('hidden');
+        document.getElementById('area-bc-mid').innerHTML = '';
+        document.getElementById('area-bc-current').textContent = 'Area Insights';
         ['area-agents','area-insights-panel','top-agents-bar','nearby-areas','area-hero-actions','area-wizard-wrap','area-compare-table-wrap'].forEach(id => document.getElementById(id).style.display = 'none');
         document.getElementById('popular-areas').style.display = '';
         document.getElementById('recent-areas').style.display = 'none';
@@ -483,7 +486,8 @@
       document.getElementById('area-clear-filters').style.display = 'none';
       addRecentArea(outcode);
 
-      // Breadcrumb
+      // Breadcrumb: Home > Area Insights > SW1
+      document.getElementById('area-bc-mid').innerHTML = '<a href="area.html">Area Insights</a> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="m9 18 6-6-6-6"/></svg> ';
       document.getElementById('area-bc-current').textContent = outcode;
       document.getElementById('area-title').textContent = `${outcode} Area Insights`;
       document.getElementById('area-subtitle').textContent = `${stats.agentCount} lettings & estate agent${stats.agentCount !== 1 ? 's' : ''} operating in the ${outcode} postcode area`;
