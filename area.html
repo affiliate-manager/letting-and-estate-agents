@@ -57,11 +57,32 @@
         <button class="area-compare-go" id="area-compare-go" style="display:none">Compare Side by Side</button>
       </div>
 
-      <!-- Locate me button (landing only) -->
-      <button class="area-locate-btn" id="area-locate-btn" style="display:none">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M2 12h2"/><path d="M20 12h2"/><circle cx="12" cy="12" r="9"/></svg>
-        Use My Location
-      </button>
+      <!-- Locate me button -->
+      <div class="locate-wrapper" id="locate-wrapper" style="display:none">
+        <button class="area-locate-btn" id="area-locate-btn">
+          <svg class="locate-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M2 12h2"/><path d="M20 12h2"/><circle cx="12" cy="12" r="9"/></svg>
+          <span class="locate-label">Use My Location</span>
+        </button>
+        <div class="locate-denied-msg" id="locate-denied-msg">
+          Location access was blocked. Search by postcode instead.
+        </div>
+      </div>
+
+      <!-- Pre-permission card (rendered outside hero to avoid overflow:hidden clipping) -->
+      <div class="locate-prompt-backdrop" id="locate-backdrop"></div>
+      <div class="locate-prompt" id="locate-prompt">
+        <div class="locate-prompt-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M2 12h2"/><path d="M20 12h2"/><circle cx="12" cy="12" r="9"/></svg>
+        </div>
+        <h4>Find agents near you</h4>
+        <p>We'll use your location to show letting agents and area stats for your nearest postcode area.</p>
+        <button class="btn btn-primary locate-prompt-yes" id="locate-yes">Yes, find my area</button>
+        <button class="locate-prompt-no" id="locate-no">No thanks</button>
+        <div class="locate-prompt-privacy">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;flex-shrink:0"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Location is never stored
+        </div>
+      </div>
 
       <!-- Stats (shown when area selected) -->
       <div class="area-stats-grid hidden" id="area-stats-grid"></div>
@@ -259,7 +280,7 @@
     function showPopularAreas() {
       renderPopularTab(popularTab);
       showRecentAreas();
-      document.getElementById('area-locate-btn').style.display = '';
+      document.getElementById('locate-wrapper').style.display = '';
     }
     function renderPopularTab(tab) {
       popularTab = tab;
@@ -500,7 +521,7 @@
         ['area-agents','area-insights-panel','top-agents-bar','nearby-areas','area-hero-actions','area-wizard-wrap','area-compare-table-wrap'].forEach(id => document.getElementById(id).style.display = 'none');
         document.getElementById('popular-areas').style.display = '';
         document.getElementById('recent-areas').style.display = 'none';
-        document.getElementById('area-locate-btn').style.display = 'none';
+        document.getElementById('locate-wrapper').style.display = 'none';
         return;
       }
 
@@ -537,7 +558,7 @@
           window.showAuthModal && window.showAuthModal();
         }
       });
-      document.getElementById('area-locate-btn').style.display = 'none';
+      document.getElementById('locate-wrapper').style.display = 'none';
 
       // Stats grid with count-up
       const sg = document.getElementById('area-stats-grid');
@@ -655,25 +676,77 @@
     searchInput.addEventListener('input', e => showSugg(e.target.value));
     document.addEventListener('click', e => { if (!e.target.closest('.search-wrapper')) suggestionsEl.classList.remove('open'); });
 
-    /* ── Geolocation ── */
-    document.getElementById('area-locate-btn').addEventListener('click', () => {
-      const btn = document.getElementById('area-locate-btn');
-      btn.textContent = 'Locating...'; btn.disabled = true;
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          async (pos) => {
-            try {
-              const r = await fetch(`https://api.postcodes.io/postcodes?lon=${pos.coords.longitude}&lat=${pos.coords.latitude}&limit=1`);
-              const j = await r.json();
-              if (j.result && j.result.length) { const oc = j.result[0].outcode; searchInput.value = oc; doSearch(oc); }
-              else btn.textContent = 'Not found';
-            } catch { btn.textContent = 'Error'; }
-            setTimeout(() => { btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><circle cx="12" cy="12" r="3"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M2 12h2"/><path d="M20 12h2"/><circle cx="12" cy="12" r="9"/></svg> Use My Location'; btn.disabled = false; }, 3000);
-          },
-          () => { btn.textContent = 'Denied'; setTimeout(() => { btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><circle cx="12" cy="12" r="3"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="M2 12h2"/><path d="M20 12h2"/><circle cx="12" cy="12" r="9"/></svg> Use My Location'; btn.disabled = false; }, 3000); },
-          { timeout: 10000 }
-        );
-      } else { btn.textContent = 'Not supported'; }
+    /* ── Geolocation (pre-permission pattern) ── */
+    const locateBtn = document.getElementById('area-locate-btn');
+    const locatePrompt = document.getElementById('locate-prompt');
+    const locateBackdrop = document.getElementById('locate-backdrop');
+    const locateLabel = locateBtn.querySelector('.locate-label');
+    const locateIcon = locateBtn.querySelector('.locate-icon');
+    const deniedMsg = document.getElementById('locate-denied-msg');
+
+    function resetLocateBtn() {
+      locateBtn.disabled = false;
+      locateBtn.classList.remove('locating');
+      locateLabel.textContent = 'Use My Location';
+    }
+
+    function openLocatePrompt() {
+      deniedMsg.classList.remove('visible');
+      locatePrompt.classList.add('open');
+      locateBackdrop.classList.add('open');
+    }
+
+    function closeLocatePrompt() {
+      locatePrompt.classList.remove('open');
+      locateBackdrop.classList.remove('open');
+    }
+
+    locateBtn.addEventListener('click', openLocatePrompt);
+    document.getElementById('locate-no').addEventListener('click', closeLocatePrompt);
+    locateBackdrop.addEventListener('click', closeLocatePrompt);
+
+    document.getElementById('locate-yes').addEventListener('click', () => {
+      closeLocatePrompt();
+      locateBtn.disabled = true;
+      locateBtn.classList.add('locating');
+      locateLabel.textContent = 'Finding your area...';
+
+      if (!navigator.geolocation) {
+        locateLabel.textContent = 'Not supported';
+        setTimeout(resetLocateBtn, 3000);
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          try {
+            const r = await fetch(`https://api.postcodes.io/postcodes?lon=${pos.coords.longitude}&lat=${pos.coords.latitude}&limit=1`);
+            const j = await r.json();
+            if (j.result && j.result.length) {
+              const oc = j.result[0].outcode;
+              searchInput.value = oc;
+              doSearch(oc);
+            } else {
+              locateLabel.textContent = 'Area not found';
+              setTimeout(resetLocateBtn, 3000);
+            }
+          } catch {
+            locateLabel.textContent = 'Connection error';
+            setTimeout(resetLocateBtn, 3000);
+          }
+        },
+        () => {
+          resetLocateBtn();
+          deniedMsg.classList.add('visible');
+          searchInput.focus();
+          setTimeout(() => deniedMsg.classList.remove('visible'), 6000);
+        },
+        { timeout: 10000 }
+      );
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeLocatePrompt();
     });
 
     /* ── Init ── */

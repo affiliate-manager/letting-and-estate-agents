@@ -3242,24 +3242,32 @@ h4 { font-size: 1.1rem; font-weight: 600; }
 .area-journey-name { font-weight: 700; font-size: 0.9rem; color: var(--brand-orange); }
 .area-journey-stat { font-size: 0.72rem; color: var(--text-muted); }
 
-/* Geolocation button */
-.area-locate-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 18px;
-  border-radius: 20px;
-  background: rgba(255,255,255,0.12);
-  color: rgba(255,255,255,0.9);
-  font-size: 0.82rem;
-  font-weight: 500;
-  border: 1px solid rgba(255,255,255,0.2);
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-  margin-top: var(--sp-3);
-}
-.area-locate-btn:hover { background: rgba(255,255,255,0.25); color: #fff; }
-.area-locate-btn svg { width: 16px; height: 16px; }
+/* Geolocation button + pre-permission */
+.locate-wrapper{position:relative;display:inline-flex;flex-direction:column;align-items:center;margin-top:var(--sp-3)}
+.area-locate-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:20px;background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.9);font-size:0.82rem;font-weight:500;border:1px solid rgba(255,255,255,0.2);cursor:pointer;transition:background .2s,color .2s}
+.area-locate-btn:hover{background:rgba(255,255,255,0.25);color:#fff}
+.area-locate-btn .locate-icon{width:16px;height:16px;transition:transform .3s}
+.area-locate-btn.locating .locate-icon{animation:locateSpin 1s linear infinite}
+@keyframes locateSpin{to{transform:rotate(360deg)}}
+.area-locate-btn:disabled{opacity:.7;cursor:default}
+
+/* Pre-permission card (fixed overlay to avoid hero overflow:hidden clipping) */
+.locate-prompt{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.95);width:300px;background:var(--surface);border-radius:var(--radius-lg);padding:var(--sp-5);box-shadow:0 20px 60px rgba(0,0,0,.25);text-align:center;opacity:0;pointer-events:none;transition:opacity .2s var(--ease),transform .2s var(--ease);z-index:10000}
+.locate-prompt.open{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.locate-prompt-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:9999;opacity:0;pointer-events:none;transition:opacity .2s var(--ease)}
+.locate-prompt-backdrop.open{opacity:1;pointer-events:auto}
+.locate-prompt-icon{width:40px;height:40px;border-radius:50%;background:rgba(var(--brand-orange-rgb),.1);display:flex;align-items:center;justify-content:center;margin:0 auto var(--sp-2)}
+.locate-prompt-icon svg{width:20px;height:20px;color:var(--brand-orange)}
+.locate-prompt h4{margin:0 0 var(--sp-1);font-size:.95rem;font-weight:700;color:var(--text)}
+.locate-prompt p{margin:0 0 var(--sp-3);font-size:.8rem;color:var(--text-secondary);line-height:1.45}
+.locate-prompt-yes{width:100%;padding:10px;font-size:.88rem;margin-bottom:var(--sp-1)}
+.locate-prompt-no{display:block;width:100%;background:none;border:none;color:var(--text-muted);font-size:.78rem;cursor:pointer;padding:6px 0;transition:color .2s}
+.locate-prompt-no:hover{color:var(--text-secondary);text-decoration:underline}
+.locate-prompt-privacy{display:flex;align-items:center;justify-content:center;gap:4px;font-size:.7rem;color:var(--text-muted);margin-top:var(--sp-2);padding-top:var(--sp-2);border-top:1px solid var(--border)}
+
+/* Denied message */
+.locate-denied-msg{margin-top:var(--sp-2);font-size:.78rem;color:rgba(255,255,255,.8);background:rgba(255,255,255,.1);padding:6px 14px;border-radius:var(--radius);opacity:0;transform:translateY(-4px);transition:opacity .25s,transform .25s;pointer-events:none}
+.locate-denied-msg.visible{opacity:1;transform:translateY(0);pointer-events:auto}
 
 @media (max-width: 640px) {
   .area-hero-actions { gap: var(--sp-2); }
@@ -3908,6 +3916,59 @@ h4 { font-size: 1.1rem; font-weight: 600; }
 .si-inner .btn-primary{width:100%;padding:12px;font-size:.95rem;margin-bottom:var(--sp-2)}
 .si-skip{display:block;width:100%;background:none;border:none;color:var(--text-muted);font-size:.82rem;cursor:pointer;padding:8px 0;transition:color .2s}
 .si-skip:hover{color:var(--text-secondary);text-decoration:underline}
+
+/* ---------- Mobile Optimization (consolidated) ---------- */
+@media (max-width: 640px) {
+  /* A. Fix iOS auto-zoom on small inputs */
+  .cf-dd-search{font-size:1rem;padding:10px 12px}
+  .search-input{font-size:1rem}
+
+  /* B. Touch targets — minimum 44px */
+  .cf-chip{padding:10px 14px;min-height:44px;font-size:.82rem}
+  .cf-dd-item{padding:12px 14px;min-height:44px;font-size:.85rem}
+  .cf-dd-list{max-height:50vh;-webkit-overflow-scrolling:touch}
+  .suggestion-item{padding:12px var(--sp-4);min-height:44px}
+  .suggestion-divider{padding:10px var(--sp-4) 4px}
+  .cmp-step-dot{width:36px;height:36px;font-size:.8rem}
+  .cmp-step-line{width:24px}
+  .area-tab{min-height:44px;display:inline-flex;align-items:center}
+
+  /* C. Compare page — stack slots vertically */
+  .compare-agents{flex-direction:column;overflow-x:visible;gap:var(--sp-3)}
+  .compare-slot{min-width:100%;padding:var(--sp-4)}
+  .compare-slot .compare-slot-num{font-size:1.2rem}
+  .compare-table td{min-width:140px;padding:var(--sp-2) var(--sp-3);font-size:.8rem}
+  .compare-table th{padding:var(--sp-2) var(--sp-3);font-size:.7rem}
+  .cmp-action-bar{flex-direction:column;gap:var(--sp-2)}
+  .cmp-action-btn{width:100%;justify-content:center;padding:12px 16px;min-height:44px}
+
+  /* D. Search suggestions — mobile cap */
+  .search-suggestions{max-height:55vh;-webkit-overflow-scrolling:touch}
+  #area-suggestions{max-height:50vh}
+
+  /* E. General mobile polish */
+  .search-interstitial .si-inner{padding:var(--sp-4);width:95%}
+  .si-inner h3{font-size:1.05rem}
+  .si-inner p{font-size:.82rem}
+  .exit-modal{padding:var(--sp-4);width:95%;max-width:none}
+  .exit-modal h2{font-size:1.05rem}
+  .exit-modal .exit-benefits li{font-size:.8rem;padding:6px 0}
+  .exit-modal .exit-cta{padding:12px;font-size:.9rem}
+  .locate-prompt{width:90%;max-width:300px;padding:var(--sp-4)}
+  .locate-prompt h4{font-size:.9rem}
+  .locate-prompt p{font-size:.78rem}
+  .sticky-signup-bar .bar-inner{flex-direction:column;gap:var(--sp-2);text-align:center}
+  .sticky-signup-bar .bar-inner p{font-size:.8rem;margin:0}
+  .signup-card-inline{padding:var(--sp-4)}
+  .signup-card-inline h3{font-size:1rem}
+  .social-proof-banner .spb-form{flex-direction:column}
+  .social-proof-banner .spb-form input,.social-proof-banner .spb-form .btn{width:100%}
+  .fee-alert-card{flex-direction:column;text-align:center}
+  .download-report-cta{flex-direction:column;text-align:center;gap:var(--sp-2)}
+  .contact-gate-card{padding:var(--sp-3)}
+  .slot-auth-gate{padding:var(--sp-3)}
+  .slot-auth-gate p{font-size:.78rem}
+}
 
 /* ---------- Print Styles ---------- */
 @media print {
