@@ -226,9 +226,14 @@
         tab.classList.add('active');
         document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
         tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
         const section = document.querySelector('.profile-content');
-        if (section && window.innerWidth < 768) {
-          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (section) {
+          const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 64;
+          const tabsH = document.querySelector('.profile-tabs-wrapper')?.offsetHeight || 0;
+          const offset = headerH + tabsH;
+          const top = section.getBoundingClientRect().top + window.scrollY - offset;
+          window.scrollTo({ top, behavior: 'smooth' });
         }
       });
     });
