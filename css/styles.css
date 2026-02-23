@@ -2206,7 +2206,7 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   border-color: var(--primary);
 }
 
-/* Mobile: sticky pill tabs — refined */
+/* Mobile: Instagram-style swipeable tabs */
 @media (max-width: 767px) {
   .profile-tabs-wrapper {
     position: sticky;
@@ -2215,20 +2215,46 @@ h4 { font-size: 1.1rem; font-weight: 600; }
     background: var(--surface);
     border-bottom: 1px solid var(--border-light);
   }
+  .profile-tabs-wrapper::before,
+  .profile-tabs-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 28px;
+    z-index: 2;
+    pointer-events: none;
+    transition: opacity .3s;
+  }
+  .profile-tabs-wrapper::before {
+    left: 0;
+    background: linear-gradient(to right, var(--surface) 0%, transparent 100%);
+  }
+  .profile-tabs-wrapper::after {
+    right: 0;
+    background: linear-gradient(to left, var(--surface) 0%, transparent 100%);
+  }
   .profile-tabs {
-    padding: 10px var(--sp-3);
-    gap: 8px;
-    justify-content: center;
+    padding: 10px 28px;
+    gap: 6px;
+    justify-content: flex-start;
   }
   .profile-tab {
-    font-size: 0.72rem;
-    padding: 7px 14px;
-    border-color: var(--border-light);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 7px 16px;
+    border: none;
+    border-radius: 100px;
+    background: rgba(0,0,0,.04);
+    color: var(--text-muted);
+    letter-spacing: 0.01em;
+    transition: all .25s cubic-bezier(.4,0,.2,1);
   }
   .profile-tab.active {
-    background: var(--primary-bg);
-    color: var(--primary);
-    border-color: rgba(30,58,95,.15);
+    background: var(--primary);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(30,58,95,.18);
   }
 }
 
