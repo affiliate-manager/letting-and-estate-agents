@@ -199,10 +199,14 @@
         ${metaParts.length ? `<div class="profile-meta-line">${metaParts.join(' · ')}</div>` : ''}
 
         <div class="profile-header-badges">
-          ${reviewPlatformsHTML(agent.reviews, 'lg')}
-          ${complianceStatusHTML(agent.regulatory)}
-          ${portalBadgesHTML(agent.portals, 'lg')}
-          ${socialIconsHTML(agent.social)}
+          <div class="badge-row badge-row-trust">
+            ${reviewPlatformsHTML(agent.reviews, 'lg')}
+            ${complianceStatusHTML(agent.regulatory)}
+          </div>
+          <div class="badge-row badge-row-presence">
+            ${portalBadgesHTML(agent.portals, 'lg')}
+            ${socialIconsHTML(agent.social)}
+          </div>
         </div>
       </div>
     `;
