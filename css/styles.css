@@ -3986,6 +3986,11 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   .review-source-item svg{height:22px !important}
   .review-source-sep{display:none}
   .review-source-label{width:100%;text-align:center;margin-bottom:2px}
+
+  /* I. Agent profile tabs — mobile fix */
+  .profile-tabs{position:sticky;top:calc(var(--header-h) + 36px);z-index:40;padding:0;gap:0;scrollbar-width:none;-ms-overflow-style:none;mask-image:linear-gradient(to right,#000 85%,transparent);-webkit-mask-image:linear-gradient(to right,#000 85%,transparent)}
+  .profile-tabs::-webkit-scrollbar{display:none}
+  .profile-tab{padding:var(--sp-3) var(--sp-3);font-size:.78rem;min-height:44px}
 }
 
 /* ---------- Print Styles ---------- */
