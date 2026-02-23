@@ -1780,8 +1780,12 @@ h4 { font-size: 1.1rem; font-weight: 600; }
 
 .profile-hero {
   background: var(--surface);
-  border-bottom: 1px solid var(--border-light);
-  padding: var(--sp-6) 0;
+  border-bottom: none;
+  padding: var(--sp-6) 0 0;
+}
+.profile-hero > .container {
+  display: flex;
+  flex-direction: column;
 }
 .profile-header {
   display: flex;
@@ -2173,6 +2177,18 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   position: sticky;
   top: var(--header-h);
   z-index: 50;
+  border-top: 1px solid var(--border-light);
+  margin-top: var(--sp-4);
+}
+@media (min-width: 768px) {
+  .profile-tabs-wrapper {
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+    padding-left: calc(50vw - 50%);
+    padding-right: calc(50vw - 50%);
+    order: 99;
+    border-bottom: 1px solid var(--border-light);
+  }
 }
 .profile-tabs {
   display: flex;
@@ -2180,7 +2196,7 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   background: var(--surface);
-  padding: 8px var(--sp-4);
+  padding: 8px 0;
   position: relative;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -2214,6 +2230,9 @@ h4 { font-size: 1.1rem; font-weight: 600; }
     z-index: 50;
     background: var(--surface);
     border-bottom: 1px solid var(--border-light);
+    border-top: none;
+    margin: var(--sp-2) calc(-1 * var(--sp-4)) 0;
+    width: calc(100% + var(--sp-4) * 2);
   }
   .profile-tabs-wrapper::before,
   .profile-tabs-wrapper::after {
