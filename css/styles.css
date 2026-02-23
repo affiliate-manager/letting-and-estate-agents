@@ -4002,6 +4002,13 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   .slot-auth-gate{padding:var(--sp-3)}
   .slot-auth-gate p{font-size:.78rem}
 
+  /* F2. Results header — filter + sort on one line */
+  .results-header>div:first-child{display:contents}
+  .results-count{width:100%;display:block;order:-1;margin-bottom:var(--sp-1)}
+  .filter-mobile-btn{margin-left:0 !important;order:0}
+  .results-sort{order:1}
+  .results-sort label{display:none}
+
   /* F. Hero — prevent h1 clipping on mobile */
   .hero{padding:var(--sp-6) 0 var(--sp-8)}
   .hero h1{font-size:1.55rem;margin-bottom:var(--sp-3)}
