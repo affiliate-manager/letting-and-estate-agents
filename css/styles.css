@@ -870,11 +870,17 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   height: 20px !important;
 }
 .tp-logo-lg svg {
-  width: 110px !important;
-  height: 27px !important;
+  width: 90px !important;
+  height: 22px !important;
+  opacity: .55;
 }
 .review-platform-tp {
-  padding: 4px 10px;
+  padding: 3px 8px;
+  border-color: var(--border-light);
+}
+.review-platform-tp .review-platform-rating {
+  font-size: 0.78rem;
+  color: var(--text-muted);
 }
 
 /* ---------- Activity Dot ---------- */
