@@ -1904,6 +1904,61 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   background: var(--primary-bg);
 }
 .profile-action-btn.saved { border-color: var(--brand-orange); color: var(--brand-orange); }
+
+/* Share popover */
+.share-wrapper {
+  position: relative;
+}
+.share-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) scale(.95);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 30px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.06);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 160px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s var(--ease), transform .2s var(--ease);
+  z-index: 100;
+}
+.share-wrapper.open .share-popover {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) scale(1);
+}
+.share-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+  text-decoration: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s;
+  width: 100%;
+}
+.share-option:hover {
+  background: var(--bg);
+}
+.share-option svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
 .profile-meta-line {
   font-size: 0.8rem;
   color: var(--text-muted);
