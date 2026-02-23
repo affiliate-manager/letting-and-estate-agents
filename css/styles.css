@@ -1998,26 +1998,77 @@ h4 { font-size: 1.1rem; font-weight: 600; }
     color: var(--text-muted);
   }
   .profile-header-badges {
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     margin-top: var(--sp-3);
     padding-top: var(--sp-3);
     border-top: 1px solid var(--border-light);
-    gap: var(--sp-2);
+    gap: 10px;
   }
-  .profile-header-badges .tp-logo svg {
-    width: 72px !important;
-    height: 18px !important;
-    opacity: .55;
+
+  /* Review platforms row */
+  .profile-header-badges .review-platforms {
+    gap: 6px;
   }
-  .profile-header-badges .review-platform-tp {
+  .profile-header-badges .review-platform {
     padding: 2px 6px;
     border-color: var(--border-light);
     background: transparent;
+    font-size: 0.72rem;
   }
-  .profile-header-badges .review-platform-tp .review-platform-rating {
+  .profile-header-badges .tp-logo svg {
+    width: 68px !important;
+    height: 17px !important;
+    opacity: .5;
+  }
+  .profile-header-badges .g-logo svg {
+    opacity: .6;
+  }
+  .profile-header-badges .review-platform-rating {
     font-size: 0.72rem;
     font-weight: 600;
     color: var(--text-muted);
+  }
+
+  /* Compliance / regulatory row */
+  .profile-header-badges .compliance-badges {
+    gap: 6px;
+    justify-content: center;
+  }
+  .profile-header-badges .reg-badge-logo svg {
+    height: 16px !important;
+    opacity: .6;
+  }
+  .profile-header-badges .compliance-not-displayed {
+    font-size: 0.68rem;
+    padding: 2px 6px;
+  }
+
+  /* Portal badges row */
+  .profile-header-badges .portal-badges {
+    gap: 4px;
+    justify-content: center;
+  }
+  .profile-header-badges .portal-badge {
+    font-size: 0.65rem;
+    padding: 2px 7px;
+    opacity: .7;
+    font-weight: 500;
+  }
+
+  /* Social icons row */
+  .profile-header-badges .social-icons-row {
+    gap: 12px;
+    justify-content: center;
+  }
+  .profile-header-badges .social-icon-sm {
+    width: 28px;
+    height: 28px;
+    opacity: .5;
+  }
+  .profile-header-badges .social-icon-sm svg {
+    width: 14px;
+    height: 14px;
   }
 }
 
