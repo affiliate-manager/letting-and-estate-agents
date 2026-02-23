@@ -185,6 +185,8 @@
       </div>
     `;
 
+    const isAuthed = window._isAuthenticated && window._isAuthenticated();
+
     // -- Tabs --
     document.querySelectorAll('.profile-tab').forEach(tab => {
       tab.addEventListener('click', () => {
@@ -679,7 +681,6 @@
     // -- Contact Tab (with soft gate on phone/email for unauthed users) --
     const contHTML = [];
     const contactItems = [];
-    const isAuthed = window._isAuthenticated && window._isAuthenticated();
     const maskValue = (val) => val.length > 4 ? val.slice(0, -3) + '***' : val.slice(0, 1) + '***';
 
     if (agent.phone) contactItems.push({ icon: ICONS.phone, label: 'Phone', value: agent.phone, link: `tel:${agent.phone}`, gated: true });
