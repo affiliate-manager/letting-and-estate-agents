@@ -468,9 +468,12 @@ h4 { font-size: 1.1rem; font-weight: 600; }
 /* Mobile nav overlay */
 .mobile-nav {
   display: none;
-  position: fixed;
-  inset: 0;
-  top: var(--header-h);
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: calc(100vh - var(--header-h));
+  height: calc(100dvh - var(--header-h));
   background: var(--surface);
   z-index: 99;
   padding: var(--sp-6);
@@ -1887,41 +1890,14 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   border-color: var(--primary);
 }
 
-/* Inline tabs copy (mobile only, between logo and name) */
-.profile-tabs-inline {
-  display: none;
-}
+/* Mobile: sticky pill tabs */
 @media (max-width: 767px) {
-  .profile-tabs-inline {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    padding: var(--sp-2) 0;
-  }
-  .profile-tabs-inline::-webkit-scrollbar { display: none; }
-  .profile-tabs-inline .profile-tab {
-    font-size: 0.75rem;
-    padding: 6px 14px;
-    flex-shrink: 0;
-  }
   .profile-tabs-wrapper {
     position: sticky;
     top: var(--header-h);
     z-index: 50;
     background: var(--surface);
     border-bottom: 1px solid var(--border-light);
-    transform: translateY(-100%);
-    opacity: 0;
-    pointer-events: none;
-    transition: transform .25s var(--ease), opacity .25s var(--ease);
-  }
-  .profile-tabs-wrapper.visible {
-    transform: translateY(0);
-    opacity: 1;
-    pointer-events: auto;
   }
   .profile-tabs {
     padding: 8px var(--sp-3);
