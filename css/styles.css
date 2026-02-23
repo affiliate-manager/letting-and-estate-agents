@@ -1857,30 +1857,56 @@ h4 { font-size: 1.1rem; font-weight: 600; }
 }
 .profile-tabs {
   display: flex;
-  gap: 0;
-  border-bottom: 2px solid var(--border-light);
+  gap: 6px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   background: var(--surface);
-  padding: 0 var(--sp-4);
+  padding: 8px var(--sp-4);
+  position: relative;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+.profile-tabs::-webkit-scrollbar { display: none; }
 .profile-tab {
-  padding: var(--sp-3) var(--sp-4);
-  font-size: 0.85rem;
+  padding: 8px 16px;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--text-muted);
-  border: none;
-  background: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  border-radius: 20px;
   white-space: nowrap;
   cursor: pointer;
-  transition: color var(--duration) var(--ease), border-color var(--duration) var(--ease);
+  transition: all .2s var(--ease);
+  flex-shrink: 0;
 }
-.profile-tab:hover { color: var(--text); }
+.profile-tab:hover { color: var(--text); border-color: var(--text-muted); }
 .profile-tab.active {
-  color: var(--primary);
-  border-bottom-color: var(--primary);
+  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+/* Mobile: tabs inside profile header, below logo */
+@media (max-width: 767px) {
+  .profile-tabs-wrapper {
+    position: static;
+    background: transparent;
+  }
+  .profile-tabs-wrapper > .container { padding: 0; }
+  .profile-tabs {
+    background: transparent;
+    padding: 0 0 var(--sp-3);
+    gap: 8px;
+  }
+  .profile-tab { font-size: 0.75rem; padding: 6px 14px; }
+  .profile-tabs-wrapper.in-header {
+    order: 1;
+    margin-top: var(--sp-2);
+  }
+  .profile-header .profile-logo,
+  .profile-header .profile-logo-placeholder { order: 0; }
+  .profile-header .profile-info { order: 2; }
 }
 
 .profile-content {
@@ -3991,10 +4017,7 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   .review-source-sep{display:none}
   .review-source-label{width:100%;text-align:center;margin-bottom:2px}
 
-  /* I. Agent profile tabs — mobile fix */
-  .profile-tabs{padding:0 var(--sp-2);scrollbar-width:none;-ms-overflow-style:none}
-  .profile-tabs::-webkit-scrollbar{display:none}
-  .profile-tab{padding:var(--sp-3) var(--sp-3);font-size:.78rem;min-height:44px}
+  /* I. Agent profile tabs — handled by 767px media query above */
 }
 
 /* ---------- Print Styles ---------- */
