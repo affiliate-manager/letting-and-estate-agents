@@ -1887,26 +1887,20 @@ h4 { font-size: 1.1rem; font-weight: 600; }
   border-color: var(--primary);
 }
 
-/* Mobile: tabs inside profile header, below logo */
+/* Mobile: sticky pill tabs */
 @media (max-width: 767px) {
   .profile-tabs-wrapper {
-    position: static;
-    background: transparent;
+    position: sticky;
+    top: var(--header-h);
+    z-index: 50;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border-light);
   }
-  .profile-tabs-wrapper > .container { padding: 0; }
   .profile-tabs {
-    background: transparent;
-    padding: 0 0 var(--sp-3);
+    padding: 8px var(--sp-3);
     gap: 8px;
   }
   .profile-tab { font-size: 0.75rem; padding: 6px 14px; }
-  .profile-tabs-wrapper.in-header {
-    order: 1;
-    margin-top: var(--sp-2);
-  }
-  .profile-header .profile-logo,
-  .profile-header .profile-logo-placeholder { order: 0; }
-  .profile-header .profile-info { order: 2; }
 }
 
 .profile-content {

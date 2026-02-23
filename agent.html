@@ -187,28 +187,7 @@
 
     const isAuthed = window._isAuthenticated && window._isAuthenticated();
 
-    // -- Move tabs into profile header on mobile --
-    const tabsWrapper = document.querySelector('.profile-tabs-wrapper');
-    const profileHeader = document.getElementById('profile-header');
-    function positionTabs() {
-      if (window.innerWidth < 768) {
-        if (tabsWrapper.parentNode !== profileHeader) {
-          tabsWrapper.classList.add('in-header');
-          profileHeader.insertBefore(tabsWrapper, profileHeader.querySelector('.profile-info'));
-        }
-      } else {
-        const heroSection = document.querySelector('.profile-hero');
-        if (tabsWrapper.parentNode === profileHeader) {
-          tabsWrapper.classList.remove('in-header');
-          heroSection.insertAdjacentElement('afterend', tabsWrapper);
-        }
-      }
-    }
-    positionTabs();
-    window.addEventListener('resize', positionTabs);
-
     // -- Tabs (Instagram-style) --
-    const tabsContainer = document.querySelector('.profile-tabs');
     document.querySelectorAll('.profile-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
