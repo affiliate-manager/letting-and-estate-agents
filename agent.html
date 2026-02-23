@@ -141,41 +141,47 @@
       ? `<img src="${agent.logo}" alt="${agent.name}" class="profile-logo" onerror="this.outerHTML='<div class=\\'profile-logo-placeholder\\'>${initials(agent.name)}</div>'">`
       : `<div class="profile-logo-placeholder">${initials(agent.name)}</div>`;
 
+    const agentUrl = agent.url ? (agent.url.startsWith('http') ? agent.url : 'https://' + agent.url) : '';
+    const metaParts = [];
+    if (agent.performance.years) metaParts.push(`${agent.performance.years} years`);
+    if (agent.performance.brand_age) metaParts.push(`Brand: ${agent.performance.brand_age}y`);
+    if (agent.performance.offices) metaParts.push(`${agent.performance.offices} office${agent.performance.offices > 1 ? 's' : ''}`);
+
     document.getElementById('profile-header').innerHTML = `
       ${logo}
-      <div class="profile-info" style="flex:1">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-4);flex-wrap:wrap">
-          <div>
-            <h1>${agent.name}</h1>
-            <div style="display:flex;align-items:center;gap:var(--sp-2);margin-top:4px;flex-wrap:wrap">
-              <span class="text-secondary" style="display:flex;align-items:center;gap:4px">${ICONS.mapPin} ${fmtLocation(agent)}</span>
-              ${agent.agent_type ? `<span class="badge badge-blue">${fmtAgentType(agent.agent_type)}</span>` : ''}
-              ${categoryBadgeHTML(agent.category)}
-              ${experienceBadgeHTML(agent.experience)}
-              ${agent.activity === 'active' ? '<span class="badge badge-green"><span class="activity-dot active"></span> Active</span>' : ''}
-              ${guaranteedRentBadgeHTML(agent)}
-              ${noTenantFeesBadgeHTML(agent.fees)}
-              ${agent.special_offers ? `<span class="badge badge-amber">Special Offer</span>` : ''}
-            </div>
+      <div class="profile-info">
+        <h1>${agent.name}</h1>
+        <div class="profile-location">${ICONS.mapPin} ${fmtLocation(agent)}</div>
+
+        <div class="profile-trust-block">
+          <div class="trust-score-wrap">
+            <div class="trust-score ${trustScoreClass(agent.trust_score)}" style="width:64px;height:64px;font-size:1.3rem">${agent.trust_score}</div>
+            <span class="trust-score-label" style="font-size:0.7rem">Trust <span class="trust-info-trigger" data-trust-tooltip>?</span></span>
           </div>
-          <div style="display:flex;align-items:center;gap:var(--sp-3)">
-            <button class="save-agent-btn" id="save-agent-btn" onclick="window.toggleSaveAgent && window.toggleSaveAgent(${agent.id})" title="Save to shortlist">
-              ${ICONS.heart} <span>Save</span>
-            </button>
-            <div class="trust-score-wrap">
-              <div class="trust-score ${trustScoreClass(agent.trust_score)}" style="width:64px;height:64px;font-size:1.3rem">${agent.trust_score}</div>
-              <span class="trust-score-label" style="font-size:0.7rem">Trust <span class="trust-info-trigger" data-trust-tooltip>?</span></span>
-            </div>
-          </div>
+          ${agent.reviews.avg ? `<div class="profile-stars">${starsHTML(agent.reviews.avg, agent.reviews.count)}</div>` : ''}
         </div>
 
-        <div class="profile-meta">
-          ${agent.reviews.avg ? `<div class="profile-meta-item">${starsHTML(agent.reviews.avg, agent.reviews.count)}</div>` : ''}
-          ${agent.performance.years ? `<div class="profile-meta-item">${ICONS.clock} ${agent.performance.years} years</div>` : ''}
-          ${agent.performance.brand_age ? `<div class="profile-meta-item" title="Brand heritage">${ICONS.building} Brand: ${agent.performance.brand_age}y</div>` : ''}
-          ${agent.performance.offices ? `<div class="profile-meta-item">${ICONS.building} ${agent.performance.offices} office${agent.performance.offices > 1 ? 's' : ''}</div>` : ''}
-          ${agent.url ? `<div class="profile-meta-item"><a href="${agent.url.startsWith('http') ? agent.url : 'https://' + agent.url}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:4px">${ICONS.globe} Website</a></div>` : ''}
+        <div class="profile-badges">
+          ${agent.agent_type ? `<span class="badge badge-blue">${fmtAgentType(agent.agent_type)}</span>` : ''}
+          ${categoryBadgeHTML(agent.category)}
+          ${experienceBadgeHTML(agent.experience)}
+          ${guaranteedRentBadgeHTML(agent)}
+          ${noTenantFeesBadgeHTML(agent.fees)}
+          ${agent.special_offers ? `<span class="badge badge-amber">Special Offer</span>` : ''}
         </div>
+
+        <div class="profile-actions">
+          <button class="profile-action-btn" id="save-agent-btn" onclick="window.toggleSaveAgent && window.toggleSaveAgent(${agent.id})" title="Save">
+            ${ICONS.heart}<span>Save</span>
+          </button>
+          ${agentUrl ? `<a href="${agentUrl}" target="_blank" rel="noopener" class="profile-action-btn" title="Website">${ICONS.globe}<span>Website</span></a>` : ''}
+          <button class="profile-action-btn" onclick="navigator.share?navigator.share({title:${JSON.stringify(agent.name)},url:location.href}):navigator.clipboard.writeText(location.href).then(()=>showToast('Link copied'))" title="Share">
+            ${ICONS.externalLink}<span>Share</span>
+          </button>
+        </div>
+
+        ${metaParts.length ? `<div class="profile-meta-line">${metaParts.join(' · ')}</div>` : ''}
+
         <div class="profile-header-badges">
           ${reviewPlatformsHTML(agent.reviews, 'lg')}
           ${complianceStatusHTML(agent.regulatory)}
@@ -187,39 +193,20 @@
 
     const isAuthed = window._isAuthenticated && window._isAuthenticated();
 
-    // -- Tabs (Instagram-style with inline mobile copy) --
-    const stickyTabs = document.querySelector('.profile-tabs-wrapper');
-    const profileHeader = document.getElementById('profile-header');
-
-    // Create inline tabs copy for mobile (between logo and name)
-    const inlineTabs = document.createElement('div');
-    inlineTabs.className = 'profile-tabs-inline';
-    inlineTabs.innerHTML = document.querySelector('.profile-tabs').innerHTML;
-    profileHeader.insertBefore(inlineTabs, profileHeader.querySelector('.profile-info'));
-
-    function switchTab(tabName, source) {
-      document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
-      inlineTabs.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.profile-section').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll(`.profile-tab[data-tab="${tabName}"]`).forEach(t => t.classList.add('active'));
-      document.getElementById(`tab-${tabName}`).classList.add('active');
-      if (source) source.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    }
-
-    document.querySelectorAll('.profile-tabs .profile-tab').forEach(tab => {
-      tab.addEventListener('click', () => switchTab(tab.dataset.tab, tab));
+    // -- Tabs (Instagram-style) --
+    document.querySelectorAll('.profile-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.profile-section').forEach(s => s.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+        tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        const section = document.querySelector('.profile-content');
+        if (section && window.innerWidth < 768) {
+          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
     });
-    inlineTabs.querySelectorAll('.profile-tab').forEach(tab => {
-      tab.addEventListener('click', () => switchTab(tab.dataset.tab, tab));
-    });
-
-    // Show/hide sticky tabs on mobile based on scroll
-    if (window.innerWidth < 768) {
-      const observer = new IntersectionObserver(([e]) => {
-        stickyTabs.classList.toggle('visible', !e.isIntersecting);
-      }, { rootMargin: `-${getComputedStyle(document.documentElement).getPropertyValue('--header-h').trim() || '64px'} 0px 0px 0px`, threshold: 0 });
-      observer.observe(inlineTabs);
-    }
 
     // -- Overview Tab --
     const ovHTML = [];
